@@ -1,0 +1,367 @@
+/* ============================================
+   MusicAll - Custom Styles
+   ============================================ */
+
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+}
+
+/* General */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Navbar customizations */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+/* Cards */
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+/* Buttons */
+.btn {
+    border-radius: 0.25rem;
+    font-weight: 500;
+}
+
+/* Tables */
+.table {
+    background-color: white;
+}
+
+.table thead th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid var(--primary-color);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
+/* Calendario Settimanale */
+.calendario-container {
+    overflow-x: auto;
+}
+
+.calendario-table {
+    min-width: 1200px;
+    font-size: 0.85rem;
+}
+
+.calendario-table th {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 10;
+    padding: 0.5rem;
+    vertical-align: middle;
+}
+
+.calendario-table .time-col {
+    position: sticky;
+    left: 0;
+    background-color: #f8f9fa;
+    z-index: 5;
+    font-weight: 600;
+    width: 80px;
+    min-width: 80px;
+}
+
+.calendario-table .aula-header {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    padding: 0.75rem;
+}
+
+.calendario-cell {
+    border: 1px solid #dee2e6;
+    padding: 0;
+    height: 60px;
+    vertical-align: top;
+    position: relative;
+}
+
+.lezione-slot {
+    padding: 0.5rem;
+    margin: 2px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    height: 100%;
+    overflow: hidden;
+}
+
+.lezione-slot:hover {
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+}
+
+.lezione-slot.tipo-regolare {
+    background-color: #e3f2fd;
+    border-left: 3px solid #2196f3;
+}
+
+.lezione-slot.tipo-custom {
+    background-color: #fff3e0;
+    border-left: 3px solid #ff9800;
+}
+
+.lezione-slot.tipo-recupero {
+    background-color: #e8f5e9;
+    border-left: 3px solid #4caf50;
+}
+
+.lezione-slot.tipo-laboratorio {
+    background-color: #f3e5f5;
+    border-left: 3px solid #9c27b0;
+}
+
+.lezione-allievo {
+    font-weight: 600;
+    color: #333;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.lezione-materia {
+    color: #666;
+    font-size: 0.7rem;
+    display: block;
+}
+
+.lezione-docente {
+    color: #999;
+    font-size: 0.65rem;
+    display: block;
+    font-style: italic;
+}
+
+/* Dashboard Stats Cards */
+.stat-card {
+    border-left: 4px solid;
+    transition: all 0.3s;
+}
+
+.stat-card.stat-primary {
+    border-left-color: var(--primary-color);
+}
+
+.stat-card.stat-success {
+    border-left-color: var(--success-color);
+}
+
+.stat-card.stat-warning {
+    border-left-color: var(--warning-color);
+}
+
+.stat-card.stat-danger {
+    border-left-color: var(--danger-color);
+}
+
+.stat-card:hover {
+    transform: translateX(5px);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    opacity: 0.6;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.stat-label {
+    color: #6c757d;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}
+
+/* Forms */
+.form-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Modal customizations */
+.modal-header {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.modal-header .btn-close {
+    filter: invert(1);
+}
+
+/* Login Page */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 1rem;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+}
+
+.login-card .card-header {
+    background-color: transparent;
+    border-bottom: none;
+    text-align: center;
+    padding: 2rem 1rem 1rem;
+}
+
+.login-card .card-body {
+    padding: 2rem;
+}
+
+.login-logo {
+    font-size: 4rem;
+    color: var(--primary-color);
+}
+
+/* Utility Classes */
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .calendario-table {
+        font-size: 0.75rem;
+    }
+    
+    .lezione-slot {
+        padding: 0.25rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+}
+
+/* Print styles */
+@media print {
+    .navbar,
+    footer,
+    .btn,
+    .no-print {
+        display: none !important;
+    }
+    
+    .card {
+        box-shadow: none;
+        border: 1px solid #dee2e6;
+    }
+}
+
+/* Loading spinner */
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    opacity: 0.5;
+    margin-bottom: 1rem;
+}
+
+/* Search and filters */
+.search-filters {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}

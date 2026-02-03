@@ -1,0 +1,39 @@
+# MusicAll - Git Ignore
+
+# Configurazione locale
+config/config.local.php
+
+# Uploads e file temporanei
+uploads/*
+!uploads/.gitkeep
+logs/*
+!logs/.gitkeep
+
+# Cache
+cache/*
+tmp/*
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Backup
+*.bak
+*.backup
+*~
+
+# Composer (se usato)
+/vendor/
+
+# Node modules (se usati)
+node_modules/
+
+# Ambiente
+.env
+.env.local
