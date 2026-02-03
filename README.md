@@ -15,16 +15,35 @@ Sistema completo per la gestione di scuole di musica con calendario settimanale,
 
 - **Web Server**: Apache 2.4+ o Nginx
 - **PHP**: 7.4 o superiore (consigliato PHP 8.0+)
-- **Database**: MySQL 5.7+ o MariaDB 10.3+
+- **Database**: MySQL 5.7+, MariaDB 10.3+, SQLite 3+, o PostgreSQL 12+
+- **Composer**: Per gestione dipendenze
 - **Estensioni PHP richieste**:
   - PDO
-  - pdo_mysql
+  - pdo_mysql (o pdo_sqlite, pdo_pgsql)
   - mbstring
   - session
+  - json
 
 ## 🚀 Installazione
 
-### 1. Download e Posizionamento File
+### 1. Installazione Dipendenze (Composer)
+
+Il progetto usa **Eloquent ORM** per supportare MySQL, SQLite, PostgreSQL e altri database.
+
+```bash
+# Entra nella directory del progetto
+cd musicall
+
+# Installa le dipendenze
+composer install
+```
+
+**Cosa include:**
+- `illuminate/database`: Eloquent ORM
+- `illuminate/events`: Sistema eventi
+- PHPUnit per testing (opzionale)
+
+### 2. Download e Posizionamento File
 
 ```bash
 # Clona o scarica il progetto nella directory del web server
@@ -284,8 +303,169 @@ Questo software è fornito "as is" senza garanzie di alcun tipo.
 - **Backend**: PHP, MySQL
 - **Ispirato da**: Sistema Excel originale MusicAll
 
+## 🔄 Eloquent ORM - Database Agnostico (v1.1.0)
+
+### Supporto Multi-Database
+
+Il progetto usa **Eloquent ORM** per supportare diversi database senza cambiare codice:
+
+**Database Supportati:**
+- ✅ MySQL / MariaDB (produzione)
+- ✅ SQLite (test e sviluppo)
+- ✅ PostgreSQL
+- ✅ SQL Server
+
+### Configurazione Database
+
+Modifica `config/database.php` per cambiare database:
+
+```php
+// Cambia qui per switchare database
+'default' => 'mysql',  // o 'sqlite', 'pgsql', etc.
+```
+
+**Esempio MySQL:**
+```php
+'mysql' => [
+    'driver' => 'mysql',
+    'host' => 'localhost',
+    'database' => 'musicall',
+    'username' => 'root',
+    'password' => '',
+]
+```
+
+**Esempio SQLite (in-memory per test):**
+```php
+'sqlite' => [
+    'driver' => 'sqlite',
+    'database' => ':memory:',  // o percorso file
+]
+```
+
+### Uso dei Models
+
+Eloquent ORM fornisce un'API elegante per interagire con il database:
+
+```php
+use MusicAll\Models\Allievo;
+use MusicAll\Models\Lezione;
+
+// Creare
+$allievo = Allievo::create([
+    'cognome' => 'Rossi',
+    'nome' => 'Mario',
+    'email' => 'mario@example.com',
+    'attivo' => true
+]);
+
+// Leggere
+$allievi = Allievo::all();
+$allievo = Allievo::find(1);
+$attivi = Allievo::attivi()->get();
+
+// Aggiornare
+$allievo->email = 'nuovo@email.com';
+$allievo->save();
+
+// Eliminare
+$allievo->delete();
+
+// Query complesse
+$allievi = Allievo::where('attivo', true)
+    ->orderBy('cognome')
+    ->limit(10)
+    ->get();
+
+// Relazioni
+$lezioni = $allievo->lezioni;  // Tutte le lezioni dell'allievo
+$assenze = $allievo->assenze()->daRecuperare()->get();
+```
+
+### Models Disponibili
+
+```php
+use MusicAll\Models\Allievo;
+use MusicAll\Models\Docente;
+use MusicAll\Models\Lezione;
+use MusicAll\Models\Aula;
+use MusicAll\Models\Materia;
+use MusicAll\Models\Assenza;
+use MusicAll\Models\LezioneCustom;
+use MusicAll\Models\User;
+```
+
+### Test con SQLite
+
+Testa l'applicazione senza database reale:
+
+```bash
+# Test rapido in-memory
+php tests/test_sqlite.php
+```
+
+Output atteso:
+```
+Test SQLite In-Memory con Eloquent ORM
+
+✅ Eloquent ORM caricato
+✅ Database: :memory:
+✅ Driver: sqlite
+
+Test 1: Creazione Allievi
+✅ Creati 3 allievi
+
+Test 2: Query Allievi Attivi
+- Rossi Mario (mario.rossi@email.com)
+- Bianchi Laura (laura.bianchi@email.com)
+
+...
+
+✅ TUTTI I TEST COMPLETATI CON SUCCESSO!
+```
+
+### Variabili d'Ambiente
+
+Usa variabili d'ambiente per configurazione dinamica:
+
+```bash
+# Linux/Mac
+export DB_CONNECTION=sqlite
+export DB_DATABASE=:memory:
+
+# Windows
+set DB_CONNECTION=sqlite
+set DB_DATABASE=:memory:
+```
+
+### Vantaggi Eloquent ORM
+
+✅ **Database Agnostico**: Cambia DB senza toccare codice  
+✅ **Testing Facile**: SQLite in-memory per test veloci  
+✅ **Query Eleganti**: Sintassi fluida e leggibile  
+✅ **Relazioni Automatiche**: Gestione relazioni tra tabelle  
+✅ **Migrations**: Versionamento schema database  
+✅ **Validazione**: Cast automatici e validazione  
+
+### Migration da v1.0 a v1.1
+
+Se hai già la v1.0 installata:
+
+```bash
+# 1. Installa Composer dependencies
+composer install
+
+# 2. Il codice esistente continua a funzionare
+#    (backward compatibility garantita)
+
+# 3. Inizia ad usare i Models gradualmente
+use MusicAll\Models\Allievo;
+$allievi = Allievo::all();
+```
+
 ---
 
-**Versione**: 1.0.0  
+**Versione**: 1.1.0  
 **Data**: Febbraio 2026  
-**Autore**: Sistema di Gestione Scuola di Musica
+**Autore**: Sistema di Gestione Scuola di Musica  
+**Novità v1.1**: Eloquent ORM, Supporto Multi-Database, Testing SQLite

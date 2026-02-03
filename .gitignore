@@ -28,8 +28,9 @@ desktop.ini
 *.backup
 *~
 
-# Composer (se usato)
+# Composer
 /vendor/
+composer.lock
 
 # Node modules (se usati)
 node_modules/
