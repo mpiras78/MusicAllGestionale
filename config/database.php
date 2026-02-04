@@ -18,7 +18,7 @@ return [
     |
     */
     
-    'default' => getenv('DB_CONNECTION') ?: 'sqlite',
+    'default' => getenv('DB_CONNECTION') ?: 'sqlite_file',
     
     /*
     |--------------------------------------------------------------------------
@@ -34,11 +34,11 @@ return [
         
         'mysql' => [
             'driver' => 'mysql',
-            'host' => getenv('DB_HOST') ?: DB_HOST,
+            'host' => getenv('DB_HOST') ?: 'localhost',
             'port' => getenv('DB_PORT') ?: '3306',
-            'database' => getenv('DB_NAME') ?: DB_NAME,
-            'username' => getenv('DB_USER') ?: DB_USER,
-            'password' => getenv('DB_PASS') ?: DB_PASS,
+            'database' => getenv('DB_NAME') ?: 'musicall',
+            'username' => getenv('DB_USER') ?: 'root',
+            'password' => getenv('DB_PASS') ?: '',
             'unix_socket' => '',
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
