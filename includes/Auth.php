@@ -8,12 +8,8 @@ class Auth {
     private $db;
     
     public function __construct() {
-        // Inizializza database solo se Eloquent NON è disponibile
-        if (!defined('ELOQUENT_ENABLED') || !ELOQUENT_ENABLED) {
-            $this->db = Database::getInstance();
-        } else {
-            $this->db = null; // Eloquent disponibile, usa models
-        }
+        // Inizializza database
+        $this->db = Database::getInstance();
         $this->startSession();
     }
     
@@ -45,7 +41,7 @@ class Auth {
         if ($user && password_verify($password, $user['password'])) {
             // Aggiorna ultimo login
             $this->db->execute(
-                "UPDATE users SET last_login = NOW() WHERE id = ?",
+                "UPDATE users SET last_login = datetime('now') WHERE id = ?",
                 [$user['id']]
             );
             
