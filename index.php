@@ -7,15 +7,21 @@ $auth->requireLogin();
 $page_title = 'Dashboard';
 $current_page = 'dashboard';
 
-// Statistiche
+// Inizializza Controllers
+$allieviCtrl = new AllieviController();
+$docentiCtrl = new DocentiController();
+$lezioniCtrl = new LezioniController();
+$assenzeCtrl = new AssenzeController();
+
+// Statistiche usando i controller
 $stats = [
-    'allievi' => $db->count("SELECT COUNT(*) FROM allievi WHERE attivo = 1"),
-    'docenti' => $db->count("SELECT COUNT(*) FROM docenti WHERE attivo = 1"),
-    'lezioni_settimana' => $db->count("SELECT COUNT(*) FROM lezioni WHERE attiva = 1"),
-    'assenze_mese' => 0 // TODO: implementare con SQLite
+    'allievi' => $allieviCtrl->countAllievi(),
+    'docenti' => $docentiCtrl->countDocenti(),
+    'lezioni_settimana' => $lezioniCtrl->countLezioniSettimana(),
+    'assenze_mese' => $assenzeCtrl->countAssenzeMeseCorrente()
 ];
 
-// Prossime lezioni oggi
+// Determina giorno corrente
 $oggi_giorno = strtolower(date('l'));
 $giorni_mapping = [
     'monday' => 'lunedi',
@@ -28,45 +34,10 @@ $giorni_mapping = [
 ];
 $giorno_corrente = $giorni_mapping[$oggi_giorno] ?? 'lunedi';
 
-// Prossime lezioni oggi - query database-agnostica
-$prossime_lezioni = $db->query("
-    SELECT l.*, 
-           al.cognome || ' ' || al.nome as allievo,
-           d.cognome || ' ' || d.nome as docente,
-           m.nome as materia,
-           a.nome as aula
-    FROM lezioni l
-    JOIN allievi al ON l.allievo_id = al.id
-    JOIN docenti d ON l.docente_id = d.id
-    JOIN materie m ON l.materia_id = m.id
-    JOIN aule a ON l.aula_id = a.id
-    WHERE l.attiva = 1 
-    AND l.giorno_settimana = ?
-    ORDER BY l.ora_inizio
-    LIMIT 5
-", [$giorno_corrente]);
-
-// Assenze da recuperare - query database-agnostica
-$assenze_da_recuperare = $db->query("
-    SELECT a.*, 
-           al.cognome || ' ' || al.nome as allievo,
-           d.cognome || ' ' || d.nome as docente
-    FROM assenze a
-    JOIN allievi al ON a.allievo_id = al.id
-    JOIN docenti d ON a.docente_id = d.id
-    WHERE a.recuperata = 0 
-    AND a.da_recuperare = 1
-    ORDER BY a.data_assenza DESC
-    LIMIT 10
-");
-
-// Ultimi allievi aggiunti
-$ultimi_allievi = $db->query("
-    SELECT * FROM allievi 
-    WHERE attivo = 1 
-    ORDER BY created_at DESC 
-    LIMIT 5
-");
+// Dati per la dashboard usando i controller
+$prossime_lezioni = $lezioniCtrl->getProssimeLezioniOggi($giorno_corrente, 5);
+$assenze_da_recuperare = $assenzeCtrl->getAssenzeDaRecuperare(10);
+$ultimi_allievi = $allieviCtrl->getUltimiAllievi(5);
 
 include 'includes/header.php';
 ?>

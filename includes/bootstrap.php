@@ -57,6 +57,12 @@ require_once __DIR__ . '/Auth.php';
 // Funzioni helper
 require_once __DIR__ . '/helpers.php';
 
+// Carica Controllers
+require_once __DIR__ . '/controllers/AllieviController.php';
+require_once __DIR__ . '/controllers/DocentiController.php';
+require_once __DIR__ . '/controllers/LezioniController.php';
+require_once __DIR__ . '/controllers/AssenzeController.php';
+
 // Inizializza oggetti globali
 if (!ELOQUENT_ENABLED) {
     // Legacy mode: usa classe Database
