@@ -28,11 +28,37 @@ $giorni_mapping = [
 ];
 $giorno_corrente = $giorni_mapping[$oggi_giorno] ?? 'lunedi';
 
-// Prossime lezioni oggi - query semplificata per SQLite
-$prossime_lezioni = []; // TODO: Implementare con query SQLite compatibile
+// Prossime lezioni oggi - query database-agnostica
+$prossime_lezioni = $db->query("
+    SELECT l.*, 
+           al.cognome || ' ' || al.nome as allievo,
+           d.cognome || ' ' || d.nome as docente,
+           m.nome as materia,
+           a.nome as aula
+    FROM lezioni l
+    JOIN allievi al ON l.allievo_id = al.id
+    JOIN docenti d ON l.docente_id = d.id
+    JOIN materie m ON l.materia_id = m.id
+    JOIN aule a ON l.aula_id = a.id
+    WHERE l.attiva = 1 
+    AND l.giorno_settimana = ?
+    ORDER BY l.ora_inizio
+    LIMIT 5
+", [$giorno_corrente]);
 
-// Assenze da recuperare - query semplificata per SQLite
-$assenze_da_recuperare = []; // TODO: Implementare con query SQLite compatibile
+// Assenze da recuperare - query database-agnostica
+$assenze_da_recuperare = $db->query("
+    SELECT a.*, 
+           al.cognome || ' ' || al.nome as allievo,
+           d.cognome || ' ' || d.nome as docente
+    FROM assenze a
+    JOIN allievi al ON a.allievo_id = al.id
+    JOIN docenti d ON a.docente_id = d.id
+    WHERE a.recuperata = 0 
+    AND a.da_recuperare = 1
+    ORDER BY a.data_assenza DESC
+    LIMIT 10
+");
 
 // Ultimi allievi aggiunti
 $ultimi_allievi = $db->query("
