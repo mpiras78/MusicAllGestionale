@@ -39,12 +39,14 @@ if (isPost()) {
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-4">
-                <div class="card login-card">
-                    <div class="card-header">
-                        <div class="login-logo">
-                            <i class="bi bi-music-note-beamed"></i>
+                <div class="card login-card shadow-lg">
+                    <div class="card-header text-center py-4">
+                        <div class="login-logo mb-3">
+                            <div class="logo-circle">
+                                <i class="bi bi-music-note-list"></i>
+                            </div>
                         </div>
-                        <h3 class="mb-0"><?= APP_NAME ?></h3>
+                        <h2 class="mb-2 fw-bold"><?= APP_NAME ?></h2>
                         <p class="text-muted mb-0">Sistema di Gestione Scuola di Musica</p>
                     </div>
                     <div class="card-body">

@@ -10,14 +10,30 @@ class Database {
     
     private function __construct() {
         try {
-            $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
-            $options = [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false,
-            ];
+            $driver = DB_DRIVER ?? 'sqlite';
             
-            $this->connection = new PDO($dsn, DB_USER, DB_PASS, $options);
+            if ($driver === 'sqlite') {
+                $dsn = "sqlite:" . DB_PATH;
+                $options = [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                ];
+                $this->connection = new PDO($dsn, null, null, $options);
+            } else {
+                // MySQL fallback (se definito)
+                $dsn = "mysql:host=" . (defined('DB_HOST') ? DB_HOST : 'localhost') . 
+                       ";dbname=" . (defined('DB_NAME') ? DB_NAME : 'musicall') . 
+                       ";charset=" . (defined('DB_CHARSET') ? DB_CHARSET : 'utf8mb4');
+                $options = [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => false,
+                ];
+                
+                $user = defined('DB_USER') ? DB_USER : 'root';
+                $pass = defined('DB_PASS') ? DB_PASS : '';
+                $this->connection = new PDO($dsn, $user, $pass, $options);
+            }
         } catch (PDOException $e) {
             die("Errore di connessione al database: " . $e->getMessage());
         }

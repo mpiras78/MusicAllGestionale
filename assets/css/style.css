@@ -245,26 +245,57 @@ body {
     min-height: 100vh;
     display: flex;
     align-items: center;
-    justify-content: center;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .login-card {
-    width: 100%;
-    max-width: 400px;
-    border-radius: 1rem;
-    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
 }
 
 .login-card .card-header {
-    background-color: transparent;
-    border-bottom: none;
-    text-align: center;
-    padding: 2rem 1rem 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 2.5rem 2rem;
 }
 
-.login-card .card-body {
-    padding: 2rem;
+.login-card .card-header h2 {
+    color: white;
+}
+
+.login-card .card-header p {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.login-logo {
+    margin-bottom: 1rem;
+}
+
+.logo-circle {
+    width: 100px;
+    height: 100px;
+    background: white;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    color: #667eea;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
 }
 
 .login-logo {
