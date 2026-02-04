@@ -273,6 +273,24 @@ body {
     margin-bottom: 1rem;
 }
 
+.logo-image {
+    max-width: 150px;
+    height: auto;
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+    }
+    50% {
+        transform: scale(1.05);
+        filter: drop-shadow(0 15px 40px rgba(0, 0, 0, 0.4));
+    }
+}
+
 .logo-circle {
     width: 100px;
     height: 100px;
@@ -285,17 +303,6 @@ body {
     color: #667eea;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    }
-    50% {
-        transform: scale(1.05);
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-    }
 }
 
 .login-logo {

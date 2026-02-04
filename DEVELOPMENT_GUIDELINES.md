@@ -315,4 +315,4 @@ Vedi `includes/helpers.php`:
 ---
 
 **Ultima modifica:** 04/02/2026
-**Versione:** 0.2.0
+**Versione:** 0.3.0

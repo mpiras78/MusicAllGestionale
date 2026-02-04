@@ -42,9 +42,9 @@ if (isPost()) {
                 <div class="card login-card shadow-lg">
                     <div class="card-header text-center py-4">
                         <div class="login-logo mb-3">
-                            <div class="logo-circle">
-                                <i class="bi bi-music-note-list"></i>
-                            </div>
+                            <img src="<?= BASE_URL ?>/assets/img/logo_musicall.png" 
+                                 alt="MusicAll Logo" 
+                                 class="logo-image">
                         </div>
                         <h2 class="mb-2 fw-bold"><?= APP_NAME ?></h2>
                         <p class="text-muted mb-0">Sistema di Gestione Scuola di Musica</p>
