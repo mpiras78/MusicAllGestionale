@@ -7,6 +7,10 @@ $auth->requireLogin();
 $page_title = 'Calendario Settimanale';
 $current_page = 'calendario';
 
+// Inizializza Controllers
+$lezioniCtrl = new LezioniController();
+$auleCtrl = new AuleController();
+
 // Giorno selezionato (default: giorno corrente)
 $giorno_selezionato = get('giorno', '');
 if (empty($giorno_selezionato)) {
@@ -23,30 +27,14 @@ if (empty($giorno_selezionato)) {
     $giorno_selezionato = $giorni_mapping[$oggi_giorno] ?? 'lunedi';
 }
 
-// Ottieni aule
-$aule = $db->query("SELECT * FROM aule WHERE attiva = 1 ORDER BY ordine_visualizzazione");
+// Ottieni aule tramite controller
+$aule = $auleCtrl->getAule();
 
 // Ottieni slot orari
 $slots = generaSlotOrari(ORA_INIZIO_SCUOLA, ORA_FINE_SCUOLA, DURATA_SLOT_DEFAULT);
 
-// Ottieni lezioni per il giorno selezionato
-$lezioni = $db->query("
-    SELECT l.*, 
-           CONCAT(al.cognome, ' ', al.nome) as allievo_nome,
-           CONCAT(d.cognome, ' ', d.nome) as docente_nome,
-           m.nome as materia_nome,
-           m.categoria as materia_categoria,
-           a.nome as aula_nome,
-           a.id as aula_id
-    FROM lezioni l
-    JOIN allievi al ON l.allievo_id = al.id
-    JOIN docenti d ON l.docente_id = d.id
-    JOIN materie m ON l.materia_id = m.id
-    JOIN aule a ON l.aula_id = a.id
-    WHERE l.attiva = 1 
-    AND l.giorno_settimana = ?
-    ORDER BY l.ora_inizio, a.ordine_visualizzazione
-", [$giorno_selezionato]);
+// Ottieni lezioni per il giorno selezionato tramite controller
+$lezioni = $lezioniCtrl->getLezioniPerGiorno($giorno_selezionato);
 
 // Organizza lezioni per aula e ora
 $calendario = [];
@@ -145,15 +133,15 @@ include 'includes/header.php';
                                         if ($lezione_slot): ?>
                                             <div class="lezione-slot tipo-<?= e($lezione_slot['tipo']) ?>" 
                                                  data-lezione-id="<?= $lezione_slot['id'] ?>"
-                                                 title="<?= e($lezione_slot['allievo_nome']) ?> - <?= e($lezione_slot['materia_nome']) ?>">
+                                                 title="<?= e($lezione_slot['allievo']) ?> - <?= e($lezione_slot['materia']) ?>">
                                                 <span class="lezione-allievo">
-                                                    <?= e($lezione_slot['allievo_nome']) ?>
+                                                    <?= e($lezione_slot['allievo']) ?>
                                                 </span>
                                                 <span class="lezione-materia">
-                                                    <?= e($lezione_slot['materia_nome']) ?>
+                                                    <?= e($lezione_slot['materia']) ?>
                                                 </span>
                                                 <span class="lezione-docente">
-                                                    <?= e($lezione_slot['docente_nome']) ?>
+                                                    <?= e($lezione_slot['docente']) ?>
                                                 </span>
                                             </div>
                                         <?php endif; ?>
