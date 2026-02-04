@@ -8,11 +8,14 @@
 date_default_timezone_set('Europe/Rome');
 
 // Configurazione Database
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'musicall');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_CHARSET', 'utf8mb4');
+//define('DB_HOST', 'localhost');
+//define('DB_NAME', 'musicall');
+//define('DB_USER', 'root');
+//define('DB_PASS', '');
+//define('DB_CHARSET', 'utf8mb4');
+define('DB_DRIVER', 'sqlite');
+define('DB_PATH', __DIR__ . '/../database/musicall.sqlite');
+
 
 // Configurazione Applicazione
 define('APP_NAME', 'MusicAll');

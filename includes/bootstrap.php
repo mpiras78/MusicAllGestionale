@@ -4,6 +4,11 @@
  * Carica configurazione, Eloquent ORM e classi necessarie
  */
 
+// Use statements devono essere all'inizio
+use Illuminate\Database\Capsule\Manager as Capsule;
+use Illuminate\Events\Dispatcher;
+use Illuminate\Container\Container;
+
 // Carica configurazione
 require_once __DIR__ . '/../config/config.php';
 
@@ -13,9 +18,6 @@ if (file_exists($composerAutoload)) {
     require_once $composerAutoload;
     
     // Inizializza Eloquent ORM
-    use Illuminate\Database\Capsule\Manager as Capsule;
-    use Illuminate\Events\Dispatcher;
-    use Illuminate\Container\Container;
     
     $capsule = new Capsule;
     
@@ -24,13 +26,17 @@ if (file_exists($composerAutoload)) {
     $defaultConnection = $dbConfig['default'];
     $connections = $dbConfig['connections'];
     
-    // Aggiungi connessioni
-    foreach ($connections as $name => $config) {
-        $capsule->addConnection($config, $name);
+    // Aggiungi connessione di default (senza nome diventa 'default')
+    if (isset($connections[$defaultConnection])) {
+        $capsule->addConnection($connections[$defaultConnection]);
     }
     
-    // Imposta connection di default
-    $capsule->addConnection($connections[$defaultConnection]);
+    // Aggiungi altre connessioni nominate
+    foreach ($connections as $name => $config) {
+        if ($name !== $defaultConnection) {
+            $capsule->addConnection($config, $name);
+        }
+    }
     
     // Set eventi e container
     $capsule->setEventDispatcher(new Dispatcher(new Container));
@@ -51,10 +57,12 @@ require_once __DIR__ . '/Auth.php';
 // Funzioni helper
 require_once __DIR__ . '/helpers.php';
 
-// Inizializza oggetti globali (legacy mode se Eloquent non disponibile)
+// Inizializza oggetti globali
 if (!ELOQUENT_ENABLED) {
+    // Legacy mode: usa classe Database
     $db = Database::getInstance();
 }
+// Auth sempre necessario per login/logout
 $auth = new Auth();
 
 // Carica Models (se Eloquent disponibile)

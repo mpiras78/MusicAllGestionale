@@ -8,7 +8,12 @@ class Auth {
     private $db;
     
     public function __construct() {
-        $this->db = Database::getInstance();
+        // Inizializza database solo se Eloquent NON è disponibile
+        if (!defined('ELOQUENT_ENABLED') || !ELOQUENT_ENABLED) {
+            $this->db = Database::getInstance();
+        } else {
+            $this->db = null; // Eloquent disponibile, usa models
+        }
         $this->startSession();
     }
     

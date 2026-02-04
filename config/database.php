@@ -14,11 +14,11 @@ return [
     | Specifica quale connessione usare. Può essere sovrascritto con 
     | variabile d'ambiente DB_CONNECTION
     |
-    | Opzioni: 'mysql', 'sqlite', 'pgsql', 'sqlsrv'
+    | Opzioni: 'mysql', 'sqlite', 'pgsql', 'sqlsrv', 'sqlite_file'
     |
     */
     
-    'default' => getenv('DB_CONNECTION') ?: 'mysql',
+    'default' => getenv('DB_CONNECTION') ?: 'sqlite',
     
     /*
     |--------------------------------------------------------------------------

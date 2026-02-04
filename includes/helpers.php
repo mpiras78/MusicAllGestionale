@@ -5,10 +5,12 @@
  */
 
 /**
- * Escape HTML
+ * Escape HTML (solo se non già definita da Laravel)
  */
-function e($string) {
-    return htmlspecialchars($string ?? '', ENT_QUOTES, 'UTF-8');
+if (!function_exists('e')) {
+    function e($string) {
+        return htmlspecialchars($string ?? '', ENT_QUOTES, 'UTF-8');
+    }
 }
 
 /**

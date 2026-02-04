@@ -8,7 +8,7 @@
  */
 
 // Imposta connessione a SQLite per test
-putenv('DB_CONNECTION=sqlite');
+putenv('DB_CONNECTION=sqlite-file');
 putenv('DB_DATABASE=:memory:');
 
 require_once __DIR__ . '/../includes/bootstrap.php';

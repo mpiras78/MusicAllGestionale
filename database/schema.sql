@@ -69,6 +69,20 @@ CREATE TABLE IF NOT EXISTS materie (
     attiva BOOLEAN DEFAULT TRUE
 );
 
+-- Tabella Relazione Docenti-Materie (many-to-many)
+CREATE TABLE IF NOT EXISTS docenti_materie (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    docente_id INT NOT NULL,
+    materia_id INT NOT NULL,
+    livello ENUM('principiante', 'intermedio', 'avanzato', 'tutti') DEFAULT NULL,
+    note TEXT,
+    FOREIGN KEY (docente_id) REFERENCES docenti(id) ON DELETE CASCADE,
+    FOREIGN KEY (materia_id) REFERENCES materie(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_docente_materia (docente_id, materia_id),
+    INDEX idx_docente (docente_id),
+    INDEX idx_materia (materia_id)
+);
+
 -- Tabella Slot Orari Template
 CREATE TABLE IF NOT EXISTS slot_orari (
     id INT AUTO_INCREMENT PRIMARY KEY,
