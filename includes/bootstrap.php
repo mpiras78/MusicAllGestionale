@@ -53,6 +53,8 @@ if (file_exists($composerAutoload)) {
 // Carica classi legacy (backwards compatibility)
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Auth.php';
+require_once __DIR__ . '/SecurityHelper.php';
+require_once __DIR__ . '/EmailHelper.php';
 
 // Funzioni helper
 require_once __DIR__ . '/helpers.php';

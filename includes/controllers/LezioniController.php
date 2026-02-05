@@ -125,6 +125,26 @@ class LezioniController {
     }
     
     /**
+     * Ottiene lezioni per docente e giorno specifico
+     */
+    public function getLezioniPerDocenteEGiorno($docente_id, $giorno) {
+        return $this->db->query("
+            SELECT l.*, 
+                   al.cognome || ' ' || al.nome as allievo,
+                   d.cognome || ' ' || d.nome as docente,
+                   m.nome as materia,
+                   a.nome as aula
+            FROM lezioni l
+            JOIN allievi al ON l.allievo_id = al.id
+            JOIN docenti d ON l.docente_id = d.id
+            JOIN materie m ON l.materia_id = m.id
+            JOIN aule a ON l.aula_id = a.id
+            WHERE l.docente_id = ? AND l.giorno_settimana = ? AND l.attiva = 1
+            ORDER BY l.ora_inizio
+        ", [$docente_id, $giorno]);
+    }
+    
+    /**
      * Ottiene lezioni per aula
      */
     public function getLezioniAula($aula_id, $giorno = null) {

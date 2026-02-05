@@ -3,7 +3,7 @@
    ============================================ */
 
 :root {
-    --primary-color: #0d6efd;
+    --primary-color: #ff6b35;
     --secondary-color: #6c757d;
     --success-color: #28a745;
     --danger-color: #dc3545;
@@ -72,8 +72,14 @@ body {
 }
 
 .calendario-table {
-    min-width: 1200px;
+    min-width: 1000px;
     font-size: 0.85rem;
+    table-layout: fixed;
+}
+
+.calendario-table td {
+    width: auto;
+    min-width: 120px;
 }
 
 .calendario-table th {
@@ -109,17 +115,36 @@ body {
     height: 60px;
     vertical-align: top;
     position: relative;
+    width: 140px;
+    max-width: 150px;
 }
 
 .lezione-slot {
-    padding: 0.5rem;
+    padding: 0.35rem;
     margin: 2px;
     border-radius: 4px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     cursor: pointer;
     transition: all 0.2s;
     height: 100%;
     overflow: hidden;
+    position: relative;
+}
+
+/* Badge orario in alto a destra */
+.lezione-orario-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    z-index: 5;
 }
 
 .lezione-slot:hover {
@@ -129,8 +154,8 @@ body {
 }
 
 .lezione-slot.tipo-regolare {
-    background-color: #e3f2fd;
-    border-left: 3px solid #2196f3;
+    background-color: #fff5f0;
+    border-left: 3px solid #ff6b35;
 }
 
 .lezione-slot.tipo-custom {
@@ -148,24 +173,67 @@ body {
     border-left: 3px solid #9c27b0;
 }
 
-.lezione-allievo {
-    font-weight: 600;
-    color: #333;
-    display: block;
-    margin-bottom: 2px;
+/* Header lezione con icona + nome allievo */
+.lezione-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    padding-right: 60px; /* Spazio per badge orario */
 }
 
+.icona-strumento {
+    font-size: 1.2rem;
+    color: #ff6b35;
+    flex-shrink: 0;
+}
+
+.lezione-allievo {
+    font-weight: 700;
+    color: #2c3e50;
+    font-size: 0.8rem;
+    line-height: 1.1;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+}
+
+/* Riga info con docente */
+.lezione-info-row {
+    position: relative;
+}
+
+.lezione-docente {
+    font-size: 0.7rem;
+    color: #34495e;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.1px;
+}
+
+.lezione-docente i {
+    color: #7f8c8d;
+    font-size: 0.75rem;
+}
+
+.lezione-materia-inline {
+    color: #555;
+    font-size: 0.65rem;
+    text-align: left;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.1px;
+    margin-top: 2px;
+    display: block;
+}
+
+/* Vecchio stile materia (non più usato) */
 .lezione-materia {
     color: #666;
     font-size: 0.7rem;
     display: block;
-}
-
-.lezione-docente {
-    color: #999;
-    font-size: 0.65rem;
-    display: block;
-    font-style: italic;
 }
 
 /* Dashboard Stats Cards */
@@ -245,7 +313,7 @@ body {
     min-height: 100vh;
     display: flex;
     align-items: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #F29400;
 }
 
 .login-card {
@@ -255,18 +323,35 @@ body {
 }
 
 .login-card .card-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: white;
+    color: #333;
     border: none;
     padding: 2.5rem 2rem;
 }
 
 .login-card .card-header h2 {
-    color: white;
+    color: #333;
 }
 
 .login-card .card-header p {
-    color: rgba(255, 255, 255, 0.9);
+    color: #6c757d;
+}
+
+.login-card .btn-primary {
+    background-color: #F29400;
+    border-color: #F29400;
+}
+
+.login-card .btn-primary:hover {
+    background-color: #d68200;
+    border-color: #d68200;
+}
+
+.login-card .btn-primary:focus,
+.login-card .btn-primary:active {
+    background-color: #d68200;
+    border-color: #d68200;
+    box-shadow: 0 0 0 0.2rem rgba(242, 148, 0, 0.25);
 }
 
 .login-logo {
@@ -402,4 +487,22 @@ body {
     border-radius: 0.5rem;
     margin-bottom: 1.5rem;
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Navbar tema arancione */
+.navbar {
+    background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-dark .navbar-brand,
+.navbar-dark .navbar-nav .nav-link {
+    color: white !important;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-nav .nav-link.active {
+    color: #fff3e0 !important;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 0.25rem;
 }

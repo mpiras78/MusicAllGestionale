@@ -1,0 +1,208 @@
+Traceback (most recent call last):
+  File "c:\git\ct-poc\MusicAll\tests\generate_all_days_sql.py", line 50, in <module>
+    print(f"\n\u2713 File creato: {output_file}")
+  File "C:\Users\marco.piras\AppData\Local\Programs\Python\Python311\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2713' in position 2: character maps to <undefined>
+Traceback (most recent call last):
+  File "c:\git\ct-poc\MusicAll\tests\generate_all_days_sql.py", line 50, in <module>
+    print(f"\n\u2713 File creato: {output_file}")
+  File "C:\Users\marco.piras\AppData\Local\Programs\Python\Python311\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2713' in position 2: character maps to <undefined>
+Traceback (most recent call last):
+  File "c:\git\ct-poc\MusicAll\tests\generate_all_days_sql.py", line 50, in <module>
+    print(f"\n\u2713 File creato: {output_file}")
+  File "C:\Users\marco.piras\AppData\Local\Programs\Python\Python311\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2713' in position 2: character maps to <undefined>
+Traceback (most recent call last):
+  File "c:\git\ct-poc\MusicAll\tests\generate_all_days_sql.py", line 50, in <module>
+    print(f"\n\u2713 File creato: {output_file}")
+  File "C:\Users\marco.piras\AppData\Local\Programs\Python\Python311\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2713' in position 2: character maps to <undefined>
+
+==================================================
+GENERAZIONE SQL MERCOLEDI
+==================================================
+
+Struttura foglio (prime 50 righe):
+
+  B1:
+  C4:AULA MIDI | D4:AULA PIANO | E4:AULA MAGNA | F4:SALA JAZZ | G4:SALA POP | H4:SALA ROCK
+  B5:DOCENTE | G5:URSINI                                  
+  C6:TESSITORE                                | F6:NICASTRI                                 | G6:NICASTRI                                 | H6:DI GIORGIO                      ( canto 
+  C7:PITINI                                   | D7:LABANCA                                  | E7:LORITO                                   | F7:URSINI                                   | G7:DI GIORGIO                               | H7:BONIOLI                                 
+  B8:9:15 - 10:00
+  B10:10:00 - 10:45
+  B12:10:45 - 11:30 | C12:10:00/11:00
+  C13:COSENZA WILLIAM
+  B14:11:30 - 12:15 | C14:11:00/12:00 | H14:11:30/12:30
+  H15:EVANGELISTI GABRIELE
+  B16:12:15 - 13:00 | C16:12:00/13:00
+  C17:GABRIELI GIANCARLA
+  B18:13:00 - 13:45 | C18:13:00/13:30
+  C19:pausa pranzo
+  B20:13:45 - 14:30 | C20:13:30/14:15
+  C21:ROSSI EVELINA
+  B22:14:30 - 15:15 | C22:14:15/15:00
+  D23:PROVA BORJABAD PALOMA ( 4 FEBB )
+  B24:15:15 - 16:00 | C24:15:00/15:45 | E24:14:45/15:45 | G24:15:00/15:45
+  C25:BELLUCCI GIULIA | D25:PROVA MATTEO ZUGALLI (11 FEB)
+  B26:16:00 - 16:45 | C26:15:45/16:30 | E26:15:45/16:45 | G26:15:45/16:45
+  C27:DE ANGELIS MATTEO | D27:SIMONE AGOSTINO (4 FEB) | E27:PANZANELLI DANIELE | F27:BELLUCCI GIULIA
+  B28:16:45 - 17:30 | C28:16:30/17:30
+  D29:SILVESTRI CHIARA | E29:GRASSO GAIA | F29:DE MENENZES ALISSA | G29:HALL GREGORIO | H29:GIRET EUSEPI ADRIAN
+  B30:17:30 - 18:15 | C30:17:30/18:15
+  C31:TRAPANI SOPHIA | D31:SCARPACI DANILO | E31:PALDI ANDREA | G31:MU. INS. BABY URSINI | H31:NISI GIORDANO
+  B32:18:15 - 19:00 | C32:18:15/19:15
+  C33:PRISTERA' DANIELE | D33:CIOFFI RICCARDO | E33:ERCOLI MARCO | F33:CIANFONI FRANCESCO | G33:MASCOLO ROSSITTO ANDREW | H33:MUS. INS. BABY BONIOLI                  
+  B34:19:00 - 19:45 | C34:19:15/20:00 | D34:19:00/20:00 | G34:19:00/19:45 | H34:19:00/20:00
+  C35:GUERRA ISABELLA | D35:CAPUTO MARINA | E35:MECACCI ENRICO | F35:PIERACCI DANILO | G35:FRANCAVIGLIA FRANCESCO | H35:MUS. INSIEME  759 Born to be wild
+  B36:19:45 - 20:30 | C36:20:00/21:00 | D36:20:00/21:00 | F36:19:45/20:45 | G36:20:00/21:00 | H36:20:00/21:00
+  C37:CAMBARA ROSA | D37:PETACCIA PAOLO ( NO GENNAIO ) | E37:PEPE MARIELLA | F37:NIEDDU ALESSANDRO | G37:MUS. INSIEME Flungsticks | H37:FENIZI ALESSANDRO
+  B38:20:30 - 21:15 | C38:21:00/22:00 | F38:20:45/21:45 | G38:21:00/22:00 | H38:21:00/22:00
+  H39:TOLENTINO TIZIANA
+  B40:21:15 - 22:00
+  B43:NOTE | G43:DA FARE
+  B44:31.0
+ERRORE con MERCOLEDI: 'charmap' codec can't encode character '\u2713' in position 2: character maps to <undefined>
+
+==================================================
+GENERAZIONE SQL GIOVEDI
+==================================================
+
+Struttura foglio (prime 50 righe):
+
+  B1:
+  C4:AULA MIDI | D4:AULA PIANO | E4:AULA MAGNA | F4:SALA JAZZ | G4:SALA POP | H4:SALA ROCK
+  B5:DOCENTE
+  E6:SCARTONI                                 | F6:ALIEN DEE                                | G6:BUONO                                   
+  C7:MARCANTE                                 | D7:LABANCA                                  | E7:CICCARELLI                               | F7:DE CARLI                                 | G7:SABA                                     | H7:SALVUCCI                                
+  B8:9:15 - 10:00
+  B10:10:00 - 10:45
+  B12:10:45 - 11:30 | G12:9:30/10:30
+  B14:11:30 - 12:15 | E14:11:00/12:30 | G14:10:30/11:30
+  E15:PORZIO ALESSANDRO ( NO FEBBRAIO ) | G15:RICCIARELLI GABRIELE ( 5 FEBB )
+  B16:12:15 - 13:00 | G16:11:30/12:30
+  B18:13:00 - 13:45
+  B20:13:45 - 14:30
+  E21:AULISI VALENTINA
+  B22:14:30 - 15:15 | F22:14:00/15:00
+  E23:ROSSI LUCA | F23:PARIS SERGIO ( GENNAIO )
+  B24:15:15 - 16:00 | C24:15:00/16:00 | G24:15:00/15:45 | H24:15:00/16:00
+  C25:SALERNO ANDREA | E25:PAULHIAC DANIEL | F25:ROSSI LUCA | G25:CASTALDO  LEONARDO | H25:CERUZZI IOLE
+  B26:16:00 - 16:45 | F26:16:00/17:00 | G26:15:45/16:30
+  C27:CARTA ELISABETTA ( NO FEBBRAIO ) | E27:CASTELLANI GIORGIO | F27:BOTTARELLI  LORENZO | G27:SALVATORI  MATTEO | H27:DEL CAMPO ANDREA
+  B28:16:45 - 17:30 | F28:17:00/17:30 | G28:16:30/17:30 | H28:16:45/17:45
+  C29:VALENTINI REBECCA | D29:PIERACCI LUCILLA | E29:PIRAS SAMUELE | F29:GOZZO GABRIELE | G29:ROSSI ROBERTO | H29:MONSU' ROBERTO
+  B30:17:30 - 18:15 | G30:17:30/18:30 | H30:17:45/18:45
+  C31:PACIFICI PATRICK | D31:GOZZO CHIARA | E31:BARBATI DIEGO | F31:BLASCO EMMA | G31:VALENTINI ULDERICO | H31:MONSU' MARIASILVIA
+  B32:18:15 - 19:00 | C32:18:15/19:15 | G32:18:30/19:15 | H32:18:45/19:30
+  C33:MONSU' ROBERTO | D33:RASPA VALERIO | E33:DE MICHELE MARTINA | F33:BARBATI DIEGO | G33:BRAICO SARA | H33:RICHETTI GIOVANNA
+  B34:19:00 - 19:45 | C34:19:15/20:15 | F34:19:00/20:00 | G34:19:15/20:00 | H34:19:45/20:45
+  C35:IMPERIOLI GIULIA | D35:MURATTI DANIELA | E35:TESTA VALTER | F35:MARZULLI MICHELE | G35:FERLANTI FLAVIO | H35:REGOLI GAIA
+  B36:19:45 - 20:30 | C36:20:15/21:00 | F36:20:00/21:00 | G36:20:00/21:00
+  D37:CAMPI ALESSANDRO | E37:SOLFEGGIO RITMICO | G37:MUS. INSIEME                            
+  B38:20:30 - 21:15 | E38:20:30- 21:30 | G38:21:00/22:00
+  G39:MONTARSI MARCELLO
+  B40:21:15 - 22:00
+  B43:NOTE | G43:DA FARE
+  B44:35.0
+ERRORE con GIOVEDI: 'charmap' codec can't encode character '\u2713' in position 2: character maps to <undefined>
+
+==================================================
+GENERAZIONE SQL VENERDI
+==================================================
+
+Struttura foglio (prime 50 righe):
+
+  B1:
+  C4:AULA MIDI | D4:AULA PIANO | E4:AULA MAGNA | F4:SALA JAZZ | G4:SALA POP | H4:SALA ROCK
+  B5:DOCENTE
+  F6:ZINO                                     | G6:BUONO                                    | H6:URSINI
+  C7:PITINI                                   | D7:D'AURIA                                  | E7:CICCARELLI                               | F7:OMBRES                                   | G7:ZINO                                     | H7:OMBRES                                  
+  B8:9:15 - 10:00
+  B10:10:00 - 10:45
+  B12:10:45 - 11:30
+  B14:11:30 - 12:15 | F14:11:00/11:45 | G14:11:15/12:15
+  F15:SPOSATO GIOVANNI | G15:CARUSO FRANCESCA
+  B16:12:15 - 13:00 | G16:12:15/13:00
+  G17:BUSSOLETTI STEFANO
+  B18:13:00 - 13:45 | C18:12:15/13:00
+  C19:TERESI  FRANCESCA
+  B20:13:45 - 14:30 | C20:13:00/13:30 | E20:13:15/14:15 | F20:13:30/14:30
+  C21:pausa pranzo | F21:FABBRO ALESSANDRA
+  B22:14:30 - 15:15 | C22:13:30/14:30 | E22:14:15/15:15
+  C23:PECCERILLO TERESA | E23:SAVINI RICCARDO | F23:FELLI CLAUDIO | G23:MARAS ELISABETTA
+  B24:15:15 - 16:00 | C24:14:30/15:15 | H24:15:00/15:45
+  C25:BELCASTRO LETIZIA | E25:PENNAZZA SIMONA | F25:MANNINI LEONARDO | G25:TERENZI GIULIA | H25:PROVA CUSTOM FIORAVANTI FABIO ( 30 GENN 
+  B26:16:00 - 16:45 | C26:15:15/16:15
+  C27:MUNGO MARIA LUISA | E27:AULISI LAURA | F27:MOHD ALLINA | G27:RICCO ANTONIO | H27:ALVAREZ ASHLEEM ( FA SOLO FEBBRAIO )
+  B28:16:45 - 17:30 | C28:16:15/17:00 | D28:16:50/17:35 | F28:16:45/17:45 | G28:16:45/17:45 | H28:16:50/17:35
+  C29:PROVA DI GIACOMO ALESSANDRO (6 feb) | D29:PETTI VIOLA | E29:ASSANTE CRISTIAN | F29:PIRAS SAMUELE | G29:FIERIMONTE SARA | H29:PETTI JACOPO
+  B30:17:30 - 18:15 | C30:17:00/18:00 | D30:17:35/18:20 | E30:17:30/18:00 | F30:17:45/18:45 | G30:17:45/18:30 | H30:17:45/18:30
+  C31:CARLINI MICHELLE | D31:DI MUZIO BENEDETTA | E31:FRANCAVIGLIA VINCENZO | F31:CIFALDI MARIA | G31:VALLI TOMMASO | H31:LAB. RITMICO BABY
+  B32:18:15 - 19:00 | C32:18:00/19:00 | D32:18:20/19:05 | F32:18:45/19:45 | G32:18:30/19:30 | H32:18:30/19:30
+  C33:SORRENTINO DANIELA | E33:DI MICHELE IRENE | F33:COCO ALESSIO | G33:KOONS RACHEL | H33:RIVELLINO LEONARDO
+  B34:19:00 - 19:45 | D34:19:05/19:50 | F34:19:45/20:45 | G34:19:30/20:15 | H34:19:30/20:30
+  C35:DI MICHELE IRENE | E35:TEORIA I° LIV. | F35:SCOGNAMIGLIO BARBARA | G35:SACCO FABRIZIO | H35:PROBBO LUIGI
+  B36:19:45 - 20:30 | C36:19:45/20:45 | F36:20:30/21:30 | G36:20:15/21:15 | H36:20:30/21:30
+  C37:GATTA JULIA | E37:PIANO CANTO | G37:MUS. INSIEME                            
+  B38:20:30 - 21:15 | C38:20:45/21:45 | E38:20:30/21:30
+  E39:ALFANO LEONARDO
+  B40:21:15 - 22:00
+  B43:NOTE | G43:DA FARE
+  B44:38.0
+ERRORE con VENERDI: 'charmap' codec can't encode character '\u2713' in position 2: character maps to <undefined>
+
+==================================================
+GENERAZIONE SQL SABATO
+==================================================
+
+Struttura foglio (prime 50 righe):
+
+  B1:
+  C4:AULA MIDI | D4:AULA PIANO | E4:AULA MAGNA | F4:SALA JAZZ | G4:SALA POP | H4:SALA ROCK
+  B5:DOCENTE
+  C7:PITINI                                   | D7:PACCHIAROTTI                             | E7:MENCHERINI                          ( ra | F7:OMBRES                                   | G7:PICCININI                           ( ch | H7:FERILLI                                 
+  B8:9:15 - 10:00
+  B10:10:00 - 10:45
+  B12:10:45 - 11:30 | C12:10:00/11:00 | D12:10:00/11:00 | F12:10:00/11:00 | H12:10:00/11:00
+  C13:SORRENTINO GIULIA | D13:LABANCHI LUDOVICA | F13:CARDILLI ALESSANDRO | H13:CASILLO  TIZIANA
+  B14:11:30 - 12:15 | C14:11:00/12:00 | D14:11:00/11:45 | F14:11:00/12:00 | H14:11:00/12:00
+  C15:DI SABATINO PAOLA | D15:PAULHIAC LUCAS | F15:PISANI RICCARDO
+  B16:12:15 - 13:00 | C16:12:00/12:45 | D16:11:45/12:45 | F16:12:00/13:00 | H16:12:00/13:00
+  C17:MAZZI LUCA | D17:GUELI GIORGIA | F17:PISANI ILARIA | H17:LOFFREDO STEFANO
+  B18:13:00 - 13:45 | C18:12:45/13:15 | E18:12.00 /13:00 | F18:13:00/14:00
+  C19:pausa pranzo | E19:DELLE CESE EDOARDO | F19:CASTELLANI LAURA | H19:pausa pranzo
+  B20:13:45 - 14:30 | C20:13:15/14:00 | E20:13:00/14:00 | F20:14:00/14:45 | H20:13:15/14:15
+  E21:HENKE GINEVRA | F21:FILACCHIONE CAMILLA
+  B22:14:30 - 15:15 | C22:14:00/15:00 | E22:14:00/15:00 | F22:14:45/15:30 | H22:14:15/15:00
+  C23:PIETRANTONIO DIEGO ( no gennaio ) | E23:DELLE CESE RICCARDO | F23:MAGALOTTI FEDERICO | H23:CASALINUOVO DANIELE
+  B24:15:15 - 16:00 | C24:15:00/16:00 | E24:15:00/16:00 | F24:15:30/16:15 | G24:15:00/16:00 | H24:15:00/15:45
+  C25:CIPRELLI GRETA | E25:ANTONIELLA ENRICO | F25:MONTARSI ROMEO | G25:MUS. INSIEME                             | H25:CAMODECA ILAI
+  B26:16:00 - 16:45 | C26:16:00/17:00 | E26:16:00/17:00 | F26:16:15/17:15 | H26:15:45/16:45
+  C27:DI LUCA SARA | E27:FORMISANO EMANUELE | F27:DI LUCA ALESSANDRO | G27:ASSANTE CRISTIAN | H27:MUS. INSIEME                            
+  B28:16:45 - 17:30 | C28:17:00/17:45 | E28:17:00/17:45 | F28:17:15/18:15
+  C29:CAVALLARO GIULIA ( piccinini ) | E29:GRASSO GAIA | F29:VIGNA MARIO | G29:RICCI SILVIA | H29:BARBATI MARIA
+  B30:17:30 - 18:15 | C30:18:00/18:45 | E30:17:45/18:45 | H30:17:30/18:30
+  C31:PROVA FANTINI ARON (14 FEB) | H31:MUS. INSIEME                            
+  B32:18:15 - 19:00 | E32:18:45/19:45 | H32:18:30/19:30
+  H33:BERNABEI LUDOVICA
+  B34:19:00 - 19:45
+  B36:19:45 - 20:30
+  B38:20:30 - 21:15
+  B40:21:15 - 22:00
+  B43:NOTE | G43:DA FARE
+  B44:29.0
+ERRORE con SABATO: 'charmap' codec can't encode character '\u2713' in position 2: character maps to <undefined>
+
+==================================================
+COMPLETATO - File SQL creati (da popolare manualmente)
+==================================================

@@ -30,11 +30,29 @@ if (empty($giorno_selezionato)) {
 // Ottieni aule tramite controller
 $aule = $auleCtrl->getAule();
 
-// Ottieni slot orari
+// Ottieni slot orari (default 15 minuti)
 $slots = generaSlotOrari(ORA_INIZIO_SCUOLA, ORA_FINE_SCUOLA, DURATA_SLOT_DEFAULT);
 
 // Ottieni lezioni per il giorno selezionato tramite controller
-$lezioni = $lezioniCtrl->getLezioniPerGiorno($giorno_selezionato);
+// Se docente e configurazione lo richiede, filtra solo sue lezioni
+if ($auth->hasRole('docente') && !DOCENTE_VIEW_ALL_CALENDAR) {
+    // Ottieni istanza database
+    $db = Database::getInstance();
+    
+    // Ottieni ID docente dell'utente loggato
+    $docente_id = $db->queryOne(
+        "SELECT id FROM docenti WHERE user_id = ?", 
+        [$auth->getUserId()]
+    );
+    
+    if ($docente_id) {
+        $lezioni = $lezioniCtrl->getLezioniPerDocenteEGiorno($docente_id['id'], $giorno_selezionato);
+    } else {
+        $lezioni = []; // Nessuna lezione se docente non collegato
+    }
+} else {
+    $lezioni = $lezioniCtrl->getLezioniPerGiorno($giorno_selezionato);
+}
 
 // Organizza lezioni per aula e ora
 $calendario = [];
@@ -42,6 +60,30 @@ foreach ($lezioni as $lezione) {
     $aula_id = $lezione['aula_id'];
     $ora = $lezione['ora_inizio'];
     $calendario[$aula_id][$ora] = $lezione;
+}
+
+// Funzione per calcolare quanti slot occupa una lezione
+function calcolaRowspan($ora_inizio, $ora_fine, $slots) {
+    $count = 0;
+    foreach ($slots as $slot) {
+        if ($slot['inizio'] >= $ora_inizio && $slot['inizio'] < $ora_fine) {
+            $count++;
+        }
+    }
+    return max(1, $count);
+}
+
+// Mappa icone strumenti (Bootstrap Icons)
+function getIconaMateria($materia) {
+    $materia_lower = strtolower($materia);
+    if (strpos($materia_lower, 'chitar') !== false) return 'bi-music-note-beamed';
+    if (strpos($materia_lower, 'piano') !== false) return 'bi-piano';
+    if (strpos($materia_lower, 'canto') !== false) return 'bi-mic';
+    if (strpos($materia_lower, 'batter') !== false) return 'bi-disc';
+    if (strpos($materia_lower, 'basso') !== false) return 'bi-soundwave';
+    if (strpos($materia_lower, 'violino') !== false) return 'bi-violin';
+    if (strpos($materia_lower, 'sax') !== false) return 'bi-trumpet';
+    return 'bi-music-note';
 }
 
 include 'includes/header.php';
@@ -119,30 +161,47 @@ include 'includes/header.php';
                                         data-aula-id="<?= $aula['id'] ?>" 
                                         data-ora="<?= $slot['inizio'] ?>">
                                         <?php
-                                        // Controlla se c'è una lezione in questo slot
+                                        // Trova lezione che INIZIA in questo slot o prima della fine dello slot
                                         $lezione_slot = null;
                                         if (isset($calendario[$aula['id']])) {
+                                            $slot_start = strtotime($slot['inizio']);
+                                            $slot_end = strtotime($slot['fine']);
+                                            
                                             foreach ($calendario[$aula['id']] as $ora => $lez) {
-                                                if ($ora >= $slot['inizio'] && $ora < $slot['fine']) {
+                                                $lezione_start = strtotime($ora);
+                                                // La lezione inizia nello slot se:
+                                                // - inizia esattamente all'inizio dello slot
+                                                // - inizia dopo l'inizio ma prima della fine dello slot
+                                                if ($lezione_start >= $slot_start && $lezione_start < $slot_end) {
                                                     $lezione_slot = $lez;
                                                     break;
                                                 }
                                             }
                                         }
                                         
-                                        if ($lezione_slot): ?>
+                                        if ($lezione_slot): 
+                                            $icona = getIconaMateria($lezione_slot['materia']);
+                                        ?>
                                             <div class="lezione-slot tipo-<?= e($lezione_slot['tipo']) ?>" 
                                                  data-lezione-id="<?= $lezione_slot['id'] ?>"
                                                  title="<?= e($lezione_slot['allievo']) ?> - <?= e($lezione_slot['materia']) ?>">
-                                                <span class="lezione-allievo">
-                                                    <?= e($lezione_slot['allievo']) ?>
-                                                </span>
-                                                <span class="lezione-materia">
-                                                    <?= e($lezione_slot['materia']) ?>
-                                                </span>
-                                                <span class="lezione-docente">
-                                                    <?= e($lezione_slot['docente']) ?>
-                                                </span>
+                                                <div class="lezione-orario-badge">
+                                                    <?= date('H:i', strtotime($lezione_slot['ora_inizio'])) ?>-<?= date('H:i', strtotime($lezione_slot['ora_fine'])) ?>
+                                                </div>
+                                                <div class="lezione-header">
+                                                    <i class="bi <?= $icona ?> icona-strumento"></i>
+                                                    <span class="lezione-allievo">
+                                                        <?= e($lezione_slot['allievo']) ?>
+                                                    </span>
+                                                </div>
+                                                <div class="lezione-info-row">
+                                                    <div class="lezione-docente">
+                                                        <i class="bi bi-person-fill"></i> <?= e($lezione_slot['docente']) ?>
+                                                    </div>
+                                                    <div class="lezione-materia-inline">
+                                                        <?= e($lezione_slot['materia']) ?>
+                                                    </div>
+                                                </div>
                                             </div>
                                         <?php endif; ?>
                                     </td>

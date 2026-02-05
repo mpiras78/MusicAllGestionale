@@ -24,69 +24,82 @@
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center" href="<?= BASE_URL ?>/index.php">
+        <a class="navbar-brand d-flex align-items-center" href="<?= BASE_URL ?><?= $auth->hasRole('docente') ? '/calendario.php' : '/index.php' ?>">
             <img src="<?= BASE_URL ?>/assets/img/logo_musicall.png" alt="MusicAll Logo" height="40" class="me-2">
-            <span><?= APP_NAME ?></span>
+            <?php //<span><?//= APP_NAME </span>?>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link <?= ($current_page ?? '') == 'dashboard' ? 'active' : '' ?>" href="<?= BASE_URL ?>/index.php">
-                        <i class="bi bi-speedometer2"></i> Dashboard
-                    </a>
-                </li>
+                <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="gestione_utenti.php">
+                            <i class="bi bi-people-fill"></i> Utenti
+                        </a>
+                    </li>
+                <?php endif; ?>
                 <li class="nav-item">
                     <a class="nav-link <?= ($current_page ?? '') == 'calendario' ? 'active' : '' ?>" href="<?= BASE_URL ?>/calendario.php">
                         <i class="bi bi-calendar-week"></i> Calendario
                     </a>
                 </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="gestioneDropdown" role="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-gear"></i> Gestione
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>/allievi/index.php">
-                            <i class="bi bi-people"></i> Allievi
-                        </a></li>
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>/docenti/index.php">
-                            <i class="bi bi-person-badge"></i> Docenti
-                        </a></li>
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>/lezioni/index.php">
-                            <i class="bi bi-book"></i> Lezioni
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>/aule/index.php">
-                            <i class="bi bi-door-open"></i> Aule
-                        </a></li>
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>/materie/index.php">
-                            <i class="bi bi-journal-text"></i> Materie
-                        </a></li>
-                    </ul>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?= ($current_page ?? '') == 'assenze' ? 'active' : '' ?>" href="<?= BASE_URL ?>/assenze/index.php">
-                        <i class="bi bi-calendar-x"></i> Assenze
-                    </a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="reportDropdown" role="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-file-earmark-bar-graph"></i> Report
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>/report/statistiche.php">
-                            <i class="bi bi-graph-up"></i> Statistiche
-                        </a></li>
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>/report/presenze.php">
-                            <i class="bi bi-check2-circle"></i> Presenze
-                        </a></li>
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>/report/docenti.php">
-                            <i class="bi bi-person-lines-fill"></i> Report Docenti
-                        </a></li>
-                    </ul>
-                </li>
+                
+                <?php if ($auth->hasRole('docente')): ?>
+                    <!-- Menu Docente -->
+                    <li class="nav-item">
+                        <a class="nav-link <?= ($current_page ?? '') == 'recuperi' ? 'active' : '' ?>" href="<?= BASE_URL ?>/recuperi.php">
+                            <i class="bi bi-calendar-plus"></i> Recuperi
+                        </a>
+                    </li>
+                <?php else: ?>
+                    <!-- Menu Admin e Segreteria -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="gestioneDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-gear"></i> Gestione
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>/allievi/index.php">
+                                <i class="bi bi-people"></i> Allievi
+                            </a></li>
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>/docenti/index.php">
+                                <i class="bi bi-person-badge"></i> Docenti
+                            </a></li>
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>/lezioni/index.php">
+                                <i class="bi bi-book"></i> Lezioni
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>/aule/index.php">
+                                <i class="bi bi-door-open"></i> Aule
+                            </a></li>
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>/materie/index.php">
+                                <i class="bi bi-journal-text"></i> Materie
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= ($current_page ?? '') == 'assenze' ? 'active' : '' ?>" href="<?= BASE_URL ?>/assenze/index.php">
+                            <i class="bi bi-calendar-x"></i> Assenze
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="reportDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-file-earmark-bar-graph"></i> Report
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>/report/statistiche.php">
+                                <i class="bi bi-graph-up"></i> Statistiche
+                            </a></li>
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>/report/presenze.php">
+                                <i class="bi bi-check2-circle"></i> Presenze
+                            </a></li>
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>/report/docenti.php">
+                                <i class="bi bi-person-lines-fill"></i> Report Docenti
+                            </a></li>
+                        </ul>
+                    </li>
+                <?php endif; ?>
             </ul>
             <ul class="navbar-nav">
                 <li class="nav-item dropdown">
@@ -98,8 +111,8 @@
                             <i class="bi bi-person"></i> Profilo
                         </a></li>
                         <?php if ($auth->isAdmin()): ?>
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>/admin/users.php">
-                            <i class="bi bi-shield-lock"></i> Utenti
+                        <li><a class="dropdown-item" href="<?= BASE_URL ?>/gestione_utenti.php">
+                            <i class="bi bi-people-fill"></i> Gestione Utenti
                         </a></li>
                         <li><a class="dropdown-item" href="<?= BASE_URL ?>/admin/settings.php">
                             <i class="bi bi-sliders"></i> Impostazioni

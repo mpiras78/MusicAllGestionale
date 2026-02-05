@@ -52,6 +52,7 @@ class Auth {
             $_SESSION['email'] = $user['email'];
             $_SESSION['logged_in'] = true;
             $_SESSION['login_time'] = time();
+            $_SESSION['last_activity'] = time(); // Inizializza timeout
             
             // Log attività
             $this->logActivity($user['id'], 'login', null, null, 'Login effettuato');
@@ -66,7 +67,7 @@ class Auth {
      * Logout utente
      */
     public function logout() {
-        if ($this->isLoggedIn()) {
+        if (isset($_SESSION['user_id'])) {
             $user_id = $_SESSION['user_id'];
             $this->logActivity($user_id, 'logout', null, null, 'Logout effettuato');
         }
@@ -78,10 +79,31 @@ class Auth {
     }
     
     /**
-     * Verifica se l'utente è loggato
+     * Verifica se l'utente è autenticato
+     * Controlla anche timeout sessione (15 minuti)
      */
     public function isLoggedIn() {
-        return isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
+        if (!isset($_SESSION['user_id'])) {
+            return false;
+        }
+        
+        // Verifica timeout sessione (15 minuti)
+        if (isset($_SESSION['last_activity'])) {
+            $timeout = 15 * 60; // 15 minuti in secondi
+            $elapsed = time() - $_SESSION['last_activity'];
+            
+            if ($elapsed > $timeout) {
+                // Sessione scaduta - salva flag per messaggio
+                $_SESSION['session_timeout'] = true;
+                $this->logout();
+                return false;
+            }
+        }
+        
+        // Aggiorna timestamp ultima attività
+        $_SESSION['last_activity'] = time();
+        
+        return true;
     }
     
     /**
@@ -180,7 +202,9 @@ class Auth {
      */
     public function requireLogin() {
         if (!$this->isLoggedIn()) {
-            header('Location: ' . BASE_URL . '/login.php');
+            // Controlla se sessione scaduta
+            $timeout = isset($_SESSION['session_timeout']) ? '?timeout=1' : '';
+            header('Location: ' . BASE_URL . '/login.php' . $timeout);
             exit;
         }
     }

@@ -19,7 +19,7 @@ define('DB_PATH', __DIR__ . '/../database/musicall.sqlite');
 
 // Configurazione Applicazione
 define('APP_NAME', 'MusicAll');
-define('APP_VERSION', '0.3.0');
+define('APP_VERSION', '0.4.0');
 define('BASE_URL', 'http://localhost:8000');
 define('BASE_PATH', dirname(__DIR__));
 
@@ -35,12 +35,32 @@ define('MAX_FILE_SIZE', 5 * 1024 * 1024); // 5MB
 // Paginazione
 define('ITEMS_PER_PAGE', 20);
 
-// Email (se necessario)
+// Email
+define('EMAIL_FROM', 'noreply@musicall.it');
+define('EMAIL_FROM_NAME', 'MusicAll');
+define('APP_URL', BASE_URL); // URL per link nelle email
+
+// ========================================
+// PERMESSI RUOLO DOCENTE
+// ========================================
+
+// Visualizzazione Calendario
+define('DOCENTE_VIEW_ALL_CALENDAR', false);  // false = solo proprie lezioni, true = tutte le lezioni
+
+// Modifica Lezioni
+define('DOCENTE_CAN_EDIT_LESSONS', false);   // false = solo lettura, true = può modificare
+
+// Gestione Assenze
+define('DOCENTE_CAN_VIEW_ABSENCES', true);   // true = può vedere assenze dei propri allievi
+
+// Gestione Allievi
+define('DOCENTE_CAN_VIEW_STUDENTS', true);   // true = può vedere lista allievi delle proprie lezioni
+
+// SMTP (se necessario per email avanzate)
 define('SMTP_HOST', 'smtp.example.com');
 define('SMTP_PORT', 587);
 define('SMTP_USER', '');
 define('SMTP_PASS', '');
-define('SMTP_FROM', 'noreply@musicall.it');
 
 // Giorni della settimana
 define('GIORNI_SETTIMANA', [
