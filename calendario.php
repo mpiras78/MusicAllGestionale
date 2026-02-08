@@ -28,12 +28,16 @@ $giorni_nomi = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sa
 $giorni_keys = ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato'];
 
 for ($i = 0; $i < 6; $i++) {
+    $data_corrente = $giorno_corrente->format('Y-m-d');
+    $festivita = isFestivitaItaliana($data_corrente);
+    
     $giorni_settimana[] = [
         'nome' => $giorni_nomi[$i],
         'key' => $giorni_keys[$i],
-        'data' => $giorno_corrente->format('Y-m-d'),
+        'data' => $data_corrente,
         'data_display' => $giorno_corrente->format('d/m'),
-        'is_today' => $giorno_corrente->format('Y-m-d') == date('Y-m-d')
+        'is_today' => $data_corrente == date('Y-m-d'),
+        'festivita' => $festivita
     ];
     $giorno_corrente->modify('+1 day');
 }
@@ -54,11 +58,13 @@ if (empty($giorno_selezionato)) {
     }
 }
 
-// Trova data del giorno selezionato
+// Trova data del giorno selezionato e verifica se è festività
 $data_selezionata = '';
+$giorno_festivita = false;
 foreach ($giorni_settimana as $g) {
     if ($g['key'] == $giorno_selezionato) {
         $data_selezionata = $g['data'];
+        $giorno_festivita = $g['festivita'];
         break;
     }
 }
@@ -161,13 +167,16 @@ include 'includes/header.php';
                 <?php foreach ($giorni_settimana as $giorno): ?>
                     <li class="nav-item" role="presentation">
                         <a href="?settimana=<?= $settimana_offset ?>&giorno=<?= $giorno['key'] ?>" 
-                           class="nav-link <?= $giorno_selezionato == $giorno['key'] ? 'active' : '' ?> <?= $giorno['is_today'] ? 'fw-bold' : '' ?>"
-                           style="<?= $giorno['is_today'] ? 'background-color: #fff3cd; border-color: #ffc107;' : '' ?>">
+                           class="nav-link <?= $giorno_selezionato == $giorno['key'] ? 'active' : '' ?> <?= $giorno['is_today'] ? 'fw-bold' : '' ?> <?= $giorno['festivita'] ? 'border-danger' : '' ?>"
+                           style="<?= $giorno['is_today'] ? 'background-color: #fff3cd; border-color: #ffc107;' : '' ?><?= $giorno['festivita'] ? 'border-width: 3px !important;' : '' ?>">
                             <div class="d-flex flex-column align-items-center">
                                 <span class="fs-6"><?= $giorno['nome'] ?></span>
                                 <span class="badge bg-secondary mt-1"><?= $giorno['data_display'] ?></span>
                                 <?php if ($giorno['is_today']): ?>
                                     <span class="badge bg-warning text-dark mt-1">OGGI</span>
+                                <?php endif; ?>
+                                <?php if ($giorno['festivita']): ?>
+                                    <span class="badge bg-danger mt-1" title="Festività Nazionale"><?= $giorno['festivita']['nome'] ?></span>
                                 <?php endif; ?>
                             </div>
                         </a>
@@ -248,13 +257,21 @@ include 'includes/header.php';
                                         
                                         if ($lezione_slot): 
                                             $icona = getIconaMateria($lezione_slot['materia']);
-                                            // Determina se lezione è annullata (attiva = 0)
-                                            $is_annullata = isset($lezione_slot['attiva']) && $lezione_slot['attiva'] == 0;
+                                            // Determina se lezione è annullata (attiva = 0 O giorno festività)
+                                            $is_annullata = (isset($lezione_slot['attiva']) && $lezione_slot['attiva'] == 0) || $giorno_festivita;
                                             $classe_annullata = $is_annullata ? ' lezione-annullata' : '';
+                                            $motivo_annullamento = '';
+                                            if ($is_annullata) {
+                                                if ($giorno_festivita) {
+                                                    $motivo_annullamento = ' (' . $giorno_festivita['nome'] . ')';
+                                                } elseif (isset($lezione_slot['attiva']) && $lezione_slot['attiva'] == 0) {
+                                                    $motivo_annullamento = ' (ANNULLATA)';
+                                                }
+                                            }
                                         ?>
                                             <div class="lezione-slot tipo-<?= e($lezione_slot['tipo']) ?><?= $classe_annullata ?>" 
                                                  data-lezione-id="<?= $lezione_slot['id'] ?>"
-                                                 title="<?= e($lezione_slot['allievo']) ?> - <?= e($lezione_slot['materia']) ?><?= $is_annullata ? ' (ANNULLATA)' : '' ?>">
+                                                 title="<?= e($lezione_slot['allievo']) ?> - <?= e($lezione_slot['materia']) ?><?= $motivo_annullamento ?>">
                                                 <div class="lezione-orario-badge">
                                                     <?= date('H:i', strtotime($lezione_slot['ora_inizio'])) ?>-<?= date('H:i', strtotime($lezione_slot['ora_fine'])) ?>
                                                 </div>

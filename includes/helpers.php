@@ -5,150 +5,47 @@
  */
 
 /**
- * Escape HTML (solo se non già definita da Laravel)
+ * Escape HTML per prevenire XSS
  */
-if (!function_exists('e')) {
-    function e($string) {
-        return htmlspecialchars($string ?? '', ENT_QUOTES, 'UTF-8');
-    }
+function e($string) {
+    return htmlspecialchars($string ?? '', ENT_QUOTES, 'UTF-8');
 }
 
 /**
- * Redirect
- */
-function redirect($url) {
-    header('Location: ' . $url);
-    exit;
-}
-
-/**
- * Formatta data italiana
- */
-function formatDate($date, $format = 'd/m/Y') {
-    if (empty($date)) return '';
-    $timestamp = is_numeric($date) ? $date : strtotime($date);
-    return date($format, $timestamp);
-}
-
-/**
- * Formatta ora
- */
-function formatTime($time) {
-    if (empty($time)) return '';
-    return date('H:i', strtotime($time));
-}
-
-/**
- * Formatta data e ora
- */
-function formatDateTime($datetime) {
-    if (empty($datetime)) return '';
-    return date('d/m/Y H:i', strtotime($datetime));
-}
-
-/**
- * Ottiene il giorno della settimana in italiano
- */
-function getGiornoItaliano($giorno_settimana) {
-    return GIORNI_SETTIMANA[$giorno_settimana] ?? $giorno_settimana;
-}
-
-/**
- * Genera select options
- */
-function selectOptions($items, $value_field, $label_field, $selected = null) {
-    $html = '';
-    foreach ($items as $item) {
-        $value = $item[$value_field];
-        $label = $item[$label_field];
-        $selected_attr = ($value == $selected) ? 'selected' : '';
-        $html .= sprintf('<option value="%s" %s>%s</option>', e($value), $selected_attr, e($label));
-    }
-    return $html;
-}
-
-/**
- * Mostra messaggio flash
- */
-function setFlashMessage($message, $type = 'info') {
-    $_SESSION['flash_message'] = $message;
-    $_SESSION['flash_type'] = $type;
-}
-
-/**
- * Ottiene e rimuove messaggio flash
- */
-function getFlashMessage() {
-    if (isset($_SESSION['flash_message'])) {
-        $message = $_SESSION['flash_message'];
-        $type = $_SESSION['flash_type'] ?? 'info';
-        unset($_SESSION['flash_message'], $_SESSION['flash_type']);
-        return ['message' => $message, 'type' => $type];
-    }
-    return null;
-}
-
-/**
- * Ottiene parametro POST in modo sicuro
- */
-function post($key, $default = null) {
-    return $_POST[$key] ?? $default;
-}
-
-/**
- * Ottiene parametro GET in modo sicuro
+ * Get parametro da GET con valore default
  */
 function get($key, $default = null) {
     return $_GET[$key] ?? $default;
 }
 
 /**
- * Verifica se la richiesta è POST
+ * Get parametro da POST con valore default
  */
-function isPost() {
-    return $_SERVER['REQUEST_METHOD'] === 'POST';
+function post($key, $default = null) {
+    return $_POST[$key] ?? $default;
 }
 
 /**
- * Verifica se la richiesta è AJAX
+ * Redirect a URL
  */
-function isAjax() {
-    return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
-           strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
-}
-
-/**
- * Risposta JSON
- */
-function jsonResponse($data, $status = 200) {
-    http_response_code($status);
-    header('Content-Type: application/json');
-    echo json_encode($data);
+function redirect($url) {
+    header("Location: " . $url);
     exit;
-}
-
-/**
- * Calcola durata in minuti tra due orari
- */
-function calcolaDurata($ora_inizio, $ora_fine) {
-    $start = strtotime($ora_inizio);
-    $end = strtotime($ora_fine);
-    return ($end - $start) / 60;
 }
 
 /**
  * Genera slot orari
  */
-function generaSlotOrari($ora_inizio = '09:15', $ora_fine = '22:00', $durata = 45) {
+function generaSlotOrari($ora_inizio, $ora_fine, $durata_minuti = 15) {
     $slots = [];
     $current = strtotime($ora_inizio);
     $end = strtotime($ora_fine);
     
     while ($current < $end) {
-        $next = strtotime("+{$durata} minutes", $current);
+        $next = strtotime("+{$durata_minuti} minutes", $current);
         $slots[] = [
-            'inizio' => date('H:i', $current),
-            'fine' => date('H:i', $next)
+            'inizio' => date('H:i:s', $current),
+            'fine' => date('H:i:s', $next)
         ];
         $current = $next;
     }
@@ -157,119 +54,145 @@ function generaSlotOrari($ora_inizio = '09:15', $ora_fine = '22:00', $durata = 4
 }
 
 /**
- * Valida email
+ * Formatta data italiana
  */
-function isValidEmail($email) {
-    return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
-}
-
-/**
- * Sanitize string
- */
-function sanitize($string) {
-    return filter_var($string, FILTER_SANITIZE_STRING);
-}
-
-/**
- * Tronca testo
- */
-function truncate($text, $length = 100, $suffix = '...') {
-    if (strlen($text) <= $length) {
-        return $text;
-    }
-    return substr($text, 0, $length) . $suffix;
-}
-
-/**
- * Badge colore per categoria materia
- */
-function getCategoriaBadge($categoria) {
-    $badges = [
-        'strumento' => 'primary',
-        'canto' => 'success',
-        'teoria' => 'info',
-        'insieme' => 'warning',
-        'laboratorio' => 'secondary',
-        'custom' => 'dark'
-    ];
-    return $badges[$categoria] ?? 'secondary';
-}
-
-/**
- * Badge colore per tipo lezione
- */
-function getTipoLezioneBadge($tipo) {
-    $badges = [
-        'regolare' => 'primary',
-        'custom' => 'warning',
-        'recupero' => 'success',
-        'laboratorio' => 'info'
-    ];
-    return $badges[$tipo] ?? 'secondary';
-}
-
-/**
- * Formatta nome completo
- */
-function nomeCompleto($cognome, $nome) {
-    return trim($cognome . ' ' . $nome);
-}
-
-/**
- * Genera colore casuale per eventi calendario
- */
-function getRandomColor($seed = null) {
-    $colors = [
-        '#3788d8', '#28a745', '#ffc107', '#dc3545', '#17a2b8',
-        '#6f42c1', '#e83e8c', '#fd7e14', '#20c997', '#6610f2'
-    ];
+function formatDataItaliana($data) {
+    if (empty($data)) return '';
     
-    if ($seed !== null) {
-        return $colors[$seed % count($colors)];
+    $timestamp = is_numeric($data) ? $data : strtotime($data);
+    return date('d/m/Y', $timestamp);
+}
+
+/**
+ * Formatta data e ora italiana
+ */
+function formatDataOraItaliana($datetime) {
+    if (empty($datetime)) return '';
+    
+    $timestamp = is_numeric($datetime) ? $datetime : strtotime($datetime);
+    return date('d/m/Y H:i', $timestamp);
+}
+
+/**
+ * Calcola età da data nascita
+ */
+function calcolaEta($data_nascita) {
+    if (empty($data_nascita)) return null;
+    
+    $nascita = new DateTime($data_nascita);
+    $oggi = new DateTime();
+    return $oggi->diff($nascita)->y;
+}
+
+/**
+ * Verifica se una data è una festività italiana
+ * Ritorna array con info festività o false
+ */
+function isFestivitaItaliana($data) {
+    // Converti in DateTime se è stringa
+    if (is_string($data)) {
+        $data = new DateTime($data);
     }
     
-    return $colors[array_rand($colors)];
+    $anno = (int)$data->format('Y');
+    $mese = (int)$data->format('m');
+    $giorno = (int)$data->format('d');
+    
+    // Festività fisse
+    $festivita_fisse = [
+        '01-01' => '🎊 Capodanno',
+        '01-06' => '🌟 Epifania',
+        '04-25' => '🇮🇹 Festa della Liberazione',
+        '05-01' => '⚒️ Festa dei Lavoratori',
+        '06-02' => '🇮🇹 Festa della Repubblica',
+        '08-15' => '⛪ Ferragosto',
+        '11-01' => '🕯️ Ognissanti',
+        '12-08' => '⛪ Immacolata Concezione',
+        '12-25' => '🎄 Natale',
+        '12-26' => '🎁 Santo Stefano'
+    ];
+    
+    $chiave = sprintf('%02d-%02d', $mese, $giorno);
+    
+    if (isset($festivita_fisse[$chiave])) {
+        return [
+            'nome' => $festivita_fisse[$chiave],
+            'tipo' => 'nazionale',
+            'data' => $data->format('Y-m-d')
+        ];
+    }
+    
+    // Pasqua e Lunedì dell'Angelo (mobili)
+    $pasqua = easter_date($anno);
+    $data_pasqua = date('Y-m-d', $pasqua);
+    $lunedi_angelo = date('Y-m-d', strtotime('+1 day', $pasqua));
+    
+    if ($data->format('Y-m-d') == $data_pasqua) {
+        return [
+            'nome' => '🐣 Pasqua',
+            'tipo' => 'nazionale',
+            'data' => $data_pasqua
+        ];
+    }
+    
+    if ($data->format('Y-m-d') == $lunedi_angelo) {
+        return [
+            'nome' => '🐰 Lunedì dell\'Angelo',
+            'tipo' => 'nazionale',
+            'data' => $lunedi_angelo
+        ];
+    }
+    
+    return false;
 }
 
 /**
- * Debug print
+ * Ottieni tutte le festività per un mese
  */
-function dd($data) {
-    echo '<pre>';
-    var_dump($data);
-    echo '</pre>';
-    die();
+function getFestivitaMese($anno, $mese) {
+    $festivita = [];
+    $giorni_mese = cal_days_in_month(CAL_GREGORIAN, $mese, $anno);
+    
+    for ($giorno = 1; $giorno <= $giorni_mese; $giorno++) {
+        $data = new DateTime("$anno-$mese-$giorno");
+        $festivity = isFestivitaItaliana($data);
+        if ($festivity) {
+            $festivita[$data->format('Y-m-d')] = $festivity;
+        }
+    }
+    
+    return $festivita;
 }
 
 /**
- * Log personalizzato
+ * Ottieni tutte le festività per un anno
  */
-function logMessage($message, $file = 'app.log') {
-    $log_file = BASE_PATH . '/logs/' . $file;
-    $timestamp = date('Y-m-d H:i:s');
-    $log_message = "[$timestamp] $message" . PHP_EOL;
-    file_put_contents($log_file, $log_message, FILE_APPEND);
+function getFestivitaAnno($anno) {
+    $festivita = [];
+    
+    for ($mese = 1; $mese <= 12; $mese++) {
+        $festivita = array_merge($festivita, getFestivitaMese($anno, $mese));
+    }
+    
+    return $festivita;
 }
 
 /**
- * Genera password casuale
+ * Verifica se la scuola è aperta in una data
  */
-function generatePassword($length = 10) {
-    $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%';
-    return substr(str_shuffle(str_repeat($chars, $length)), 0, $length);
-}
-
-/**
- * Ottiene array giorni settimana
- */
-function getGiorniSettimana() {
-    return GIORNI_SETTIMANA;
-}
-
-/**
- * Controlla se una data è nel weekend
- */
-function isWeekend($date) {
-    $day = date('N', strtotime($date));
-    return $day >= 6; // 6 = Sabato, 7 = Domenica
+function isScuolaAperta($data) {
+    // Verifica festività
+    if (isFestivitaItaliana($data)) {
+        return false;
+    }
+    
+    // Verifica domenica
+    $dt = is_string($data) ? new DateTime($data) : $data;
+    if ($dt->format('N') == 7) { // 7 = Domenica
+        return false;
+    }
+    
+    // TODO: Aggiungere controllo periodi ferie scuola (estate, Natale, etc.)
+    
+    return true;
 }
