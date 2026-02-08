@@ -178,11 +178,40 @@ git pull origin main
 
 ## ✨ Prossime Feature (Roadmap v1.2.0)
 
-- [ ] Modifica lezioni da calendario (drag & drop)
-- [ ] Export calendario PDF
-- [ ] Notifiche push per assenze
-- [ ] Dashboard analytics avanzate
-- [ ] Mobile app companion
+### **Calendario Avanzato:**
+- [ ] **Lezioni Annullate:** Visualizzazione in grigio delle lezioni annullate
+- [ ] **Recuperi in Calendario:** Schede verdi per recuperi programmati
+  - Click su recupero → modal con dettagli recupero + assenza origine
+  - Distinguere visivamente recuperi da lezioni normali
+- [ ] **Modifica Lezioni:** Drag & drop per spostare lezioni
+- [ ] **Export PDF:** Generazione calendario stampabile
+
+### **Gestione Allievi & Docenti:**
+- [ ] **Pagina Lista Allievi:** Tabella completa con ricerca/filtri
+- [ ] **Pagina Nuovo Allievo:** Form inserimento con validazione
+- [ ] **Pagina Lista Docenti:** Gestione completa docenti
+- [ ] **Pagina Nuovo Docente:** Form inserimento docente
+- [ ] **Dettaglio Allievo:** Scheda completa con storico
+- [ ] **Dettaglio Docente:** Panoramica lezioni e statistiche
+
+### **Azioni Rapide Dashboard:**
+- [ ] **Aggancio Funzionalità:** Collegare pulsanti box "Azioni Rapide" a:
+  - Aggiungi Allievo → Form nuovo allievo
+  - Aggiungi Docente → Form nuovo docente
+  - Registra Assenza → Modal assenza rapida
+  - Programma Recupero → Form recupero
+  - Visualizza Calendario → Redirect calendario settimana
+  - Report Mensile → Generazione report
+
+### **Notifiche & Analytics:**
+- [ ] **Notifiche Push:** Alert per assenze e recuperi
+- [ ] **Dashboard Analytics:** Grafici e statistiche avanzate
+- [ ] **Report Automatici:** Generazione report mensili/settimanali
+
+### **Mobile & Accessibilità:**
+- [ ] **Responsive Mobile:** Ottimizzazione layout mobile
+- [ ] **Mobile App Companion:** App nativa iOS/Android
+- [ ] **PWA Support:** Progressive Web App per offline
 
 ---
 
