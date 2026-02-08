@@ -248,10 +248,13 @@ include 'includes/header.php';
                                         
                                         if ($lezione_slot): 
                                             $icona = getIconaMateria($lezione_slot['materia']);
+                                            // Determina se lezione è annullata (attiva = 0)
+                                            $is_annullata = isset($lezione_slot['attiva']) && $lezione_slot['attiva'] == 0;
+                                            $classe_annullata = $is_annullata ? ' lezione-annullata' : '';
                                         ?>
-                                            <div class="lezione-slot tipo-<?= e($lezione_slot['tipo']) ?>" 
+                                            <div class="lezione-slot tipo-<?= e($lezione_slot['tipo']) ?><?= $classe_annullata ?>" 
                                                  data-lezione-id="<?= $lezione_slot['id'] ?>"
-                                                 title="<?= e($lezione_slot['allievo']) ?> - <?= e($lezione_slot['materia']) ?>">
+                                                 title="<?= e($lezione_slot['allievo']) ?> - <?= e($lezione_slot['materia']) ?><?= $is_annullata ? ' (ANNULLATA)' : '' ?>">
                                                 <div class="lezione-orario-badge">
                                                     <?= date('H:i', strtotime($lezione_slot['ora_inizio'])) ?>-<?= date('H:i', strtotime($lezione_slot['ora_fine'])) ?>
                                                 </div>
@@ -725,7 +728,7 @@ function confermaAssenza() {
     });
 }
 
-// Funzione per mostrare toast
+// Funzione per mostrare toast (NO auto-hide, utente deve chiudere manualmente)
 function mostraToast(titolo, messaggio, tipo = 'info') {
     // Crea container toast se non esiste
     let toastContainer = document.getElementById('toastContainer');
@@ -770,15 +773,14 @@ function mostraToast(titolo, messaggio, tipo = 'info') {
     
     toastContainer.insertAdjacentHTML('beforeend', toastHTML);
     
-    // Mostra toast
+    // Mostra toast SENZA auto-hide - utente deve cliccare X per chiudere
     const toastElement = document.getElementById(toastId);
     const toast = new bootstrap.Toast(toastElement, {
-        autohide: true,
-        delay: tipo === 'danger' ? 5000 : 3000
+        autohide: false  // ← Cambiato: NO auto-hide
     });
     toast.show();
     
-    // Rimuovi dopo nascosto
+    // Rimuovi dopo nascosto manualmente
     toastElement.addEventListener('hidden.bs.toast', () => {
         toastElement.remove();
     });
