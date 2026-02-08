@@ -191,8 +191,26 @@ include 'includes/header.php';
                     <thead>
                         <tr>
                             <th class="time-col">Orario</th>
-                            <?php foreach ($aule as $aula): ?>
-                                <th class="aula-header">
+                            <?php foreach ($aule as $aula): 
+                                // Determina classe CSS per colore aula
+                                $aula_nome_lower = strtolower($aula['nome']);
+                                $aula_class = 'aula-header';
+                                
+                                if (strpos($aula_nome_lower, 'midi') !== false) {
+                                    $aula_class .= ' aula-midi';
+                                } elseif (strpos($aula_nome_lower, 'piano') !== false) {
+                                    $aula_class .= ' aula-piano';
+                                } elseif (strpos($aula_nome_lower, 'magna') !== false) {
+                                    $aula_class .= ' aula-magna';
+                                } elseif (strpos($aula_nome_lower, 'jazz') !== false) {
+                                    $aula_class .= ' aula-jazz';
+                                } elseif (strpos($aula_nome_lower, 'pop') !== false) {
+                                    $aula_class .= ' aula-pop';
+                                } elseif (strpos($aula_nome_lower, 'rock') !== false) {
+                                    $aula_class .= ' aula-rock';
+                                }
+                            ?>
+                                <th class="<?= $aula_class ?>">
                                     <i class="bi bi-door-open"></i> <?= e($aula['nome']) ?>
                                 </th>
                             <?php endforeach; ?>

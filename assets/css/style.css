@@ -107,6 +107,31 @@ body {
     padding: 0.75rem;
 }
 
+/* Colori specifici per aule */
+.calendario-table .aula-midi {
+    background-color: #2196F3 !important; /* Blu */
+}
+
+.calendario-table .aula-piano {
+    background-color: #4CAF50 !important; /* Verde */
+}
+
+.calendario-table .aula-magna {
+    background-color: #FF9800 !important; /* Arancione */
+}
+
+.calendario-table .aula-jazz {
+    background-color: #E91E63 !important; /* Ciclamino/Magenta */
+}
+
+.calendario-table .aula-pop {
+    background-color: #9C27B0 !important; /* Viola */
+}
+
+.calendario-table .aula-rock {
+    background-color: #F44336 !important; /* Rosso */
+}
+
 .calendario-cell {
     border: 1px solid #dee2e6;
     padding: 0;
