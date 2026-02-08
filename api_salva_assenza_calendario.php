@@ -102,20 +102,31 @@ try {
     }
     
     // Se causata da docente, crea automaticamente recupero
+    // TODO: Implementare creaRecuperoDaAssenza() in RecuperiController
+    $recupero_creato = false;
     if ($causale === 'docente') {
-        file_put_contents(__DIR__ . '/debug_assenza.log', "Creazione recupero automatico...\n", FILE_APPEND);
+        file_put_contents(__DIR__ . '/debug_assenza.log', "Creazione recupero automatico richiesta...\n", FILE_APPEND);
         
-        $recuperiCtrl = new RecuperiController();
-        $recuperiCtrl->creaRecuperoDaAssenza($assenza_id);
-        
-        file_put_contents(__DIR__ . '/debug_assenza.log', "Recupero creato\n", FILE_APPEND);
+        try {
+            $recuperiCtrl = new RecuperiController();
+            if (method_exists($recuperiCtrl, 'creaRecuperoDaAssenza')) {
+                $recuperiCtrl->creaRecuperoDaAssenza($assenza_id);
+                $recupero_creato = true;
+                file_put_contents(__DIR__ . '/debug_assenza.log', "Recupero creato\n", FILE_APPEND);
+            } else {
+                file_put_contents(__DIR__ . '/debug_assenza.log', "Metodo creaRecuperoDaAssenza() non implementato - skip\n", FILE_APPEND);
+            }
+        } catch (Exception $e) {
+            file_put_contents(__DIR__ . '/debug_assenza.log', "Errore creazione recupero (skip): " . $e->getMessage() . "\n", FILE_APPEND);
+        }
     }
     
     echo json_encode([
         'success' => true,
         'message' => 'Assenza registrata con successo',
         'assenza_id' => $assenza_id,
-        'recupero_creato' => ($causale === 'docente')
+        'recupero_creato' => $recupero_creato,
+        'note' => $recupero_creato ? '' : 'Recupero da creare manualmente'
     ]);
     
 } catch (Exception $e) {
