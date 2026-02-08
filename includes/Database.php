@@ -120,6 +120,19 @@ class Database {
     }
     
     /**
+     * Prepara uno statement (per uso diretto)
+     * Utile quando serve un PDOStatement per operazioni personalizzate
+     */
+    public function prepare($sql) {
+        try {
+            return $this->connection->prepare($sql);
+        } catch (PDOException $e) {
+            $this->logError($e, $sql, []);
+            return false;
+        }
+    }
+    
+    /**
      * Inizia una transazione
      */
     public function beginTransaction() {
