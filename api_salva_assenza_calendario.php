@@ -81,14 +81,13 @@ try {
         throw new Exception('Assenza già registrata per questa lezione');
     }
     
-    // Crea assenza
+    // Crea assenza - usa nomi parametri corretti per AssenzeController
     $assenza_data = [
-        'allievo_id' => $lezione['allievo_id'],
         'lezione_id' => $lezione_id,
-        'data_assenza' => $data_lezione,
-        'causale' => $causale,
-        'richiede_recupero' => ($causale === 'docente') ? 1 : 0,
-        'note' => $note
+        'data' => $data_lezione,  // AssenzeController si aspetta 'data', non 'data_assenza'
+        'causata_da' => $causale,  // AssenzeController si aspetta 'causata_da', non 'causale'
+        'necessita_recupero' => ($causale === 'docente') ? 1 : 0,
+        'note_annullamento' => $note
     ];
     
     file_put_contents(__DIR__ . '/debug_assenza.log', "Dati assenza: " . json_encode($assenza_data) . "\n", FILE_APPEND);
