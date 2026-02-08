@@ -6,23 +6,30 @@
 
 /**
  * Escape HTML per prevenire XSS
+ * (Solo se non già definita da Laravel/Illuminate)
  */
-function e($string) {
-    return htmlspecialchars($string ?? '', ENT_QUOTES, 'UTF-8');
+if (!function_exists('e')) {
+    function e($string) {
+        return htmlspecialchars($string ?? '', ENT_QUOTES, 'UTF-8');
+    }
 }
 
 /**
  * Get parametro da GET con valore default
  */
-function get($key, $default = null) {
-    return $_GET[$key] ?? $default;
+if (!function_exists('get')) {
+    function get($key, $default = null) {
+        return $_GET[$key] ?? $default;
+    }
 }
 
 /**
  * Get parametro da POST con valore default
  */
-function post($key, $default = null) {
-    return $_POST[$key] ?? $default;
+if (!function_exists('post')) {
+    function post($key, $default = null) {
+        return $_POST[$key] ?? $default;
+    }
 }
 
 /**
