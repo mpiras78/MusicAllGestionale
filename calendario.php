@@ -569,15 +569,27 @@ function segnaAssenza() {
     }
     
     // Chiudi modal info allievo
-    const infoModal = bootstrap.Modal.getInstance(document.getElementById('infoAllieviModal'));
-    if (infoModal) {
-        infoModal.hide();
-    }
+    chiudiModalInfoAllievo();
     
     // Apri modal crea assenza con dati pre-compilati
     setTimeout(() => {
-        const assenzaModal = new bootstrap.Modal(document.getElementById('modalCreaAssenza'));
-        assenzaModal.show();
+        const modalElement = document.getElementById('modalCreaAssenza');
+        
+        if (typeof bootstrap !== 'undefined') {
+            // Usa Bootstrap se disponibile
+            const assenzaModal = new bootstrap.Modal(modalElement);
+            assenzaModal.show();
+        } else {
+            // Fallback manuale
+            modalElement.classList.add('show');
+            modalElement.style.display = 'block';
+            document.body.classList.add('modal-open');
+            
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop fade show';
+            backdrop.id = 'assenzaBackdrop';
+            document.body.appendChild(backdrop);
+        }
         
         // Pre-compila campi
         const lezioneSelect = document.getElementById('lezione_id');
