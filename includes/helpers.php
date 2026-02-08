@@ -153,7 +153,7 @@ function calcolaEta($data_nascita) {
  * Ottieni nome giorno in italiano
  */
 function getGiornoItaliano($data_o_giorno) {
-    $giorni = [
+    $giorni_eng_ita = [
         'Monday' => 'Lunedì',
         'Tuesday' => 'Martedì', 
         'Wednesday' => 'Mercoledì',
@@ -163,16 +163,41 @@ function getGiornoItaliano($data_o_giorno) {
         'Sunday' => 'Domenica'
     ];
     
+    $giorni_ita_lower = [
+        'lunedì' => 'Lunedì',
+        'lunedi' => 'Lunedì',
+        'martedì' => 'Martedì',
+        'martedi' => 'Martedì',
+        'mercoledì' => 'Mercoledì',
+        'mercoledi' => 'Mercoledì',
+        'giovedì' => 'Giovedì',
+        'giovedi' => 'Giovedì',
+        'venerdì' => 'Venerdì',
+        'venerdi' => 'Venerdì',
+        'sabato' => 'Sabato',
+        'domenica' => 'Domenica'
+    ];
+    
     // Se è già un nome giorno in inglese
-    if (isset($giorni[$data_o_giorno])) {
-        return $giorni[$data_o_giorno];
+    if (isset($giorni_eng_ita[$data_o_giorno])) {
+        return $giorni_eng_ita[$data_o_giorno];
+    }
+    
+    // Se è già in italiano (normalizza)
+    $lower = strtolower($data_o_giorno);
+    if (isset($giorni_ita_lower[$lower])) {
+        return $giorni_ita_lower[$lower];
     }
     
     // Se è una data, converti
-    $dt = is_string($data_o_giorno) ? new DateTime($data_o_giorno) : $data_o_giorno;
-    $giorno_eng = $dt->format('l');
-    
-    return $giorni[$giorno_eng] ?? $giorno_eng;
+    try {
+        $dt = is_string($data_o_giorno) ? new DateTime($data_o_giorno) : $data_o_giorno;
+        $giorno_eng = $dt->format('l');
+        return $giorni_eng_ita[$giorno_eng] ?? $giorno_eng;
+    } catch (Exception $e) {
+        // Se fallisce, ritorna l'input originale
+        return $data_o_giorno;
+    }
 }
 
 /**
