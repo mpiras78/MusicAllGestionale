@@ -129,6 +129,13 @@ function formatDataItaliana($data) {
 }
 
 /**
+ * Alias per formatDataItaliana (compatibilità)
+ */
+function formatDate($data) {
+    return formatDataItaliana($data);
+}
+
+/**
  * Formatta data e ora italiana
  */
 function formatDataOraItaliana($datetime) {
