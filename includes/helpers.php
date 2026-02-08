@@ -41,6 +41,46 @@ function redirect($url) {
 }
 
 /**
+ * Set flash message in session
+ */
+function setFlashMessage($message, $type = 'info') {
+    if (!isset($_SESSION)) {
+        session_start();
+    }
+    $_SESSION['flash_message'] = [
+        'message' => $message,
+        'type' => $type
+    ];
+}
+
+/**
+ * Get and clear flash message from session
+ */
+function getFlashMessage() {
+    if (!isset($_SESSION)) {
+        session_start();
+    }
+    
+    if (isset($_SESSION['flash_message'])) {
+        $flash = $_SESSION['flash_message'];
+        unset($_SESSION['flash_message']);
+        return $flash;
+    }
+    
+    return null;
+}
+
+/**
+ * Check if flash message exists
+ */
+function hasFlashMessage() {
+    if (!isset($_SESSION)) {
+        session_start();
+    }
+    return isset($_SESSION['flash_message']);
+}
+
+/**
  * Genera slot orari
  */
 function generaSlotOrari($ora_inizio, $ora_fine, $durata_minuti = 15) {
