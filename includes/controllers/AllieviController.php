@@ -118,4 +118,39 @@ class AllieviController {
             [$id]
         );
     }
+
+    /**
+     * Ottieni allievi con lezioni programmate
+     */
+    public function getAllieviConLezioni() {
+        return $this->db->query("
+            SELECT 
+                a.id,
+                a.cognome || ' ' || a.nome as nome_completo,
+                COUNT(DISTINCT l.id) as num_lezioni,
+                GROUP_CONCAT(DISTINCT m.nome, ', ') as materie,
+                GROUP_CONCAT(DISTINCT l.giorno_settimana, ', ') as giorni
+            FROM allievi a
+            JOIN lezioni l ON a.id = l.allievo_id
+            JOIN materie m ON l.materia_id = m.id
+            WHERE l.attiva = 1 AND a.attivo = 1
+            GROUP BY a.id, a.cognome, a.nome
+            ORDER BY a.cognome, a.nome
+        ");
+    }
+
+    /**
+     * Statistiche allievi con/senza lezioni
+     */
+    public function getStatisticheLezioni() {
+        $totale = $this->countAllievi(true);
+        $con_lezioni = count($this->getAllieviConLezioni());
+        
+        return [
+            'totale' => $totale,
+            'con_lezioni' => $con_lezioni,
+            'senza_lezioni' => $totale - $con_lezioni,
+            'percentuale' => $totale > 0 ? round(($con_lezioni / $totale) * 100, 1) : 0
+        ];
+    }
 }

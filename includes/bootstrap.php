@@ -65,6 +65,7 @@ require_once __DIR__ . '/controllers/DocentiController.php';
 require_once __DIR__ . '/controllers/LezioniController.php';
 require_once __DIR__ . '/controllers/AssenzeController.php';
 require_once __DIR__ . '/controllers/AuleController.php';
+require_once __DIR__ . '/controllers/RecuperiController.php';
 
 // Inizializza oggetti globali
 if (!ELOQUENT_ENABLED) {

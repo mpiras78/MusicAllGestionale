@@ -49,6 +49,11 @@
                 <?php if ($auth->hasRole('docente')): ?>
                     <!-- Menu Docente -->
                     <li class="nav-item">
+                        <a class="nav-link <?= ($current_page ?? '') == 'assenze' ? 'active' : '' ?>" href="<?= BASE_URL ?>/assenze_docente.php">
+                            <i class="bi bi-calendar-x"></i> Assenze
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link <?= ($current_page ?? '') == 'recuperi' ? 'active' : '' ?>" href="<?= BASE_URL ?>/recuperi.php">
                             <i class="bi bi-calendar-plus"></i> Recuperi
                         </a>
@@ -79,8 +84,13 @@
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <?= ($current_page ?? '') == 'assenze' ? 'active' : '' ?>" href="<?= BASE_URL ?>/assenze/index.php">
+                        <a class="nav-link <?= ($current_page ?? '') == 'assenze' ? 'active' : '' ?>" href="<?= BASE_URL ?>/gestione_assenze.php">
                             <i class="bi bi-calendar-x"></i> Assenze
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= ($current_page ?? '') == 'gestione_recuperi' ? 'active' : '' ?>" href="<?= BASE_URL ?>/gestione_recuperi.php">
+                            <i class="bi bi-calendar-check"></i> Recuperi
                         </a>
                     </li>
                     <li class="nav-item dropdown">

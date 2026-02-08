@@ -68,4 +68,11 @@ class DocentiController {
             ORDER BY d.cognome, d.nome
         ", [$materia_id]);
     }
+
+    /**
+     * Ottiene docente per user_id
+     */
+    public function getDocenteByUserId($user_id) {
+        return $this->db->queryOne("SELECT * FROM docenti WHERE user_id = ?", [$user_id]);
+    }
 }

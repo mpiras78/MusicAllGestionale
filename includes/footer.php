@@ -36,6 +36,42 @@
 <!-- Custom JS -->
 <script src="<?= BASE_URL ?>/assets/js/app.js"></script>
 
+<!-- Script globale per rendere tutti gli alert dismissible -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Trova tutti gli alert che non hanno già un pulsante di chiusura
+    const alerts = document.querySelectorAll('.alert:not(.alert-dismissible)');
+    
+    alerts.forEach(alert => {
+        // Aggiungi classe dismissible
+        alert.classList.add('alert-dismissible', 'fade', 'show');
+        
+        // Aggiungi pulsante di chiusura
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'btn-close';
+        closeButton.setAttribute('data-bs-dismiss', 'alert');
+        closeButton.setAttribute('aria-label', 'Close');
+        
+        // Inserisci il pulsante come primo elemento dell'alert
+        alert.insertBefore(closeButton, alert.firstChild);
+    });
+    
+    // Per alert già dismissible ma senza pulsante
+    const dismissibleAlerts = document.querySelectorAll('.alert-dismissible:not(:has(.btn-close))');
+    
+    dismissibleAlerts.forEach(alert => {
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'btn-close';
+        closeButton.setAttribute('data-bs-dismiss', 'alert');
+        closeButton.setAttribute('aria-label', 'Close');
+        
+        alert.insertBefore(closeButton, alert.firstChild);
+    });
+});
+</script>
+
 <?php if (isset($extra_js)): ?>
     <?= $extra_js ?>
 <?php endif; ?>

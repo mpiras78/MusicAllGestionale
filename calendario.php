@@ -1,4 +1,4 @@
-<?php
+ <?php
 require_once 'includes/bootstrap.php';
 
 // Richiede login
@@ -11,20 +11,56 @@ $current_page = 'calendario';
 $lezioniCtrl = new LezioniController();
 $auleCtrl = new AuleController();
 
-// Giorno selezionato (default: giorno corrente)
+// Gestione settimana
+$settimana_offset = (int)get('settimana', 0); // 0 = settimana corrente, -1 = precedente, +1 = successiva
+
+// Calcola lunedì della settimana selezionata
+$oggi = new DateTime();
+$oggi->modify("this week monday"); // Va al lunedì della settimana corrente
+if ($settimana_offset != 0) {
+    $oggi->modify(($settimana_offset > 0 ? '+' : '') . $settimana_offset . ' weeks');
+}
+
+// Genera array giorni settimana con date
+$giorni_settimana = [];
+$giorno_corrente = clone $oggi;
+$giorni_nomi = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+$giorni_keys = ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato'];
+
+for ($i = 0; $i < 6; $i++) {
+    $giorni_settimana[] = [
+        'nome' => $giorni_nomi[$i],
+        'key' => $giorni_keys[$i],
+        'data' => $giorno_corrente->format('Y-m-d'),
+        'data_display' => $giorno_corrente->format('d/m'),
+        'is_today' => $giorno_corrente->format('Y-m-d') == date('Y-m-d')
+    ];
+    $giorno_corrente->modify('+1 day');
+}
+
+// Giorno selezionato (default: oggi se nella settimana corrente, altrimenti lunedì)
 $giorno_selezionato = get('giorno', '');
 if (empty($giorno_selezionato)) {
-    $oggi_giorno = strtolower(date('l'));
-    $giorni_mapping = [
-        'monday' => 'lunedi',
-        'tuesday' => 'martedi',
-        'wednesday' => 'mercoledi',
-        'thursday' => 'giovedi',
-        'friday' => 'venerdi',
-        'saturday' => 'sabato',
-        'sunday' => 'domenica'
+    $oggi_key = strtolower(date('l'));
+    $mapping = [
+        'monday' => 'lunedi', 'tuesday' => 'martedi', 'wednesday' => 'mercoledi',
+        'thursday' => 'giovedi', 'friday' => 'venerdi', 'saturday' => 'sabato'
     ];
-    $giorno_selezionato = $giorni_mapping[$oggi_giorno] ?? 'lunedi';
+    $giorno_selezionato = $mapping[$oggi_key] ?? 'lunedi';
+    
+    // Se oggi è domenica o non nella settimana visualizzata, usa lunedì
+    if ($oggi_key == 'sunday' || $settimana_offset != 0) {
+        $giorno_selezionato = 'lunedi';
+    }
+}
+
+// Trova data del giorno selezionato
+$data_selezionata = '';
+foreach ($giorni_settimana as $g) {
+    if ($g['key'] == $giorno_selezionato) {
+        $data_selezionata = $g['data'];
+        break;
+    }
 }
 
 // Ottieni aule tramite controller
@@ -36,17 +72,11 @@ $slots = generaSlotOrari(ORA_INIZIO_SCUOLA, ORA_FINE_SCUOLA, DURATA_SLOT_DEFAULT
 // Ottieni lezioni per il giorno selezionato tramite controller
 // Se docente e configurazione lo richiede, filtra solo sue lezioni
 if ($auth->hasRole('docente') && !DOCENTE_VIEW_ALL_CALENDAR) {
-    // Ottieni istanza database
-    $db = Database::getInstance();
+    $docentiCtrl = new DocentiController();
+    $docente = $docentiCtrl->getDocenteByUserId($auth->getUserId());
     
-    // Ottieni ID docente dell'utente loggato
-    $docente_id = $db->queryOne(
-        "SELECT id FROM docenti WHERE user_id = ?", 
-        [$auth->getUserId()]
-    );
-    
-    if ($docente_id) {
-        $lezioni = $lezioniCtrl->getLezioniPerDocenteEGiorno($docente_id['id'], $giorno_selezionato);
+    if ($docente) {
+        $lezioni = $lezioniCtrl->getLezioniPerDocenteEGiorno($docente['id'], $giorno_selezionato);
     } else {
         $lezioni = []; // Nessuna lezione se docente non collegato
     }
@@ -107,30 +137,49 @@ include 'includes/header.php';
         </div>
     </div>
 
-    <!-- Selezione Giorno -->
+    <!-- Navigazione Settimana -->
     <div class="card mb-4">
-        <div class="card-body">
-            <form method="GET" action="" class="row g-3 align-items-center">
-                <div class="col-auto">
-                    <label class="form-label mb-0">
-                        <strong><i class="bi bi-calendar3"></i> Seleziona Giorno:</strong>
-                    </label>
-                </div>
-                <div class="col-auto">
-                    <select name="giorno" id="selectGiorno" class="form-select" onchange="this.form.submit()">
-                        <?php foreach (GIORNI_SETTIMANA as $key => $label): ?>
-                            <option value="<?= $key ?>" <?= $giorno_selezionato == $key ? 'selected' : '' ?>>
-                                <?= $label ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <span class="badge bg-primary fs-6">
-                        <?= count($lezioni) ?> lezioni programmate
-                    </span>
-                </div>
-            </form>
+        <div class="card-body py-2">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <a href="?settimana=<?= $settimana_offset - 1 ?>" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-chevron-left"></i> Settimana Precedente
+                </a>
+                <h5 class="mb-0">
+                    <i class="bi bi-calendar-week"></i> 
+                    Settimana dal <?= $giorni_settimana[0]['data_display'] ?> al <?= $giorni_settimana[5]['data_display'] ?>
+                    <?php if ($settimana_offset == 0): ?>
+                        <span class="badge bg-success ms-2">Corrente</span>
+                    <?php endif; ?>
+                </h5>
+                <a href="?settimana=<?= $settimana_offset + 1 ?>" class="btn btn-outline-primary btn-sm">
+                    Settimana Successiva <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+            
+            <!-- Tab Giorni Orizzontali -->
+            <ul class="nav nav-tabs nav-fill" role="tablist">
+                <?php foreach ($giorni_settimana as $giorno): ?>
+                    <li class="nav-item" role="presentation">
+                        <a href="?settimana=<?= $settimana_offset ?>&giorno=<?= $giorno['key'] ?>" 
+                           class="nav-link <?= $giorno_selezionato == $giorno['key'] ? 'active' : '' ?> <?= $giorno['is_today'] ? 'fw-bold' : '' ?>"
+                           style="<?= $giorno['is_today'] ? 'background-color: #fff3cd; border-color: #ffc107;' : '' ?>">
+                            <div class="d-flex flex-column align-items-center">
+                                <span class="fs-6"><?= $giorno['nome'] ?></span>
+                                <span class="badge bg-secondary mt-1"><?= $giorno['data_display'] ?></span>
+                                <?php if ($giorno['is_today']): ?>
+                                    <span class="badge bg-warning text-dark mt-1">OGGI</span>
+                                <?php endif; ?>
+                            </div>
+                        </a>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+            
+            <div class="mt-3 text-center">
+                <span class="badge bg-primary fs-6">
+                    <?= count($lezioni) ?> lezioni programmate
+                </span>
+            </div>
         </div>
     </div>
 
@@ -190,7 +239,11 @@ include 'includes/header.php';
                                                 </div>
                                                 <div class="lezione-header">
                                                     <i class="bi <?= $icona ?> icona-strumento"></i>
-                                                    <span class="lezione-allievo">
+                                                    <span class="lezione-allievo" 
+                                                          style="cursor: pointer; text-decoration: underline;" 
+                                                          data-allievo-id="<?= $lezione_slot['allievo_id'] ?>"
+                                                          data-lezione-id="<?= $lezione_slot['id'] ?>"
+                                                          onclick="caricaInfoAllievo(<?= $lezione_slot['allievo_id'] ?>, <?= $lezione_slot['id'] ?>, '<?= addslashes($lezione_slot['allievo']) ?>', '<?= addslashes($lezione_slot['materia']) ?>', '<?= $data_selezionata ?>'); return false;">
                                                         <?= e($lezione_slot['allievo']) ?>
                                                     </span>
                                                 </div>
@@ -270,17 +323,298 @@ include 'includes/header.php';
     </div>
 </div>
 
-<?php 
-$extra_js = '<script>
-$(document).ready(function() {
-    // Click su lezione per mostrare dettagli
-    $(".lezione-slot").on("click", function() {
-        var lezioneId = $(this).data("lezione-id");
-        // TODO: Implementare modal dettagli lezione
-        alert("Dettagli lezione ID: " + lezioneId + "\n(Funzionalità in sviluppo)");
+<!-- Modal Info Allievo -->
+<div class="modal fade" id="infoAllieviModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary bg-opacity-10">
+                <h5 class="modal-title">
+                    <i class="bi bi-person-circle"></i> <span id="modalAllieviNome">Info Allievo</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalAllieviBody">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Caricamento...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="chiudiModalInfoAllievo()">
+                    <i class="bi bi-x-circle"></i> Chiudi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentLezioneData = null;
+
+function caricaInfoAllievo(allieviId, lezioneId = null, nomeAllievo = '', materiaLezione = '', dataLezione = '') {
+    const modalBody = document.getElementById('modalAllieviBody');
+    const modalNome = document.getElementById('modalAllieviNome');
+    const modalElement = document.getElementById('infoAllieviModal');
+    
+    // Apri la modal (verifica che Bootstrap sia caricato)
+    if (typeof bootstrap !== 'undefined') {
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+    } else {
+        // Fallback: aggiungi classi manualmente
+        modalElement.classList.add('show');
+        modalElement.style.display = 'block';
+        document.body.classList.add('modal-open');
+        
+        // Aggiungi backdrop
+        const backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        backdrop.id = 'tempBackdrop';
+        document.body.appendChild(backdrop);
+    }
+    
+    // Salva dati lezione corrente per pulsante assenza
+    currentLezioneData = lezioneId ? {
+        lezione_id: lezioneId,
+        allievo_nome: nomeAllievo,
+        materia: materiaLezione,
+        data: dataLezione
+    } : null;
+    
+    // Mostra loader
+    modalBody.innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Caricamento...</span>
+            </div>
+        </div>
+    `;
+    
+    // Fetch dati
+    fetch(`<?= BASE_URL ?>/api_get_info_allievo.php?allievo_id=${allieviId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            // Aggiorna titolo
+            modalNome.textContent = data.allievo.nome_completo;
+            
+            // Costruisci HTML stile card recuperi
+            let html = `
+                ${currentLezioneData ? `
+                <!-- Alert Lezione Selezionata -->
+                <div class="alert alert-info d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="bi bi-calendar-event"></i>
+                        <strong>Lezione:</strong> ${currentLezioneData.materia} - ${new Date(currentLezioneData.data).toLocaleDateString('it-IT')}
+                    </div>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="segnaAssenza()">
+                        <i class="bi bi-x-circle"></i> Segna Assenza
+                    </button>
+                </div>
+                ` : ''}
+                <!-- Statistiche -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card border-warning">
+                            <div class="card-header bg-warning bg-opacity-10">
+                                <h6 class="mb-0"><i class="bi bi-calendar-x"></i> Assenze</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>Totali:</span>
+                                    <span class="badge bg-secondary">${data.statistiche.assenze.totale}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>Da Recuperare:</span>
+                                    <span class="badge bg-danger">${data.statistiche.assenze.da_recuperare}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>Causate da Allievo:</span>
+                                    <span class="badge bg-warning text-dark">${data.statistiche.assenze.causate_da_allievo}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Causate da Docente:</span>
+                                    <span class="badge bg-info">${data.statistiche.assenze.causate_da_docente}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-success">
+                            <div class="card-header bg-success bg-opacity-10">
+                                <h6 class="mb-0"><i class="bi bi-calendar-check"></i> Recuperi</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>Totali:</span>
+                                    <span class="badge bg-secondary">${data.statistiche.recuperi.totale}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>Programmati:</span>
+                                    <span class="badge bg-primary">${data.statistiche.recuperi.programmati}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>Completati:</span>
+                                    <span class="badge bg-success">${data.statistiche.recuperi.completati}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Annullati:</span>
+                                    <span class="badge bg-danger">${data.statistiche.recuperi.annullati}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Corsi Frequentati -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="bi bi-book"></i> Corsi Frequentati</h6>
+                    </div>
+                    <div class="card-body">
+                        ${data.corsi.length > 0 ? `
+                            <div class="list-group list-group-flush">
+                                ${data.corsi.map(corso => `
+                                    <div class="list-group-item px-0">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">
+                                                <i class="bi bi-music-note"></i> ${corso.materia || 'N/D'}
+                                            </h6>
+                                            <small>${corso.giorno_settimana}</small>
+                                        </div>
+                                        <p class="mb-1">
+                                            <i class="bi bi-person"></i> ${corso.docente}<br>
+                                            <i class="bi bi-clock"></i> ${corso.ora_inizio.substr(0,5)} - ${corso.ora_fine.substr(0,5)}
+                                            ${corso.aula ? `<br><i class="bi bi-door-open"></i> ${corso.aula}` : ''}
+                                        </p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : '<p class="text-muted">Nessun corso registrato</p>'}
+                    </div>
+                </div>
+                
+                <!-- Prossimi Recuperi -->
+                ${data.prossimi_recuperi.length > 0 ? `
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="bi bi-calendar-event"></i> Prossimi Recuperi</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                ${data.prossimi_recuperi.map(rec => `
+                                    <div class="list-group-item px-0">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">
+                                                <i class="bi bi-calendar-check text-success"></i> 
+                                                ${new Date(rec.data_recupero).toLocaleDateString('it-IT')}
+                                            </h6>
+                                            <small>${rec.ora_inizio.substr(0,5)} - ${rec.ora_fine.substr(0,5)}</small>
+                                        </div>
+                                        <p class="mb-0">
+                                            ${rec.materia || 'N/D'} - ${rec.docente}
+                                            ${rec.aula ? `<br><i class="bi bi-door-open"></i> ${rec.aula}` : ''}
+                                        </p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+            
+            modalBody.innerHTML = html;
+        })
+        .catch(error => {
+            modalBody.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle"></i> 
+                    Errore nel caricamento: ${error.message}
+                </div>
+            `;
+        });
+}
+
+function chiudiModalInfoAllievo() {
+    const modalElement = document.getElementById('infoAllieviModal');
+    
+    if (typeof bootstrap !== 'undefined') {
+        // Usa API Bootstrap
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+            modal.hide();
+        }
+    } else {
+        // Fallback manuale
+        modalElement.classList.remove('show');
+        modalElement.style.display = 'none';
+        document.body.classList.remove('modal-open');
+        
+        // Rimuovi backdrop
+        const backdrop = document.getElementById('tempBackdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
+    }
+}
+
+function segnaAssenza() {
+    if (!currentLezioneData) {
+        alert('Errore: nessuna lezione selezionata');
+        return;
+    }
+    
+    // Chiudi modal info allievo
+    const infoModal = bootstrap.Modal.getInstance(document.getElementById('infoAllieviModal'));
+    if (infoModal) {
+        infoModal.hide();
+    }
+    
+    // Apri modal crea assenza con dati pre-compilati
+    setTimeout(() => {
+        const assenzaModal = new bootstrap.Modal(document.getElementById('modalCreaAssenza'));
+        assenzaModal.show();
+        
+        // Pre-compila campi
+        const lezioneSelect = document.getElementById('lezione_id');
+        const dataInput = document.getElementById('data_assenza');
+        
+        if (lezioneSelect && dataInput) {
+            lezioneSelect.value = currentLezioneData.lezione_id;
+            dataInput.value = currentLezioneData.data;
+            
+            // Trigger change event per caricare allievo (vanilla JS)
+            const event = new Event('change', { bubbles: true });
+            lezioneSelect.dispatchEvent(event);
+        }
+    }, 300);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Click su lezione apre modal info allievo
+    const lezioniSlots = document.querySelectorAll('.lezione-slot');
+    lezioniSlots.forEach(slot => {
+        slot.addEventListener('click', function(e) {
+            // Se il click è sul nome allievo, non fare nulla (ha già il suo onclick)
+            if (e.target.classList.contains('lezione-allievo') || e.target.closest('.lezione-allievo')) {
+                return;
+            }
+            
+            // Altrimenti apri modal info allievo
+            const allieviSpan = this.querySelector('.lezione-allievo');
+            if (allieviSpan) {
+                allieviSpan.click();
+            }
+        });
     });
 });
-</script>';
+</script>
 
-include 'includes/footer.php'; 
-?>
+<!-- Include modal crea assenza per funzionalità "Segna Assenza" da calendario -->
+<?php include 'includes/views/assenze/modal_crea_assenza.php'; ?>
+
+<?php include 'includes/footer.php'; ?>

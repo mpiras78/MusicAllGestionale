@@ -24,6 +24,13 @@ class AuleController {
     }
     
     /**
+     * Ottiene tutte le aule (alias di getAule)
+     */
+    public function getAllAule() {
+        return $this->getAule(false); // Tutte le aule, anche inattive
+    }
+    
+    /**
      * Ottiene una singola aula per ID
      */
     public function getAulaById($id) {

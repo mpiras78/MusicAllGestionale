@@ -1,4 +1,9 @@
 <?php
+/**
+ * Dashboard - Architettura Modulare
+ * View pulita che include componenti separati
+ */
+
 require_once 'includes/bootstrap.php';
 
 // Richiede login
@@ -43,6 +48,7 @@ include 'includes/header.php';
 ?>
 
 <div class="container-fluid">
+    <!-- Header -->
     <div class="row mb-4">
         <div class="col">
             <h1 class="h3 mb-0">
@@ -58,247 +64,21 @@ include 'includes/header.php';
     </div>
 
     <!-- Statistiche -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card stat-card stat-primary">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="stat-label mb-1">Allievi Attivi</p>
-                            <h3 class="stat-value text-primary"><?= $stats['allievi'] ?></h3>
-                        </div>
-                        <div class="stat-icon text-primary">
-                            <i class="bi bi-people"></i>
-                        </div>
-                    </div>
-                    <a href="<?= BASE_URL ?>/allievi/index.php" class="btn btn-sm btn-outline-primary mt-2">
-                        Visualizza <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
+    <?php require 'includes/views/dashboard/statistics.php'; ?>
 
-        <div class="col-md-3">
-            <div class="card stat-card stat-success">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="stat-label mb-1">Docenti</p>
-                            <h3 class="stat-value text-success"><?= $stats['docenti'] ?></h3>
-                        </div>
-                        <div class="stat-icon text-success">
-                            <i class="bi bi-person-badge"></i>
-                        </div>
-                    </div>
-                    <a href="<?= BASE_URL ?>/docenti/index.php" class="btn btn-sm btn-outline-success mt-2">
-                        Visualizza <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card stat-card stat-warning">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="stat-label mb-1">Lezioni/Settimana</p>
-                            <h3 class="stat-value text-warning"><?= $stats['lezioni_settimana'] ?></h3>
-                        </div>
-                        <div class="stat-icon text-warning">
-                            <i class="bi bi-book"></i>
-                        </div>
-                    </div>
-                    <a href="<?= BASE_URL ?>/lezioni/index.php" class="btn btn-sm btn-outline-warning mt-2">
-                        Visualizza <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card stat-card stat-danger">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="stat-label mb-1">Assenze (Mese)</p>
-                            <h3 class="stat-value text-danger"><?= $stats['assenze_mese'] ?></h3>
-                        </div>
-                        <div class="stat-icon text-danger">
-                            <i class="bi bi-calendar-x"></i>
-                        </div>
-                    </div>
-                    <a href="<?= BASE_URL ?>/assenze/index.php" class="btn btn-sm btn-outline-danger mt-2">
-                        Visualizza <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    <!-- Cards -->
     <div class="row g-3">
         <!-- Prossime Lezioni Oggi -->
-        <div class="col-lg-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="bi bi-clock"></i> Prossime Lezioni Oggi (<?= getGiornoItaliano($giorno_corrente) ?>)
-                    </h5>
-                </div>
-                <div class="card-body p-0">
-                    <?php if (empty($prossime_lezioni)): ?>
-                        <div class="empty-state">
-                            <div class="empty-state-icon">
-                                <i class="bi bi-calendar-check"></i>
-                            </div>
-                            <p>Nessuna lezione programmata per oggi</p>
-                        </div>
-                    <?php else: ?>
-                        <div class="list-group list-group-flush">
-                            <?php foreach ($prossime_lezioni as $lezione): ?>
-                                <div class="list-group-item">
-                                    <div class="d-flex w-100 justify-content-between align-items-start">
-                                        <div>
-                                            <h6 class="mb-1">
-                                                <?= e($lezione['allievo']) ?>
-                                                <span class="badge bg-<?= getTipoLezioneBadge($lezione['tipo']) ?>">
-                                                    <?= e($lezione['tipo']) ?>
-                                                </span>
-                                            </h6>
-                                            <p class="mb-1">
-                                                <small class="text-muted">
-                                                    <i class="bi bi-journal-text"></i> <?= e($lezione['materia']) ?>
-                                                    | <i class="bi bi-person"></i> <?= e($lezione['docente']) ?>
-                                                    | <i class="bi bi-door-open"></i> <?= e($lezione['aula']) ?>
-                                                </small>
-                                            </p>
-                                        </div>
-                                        <span class="badge bg-primary rounded-pill">
-                                            <?= formatTime($lezione['ora_inizio']) ?> - <?= formatTime($lezione['ora_fine']) ?>
-                                        </span>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
+        <?php require 'includes/views/dashboard/next_lessons.php'; ?>
 
         <!-- Assenze da Recuperare -->
-        <div class="col-lg-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="bi bi-exclamation-triangle"></i> Assenze da Recuperare
-                    </h5>
-                </div>
-                <div class="card-body p-0">
-                    <?php if (empty($assenze_da_recuperare)): ?>
-                        <div class="empty-state">
-                            <div class="empty-state-icon">
-                                <i class="bi bi-check-circle"></i>
-                            </div>
-                            <p>Nessuna assenza da recuperare</p>
-                        </div>
-                    <?php else: ?>
-                        <div class="list-group list-group-flush">
-                            <?php foreach ($assenze_da_recuperare as $assenza): ?>
-                                <div class="list-group-item">
-                                    <div class="d-flex w-100 justify-content-between align-items-start">
-                                        <div>
-                                            <h6 class="mb-1">
-                                                <?= e($assenza['allievo']) ?>
-                                                <span class="badge bg-<?= $assenza['tipo'] == 'allievo' ? 'warning' : 'info' ?>">
-                                                    <?= e($assenza['tipo']) ?>
-                                                </span>
-                                            </h6>
-                                            <p class="mb-0">
-                                                <small class="text-muted">
-                                                    <i class="bi bi-person-badge"></i> <?= e($assenza['docente']) ?>
-                                                </small>
-                                            </p>
-                                        </div>
-                                        <small class="text-muted"><?= formatDate($assenza['data_assenza']) ?></small>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                        <div class="card-footer">
-                            <a href="<?= BASE_URL ?>/assenze/index.php" class="btn btn-sm btn-outline-primary">
-                                Vedi Tutte <i class="bi bi-arrow-right"></i>
-                            </a>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
+        <?php require 'includes/views/dashboard/absences.php'; ?>
 
         <!-- Ultimi Allievi Aggiunti -->
-        <div class="col-lg-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="bi bi-person-plus"></i> Ultimi Allievi Aggiunti
-                    </h5>
-                </div>
-                <div class="card-body p-0">
-                    <?php if (empty($ultimi_allievi)): ?>
-                        <div class="empty-state">
-                            <div class="empty-state-icon">
-                                <i class="bi bi-people"></i>
-                            </div>
-                            <p>Nessun allievo registrato</p>
-                        </div>
-                    <?php else: ?>
-                        <div class="list-group list-group-flush">
-                            <?php foreach ($ultimi_allievi as $allievo): ?>
-                                <div class="list-group-item">
-                                    <div class="d-flex w-100 justify-content-between align-items-center">
-                                        <div>
-                                            <h6 class="mb-1"><?= nomeCompleto($allievo['cognome'], $allievo['nome']) ?></h6>
-                                            <p class="mb-0">
-                                                <small class="text-muted">
-                                                    <i class="bi bi-envelope"></i> <?= e($allievo['email'] ?: 'N/D') ?>
-                                                </small>
-                                            </p>
-                                        </div>
-                                        <small class="text-muted"><?= formatDate($allievo['created_at']) ?></small>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
+        <?php require 'includes/views/dashboard/last_added_students.php'; ?>
 
         <!-- Quick Actions -->
-        <div class="col-lg-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="bi bi-lightning"></i> Azioni Rapide
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="<?= BASE_URL ?>/allievi/add.php" class="btn btn-outline-primary">
-                            <i class="bi bi-person-plus"></i> Aggiungi Nuovo Allievo
-                        </a>
-                        <a href="<?= BASE_URL ?>/lezioni/add.php" class="btn btn-outline-success">
-                            <i class="bi bi-book"></i> Programma Nuova Lezione
-                        </a>
-                        <a href="<?= BASE_URL ?>/assenze/add.php" class="btn btn-outline-warning">
-                            <i class="bi bi-calendar-x"></i> Registra Assenza
-                        </a>
-                        <a href="<?= BASE_URL ?>/report/statistiche.php" class="btn btn-outline-info">
-                            <i class="bi bi-graph-up"></i> Visualizza Report
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <?php require 'includes/views/dashboard/quick_actions.php'; ?>
     </div>
 </div>
 
