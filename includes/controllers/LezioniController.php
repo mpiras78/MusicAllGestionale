@@ -145,6 +145,28 @@ class LezioniController {
     }
     
     /**
+     * Ottiene una singola lezione per ID
+     */
+    public function getLezioneById($lezione_id) {
+        $result = $this->db->query("
+            SELECT l.*, 
+                   al.cognome || ' ' || al.nome as allievo,
+                   al.id as allievo_id,
+                   d.cognome || ' ' || d.nome as docente,
+                   m.nome as materia,
+                   a.nome as aula
+            FROM lezioni l
+            JOIN allievi al ON l.allievo_id = al.id
+            JOIN docenti d ON l.docente_id = d.id
+            JOIN materie m ON l.materia_id = m.id
+            JOIN aule a ON l.aula_id = a.id
+            WHERE l.id = ?
+        ", [$lezione_id]);
+        
+        return $result ? $result[0] : null;
+    }
+    
+    /**
      * Ottiene lezioni per aula
      */
     public function getLezioniAula($aula_id, $giorno = null) {

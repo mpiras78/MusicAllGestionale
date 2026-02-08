@@ -1,4 +1,10 @@
 <?php
+// Abilita error reporting per debug
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Non mostrare errori direttamente
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/error_api_assenza.log');
+
 // Cattura qualsiasi output indesiderato
 ob_start();
 
@@ -10,6 +16,9 @@ $auth->requireLogin();
 // Pulisci buffer e imposta header JSON
 ob_clean();
 header('Content-Type: application/json');
+
+// Log richiesta
+file_put_contents(__DIR__ . '/debug_assenza.log', date('Y-m-d H:i:s') . " - Richiesta ricevuta\n", FILE_APPEND);
 
 try {
     // Verifica metodo POST
@@ -35,16 +44,28 @@ try {
         throw new Exception('Parametri mancanti');
     }
     
+    // Log parametri
+    file_put_contents(__DIR__ . '/debug_assenza.log', "Parametri: " . json_encode($data) . "\n", FILE_APPEND);
+    
     // Inizializza controller
+    file_put_contents(__DIR__ . '/debug_assenza.log', "Inizializzazione controllers...\n", FILE_APPEND);
+    
     $assenzeCtrl = new AssenzeController();
+    file_put_contents(__DIR__ . '/debug_assenza.log', "AssenzeController OK\n", FILE_APPEND);
+    
     $lezioniCtrl = new LezioniController();
+    file_put_contents(__DIR__ . '/debug_assenza.log', "LezioniController OK\n", FILE_APPEND);
     
     // Ottieni info lezione
+    file_put_contents(__DIR__ . '/debug_assenza.log', "Recupero lezione ID: $lezione_id\n", FILE_APPEND);
     $lezione = $lezioniCtrl->getLezioneById($lezione_id);
     
     if (!$lezione) {
+        file_put_contents(__DIR__ . '/debug_assenza.log', "ERRORE: Lezione non trovata\n", FILE_APPEND);
         throw new Exception('Lezione non trovata');
     }
+    
+    file_put_contents(__DIR__ . '/debug_assenza.log', "Lezione trovata: " . json_encode($lezione) . "\n", FILE_APPEND);
     
     // Verifica se assenza già esiste
     $db = Database::getInstance();
@@ -70,7 +91,12 @@ try {
         'note' => $note
     ];
     
+    file_put_contents(__DIR__ . '/debug_assenza.log', "Dati assenza: " . json_encode($assenza_data) . "\n", FILE_APPEND);
+    file_put_contents(__DIR__ . '/debug_assenza.log', "Chiamata creaAssenza...\n", FILE_APPEND);
+    
     $assenza_id = $assenzeCtrl->creaAssenza($assenza_data);
+    
+    file_put_contents(__DIR__ . '/debug_assenza.log', "Assenza creata ID: $assenza_id\n", FILE_APPEND);
     
     if (!$assenza_id) {
         throw new Exception('Errore durante la creazione dell\'assenza');
@@ -78,8 +104,12 @@ try {
     
     // Se causata da docente, crea automaticamente recupero
     if ($causale === 'docente') {
+        file_put_contents(__DIR__ . '/debug_assenza.log', "Creazione recupero automatico...\n", FILE_APPEND);
+        
         $recuperiCtrl = new RecuperiController();
         $recuperiCtrl->creaRecuperoDaAssenza($assenza_id);
+        
+        file_put_contents(__DIR__ . '/debug_assenza.log', "Recupero creato\n", FILE_APPEND);
     }
     
     echo json_encode([
@@ -90,6 +120,9 @@ try {
     ]);
     
 } catch (Exception $e) {
+    // Log errore
+    file_put_contents(__DIR__ . '/debug_assenza.log', "EXCEPTION: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n", FILE_APPEND);
+    
     // Pulisci buffer per rimuovere HTML errori
     ob_clean();
     
@@ -100,6 +133,9 @@ try {
         'trace' => DEBUG_MODE ? $e->getTraceAsString() : null
     ]);
 } catch (Error $e) {
+    // Log errore fatale
+    file_put_contents(__DIR__ . '/debug_assenza.log', "ERROR: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n", FILE_APPEND);
+    
     // Cattura anche errori PHP fatali
     ob_clean();
     
@@ -107,7 +143,8 @@ try {
     echo json_encode([
         'success' => false,
         'error' => 'Errore interno del server',
-        'details' => DEBUG_MODE ? $e->getMessage() : null
+        'details' => DEBUG_MODE ? $e->getMessage() : null,
+        'trace' => DEBUG_MODE ? $e->getTraceAsString() : null
     ]);
 }
 
