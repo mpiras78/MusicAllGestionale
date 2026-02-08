@@ -709,24 +709,78 @@ function confermaAssenza() {
                 if (backdrop) backdrop.remove();
             }
             
-            // Mostra messaggio successo
-            let messaggio = 'Assenza registrata con successo!';
-            if (data.recupero_creato) {
-                messaggio += ' È stato creato automaticamente un recupero da programmare.';
-            }
+            // Mostra toast successo
+            mostraToast('Successo', 'Assenza registrata correttamente', 'success');
             
-            alert(messaggio);
-            
-            // Ricarica pagina per aggiornare statistiche
-            location.reload();
+            // Ricarica pagina dopo breve pausa per visualizzare toast
+            setTimeout(() => location.reload(), 1500);
         } else {
             throw new Error(data.error || 'Errore durante il salvataggio');
         }
     })
     .catch(error => {
-        alert('Errore: ' + error.message);
+        mostraToast('Errore', error.message, 'danger');
         btnConferma.disabled = false;
         btnConferma.innerHTML = '<i class="bi bi-check-circle"></i> Conferma Assenza';
+    });
+}
+
+// Funzione per mostrare toast
+function mostraToast(titolo, messaggio, tipo = 'info') {
+    // Crea container toast se non esiste
+    let toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toastContainer';
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        toastContainer.style.zIndex = '9999';
+        document.body.appendChild(toastContainer);
+    }
+    
+    // Mappa colori
+    const bgColors = {
+        'success': 'bg-success',
+        'danger': 'bg-danger',
+        'warning': 'bg-warning',
+        'info': 'bg-info'
+    };
+    
+    // Mappa icone
+    const icons = {
+        'success': 'bi-check-circle-fill',
+        'danger': 'bi-exclamation-triangle-fill',
+        'warning': 'bi-exclamation-circle-fill',
+        'info': 'bi-info-circle-fill'
+    };
+    
+    // Crea toast
+    const toastId = 'toast_' + Date.now();
+    const toastHTML = `
+        <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header ${bgColors[tipo]} text-white">
+                <i class="bi ${icons[tipo]} me-2"></i>
+                <strong class="me-auto">${titolo}</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">
+                ${messaggio}
+            </div>
+        </div>
+    `;
+    
+    toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+    
+    // Mostra toast
+    const toastElement = document.getElementById(toastId);
+    const toast = new bootstrap.Toast(toastElement, {
+        autohide: true,
+        delay: tipo === 'danger' ? 5000 : 3000
+    });
+    toast.show();
+    
+    // Rimuovi dopo nascosto
+    toastElement.addEventListener('hidden.bs.toast', () => {
+        toastElement.remove();
     });
 }
 
