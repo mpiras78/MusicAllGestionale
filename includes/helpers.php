@@ -157,6 +157,17 @@ function calcolaEta($data_nascita) {
 }
 
 /**
+ * Genera nome completo da nome e cognome
+ */
+function nomeCompleto($nome, $cognome = '') {
+    if (empty($cognome)) {
+        // Se cognome vuoto, probabilmente è già nome completo
+        return trim($nome);
+    }
+    return trim($nome . ' ' . $cognome);
+}
+
+/**
  * Ottieni nome giorno in italiano
  */
 function getGiornoItaliano($data_o_giorno) {
