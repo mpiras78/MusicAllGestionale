@@ -573,7 +573,12 @@ function segnaAssenza() {
     
     // Apri modal crea assenza con dati pre-compilati
     setTimeout(() => {
-        const modalElement = document.getElementById('modalCreaAssenza');
+        const modalElement = document.getElementById('creaAssenzaModal');
+        
+        if (!modalElement) {
+            alert('Funzionalità "Segna Assenza" disponibile solo dalla pagina Gestione Assenze');
+            return;
+        }
         
         if (typeof bootstrap !== 'undefined') {
             // Usa Bootstrap se disponibile
@@ -591,17 +596,14 @@ function segnaAssenza() {
             document.body.appendChild(backdrop);
         }
         
-        // Pre-compila campi
-        const lezioneSelect = document.getElementById('lezione_id');
-        const dataInput = document.getElementById('data_assenza');
+        // Pre-compila campi se disponibili
+        const lezioneSelect = document.getElementById('lezioneSelectFinal');
+        const dataInput = document.getElementById('dataAssenza');
         
         if (lezioneSelect && dataInput) {
-            lezioneSelect.value = currentLezioneData.lezione_id;
-            dataInput.value = currentLezioneData.data;
-            
-            // Trigger change event per caricare allievo (vanilla JS)
-            const event = new Event('change', { bubbles: true });
-            lezioneSelect.dispatchEvent(event);
+            // Non possiamo pre-compilare qui perché serve prima selezionare l'allievo
+            // che poi carica le sue lezioni
+            console.log('Modal assenza aperta, seleziona manualmente allievo e lezione');
         }
     }, 300);
 }
@@ -625,8 +627,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-
-<!-- Include modal crea assenza per funzionalità "Segna Assenza" da calendario -->
-<?php include 'includes/views/assenze/modal_crea_assenza.php'; ?>
 
 <?php include 'includes/footer.php'; ?>
