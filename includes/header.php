@@ -129,6 +129,9 @@
                         </a></li>
                         <?php endif; ?>
                         <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal">
+                            <i class="bi bi-info-circle"></i> About
+                        </a></li>
                         <li><a class="dropdown-item" href="<?= BASE_URL ?>/logout.php">
                             <i class="bi bi-box-arrow-right"></i> Logout
                         </a></li>

@@ -113,7 +113,10 @@ if (isPost()) {
                             </div>
                         </form>
                         
-                        <div class="text-center mt-4">
+                        <div class="text-center mt-3">
+                            <small class="text-muted d-block mb-1">
+                                <i class="bi bi-info-circle"></i> Versione <?= APP_VERSION ?>
+                            </small>
                             <small class="text-muted">
                                 Developed by Marco Piras & Cline
                             </small>

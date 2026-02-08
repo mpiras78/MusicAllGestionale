@@ -93,5 +93,66 @@ window.addEventListener('load', function() {
     <?= $extra_js ?>
 <?php endif; ?>
 
+<!-- Modal About -->
+<div class="modal fade" id="aboutModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-info-circle"></i> About <?= APP_NAME ?>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="<?= BASE_URL ?>/assets/img/logo_musicall.png" 
+                     alt="MusicAll Logo" 
+                     class="mb-3" 
+                     style="max-width: 150px;">
+                
+                <h4 class="mb-3"><?= APP_NAME ?></h4>
+                
+                <div class="alert alert-info mb-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-tag"></i> Versione <?= APP_VERSION ?>
+                    </h5>
+                </div>
+                
+                <p class="text-muted mb-3">
+                    Sistema di gestione completo per scuole di musica
+                </p>
+                
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="bi bi-star-fill text-warning"></i> Caratteristiche
+                        </h6>
+                        <ul class="list-unstyled text-start mb-0">
+                            <li><i class="bi bi-check-circle text-success"></i> Gestione Allievi e Docenti</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Calendario Settimanale Interattivo</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Tracciamento Assenze e Recuperi</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Statistiche e Report</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Sistema Multi-Utente</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <p class="text-muted small mb-2">
+                    <i class="bi bi-code-slash"></i> Developed by
+                </p>
+                <p class="fw-bold mb-1">Marco Piras & Cline</p>
+                
+                <p class="text-muted small mb-0">
+                    © <?= date('Y') ?> - Tutti i diritti riservati
+                </p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Chiudi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
