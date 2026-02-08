@@ -150,6 +150,54 @@ function calcolaEta($data_nascita) {
 }
 
 /**
+ * Ottieni nome giorno in italiano
+ */
+function getGiornoItaliano($data_o_giorno) {
+    $giorni = [
+        'Monday' => 'Lunedì',
+        'Tuesday' => 'Martedì', 
+        'Wednesday' => 'Mercoledì',
+        'Thursday' => 'Giovedì',
+        'Friday' => 'Venerdì',
+        'Saturday' => 'Sabato',
+        'Sunday' => 'Domenica'
+    ];
+    
+    // Se è già un nome giorno in inglese
+    if (isset($giorni[$data_o_giorno])) {
+        return $giorni[$data_o_giorno];
+    }
+    
+    // Se è una data, converti
+    $dt = is_string($data_o_giorno) ? new DateTime($data_o_giorno) : $data_o_giorno;
+    $giorno_eng = $dt->format('l');
+    
+    return $giorni[$giorno_eng] ?? $giorno_eng;
+}
+
+/**
+ * Ottieni nome mese in italiano
+ */
+function getMeseItaliano($mese_numero_o_data) {
+    $mesi = [
+        1 => 'Gennaio', 2 => 'Febbraio', 3 => 'Marzo', 4 => 'Aprile',
+        5 => 'Maggio', 6 => 'Giugno', 7 => 'Luglio', 8 => 'Agosto',
+        9 => 'Settembre', 10 => 'Ottobre', 11 => 'Novembre', 12 => 'Dicembre'
+    ];
+    
+    // Se è un numero (1-12)
+    if (is_numeric($mese_numero_o_data)) {
+        return $mesi[(int)$mese_numero_o_data] ?? '';
+    }
+    
+    // Se è una data
+    $dt = is_string($mese_numero_o_data) ? new DateTime($mese_numero_o_data) : $mese_numero_o_data;
+    $mese_num = (int)$dt->format('n');
+    
+    return $mesi[$mese_num] ?? '';
+}
+
+/**
  * Verifica se una data è una festività italiana
  * Ritorna array con info festività o false
  */
