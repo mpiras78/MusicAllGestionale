@@ -33,6 +33,24 @@ if (!function_exists('post')) {
 }
 
 /**
+ * Verifica se la richiesta è POST
+ */
+if (!function_exists('isPost')) {
+    function isPost() {
+        return $_SERVER['REQUEST_METHOD'] === 'POST';
+    }
+}
+
+/**
+ * Verifica se la richiesta è GET
+ */
+if (!function_exists('isGet')) {
+    function isGet() {
+        return $_SERVER['REQUEST_METHOD'] === 'GET';
+    }
+}
+
+/**
  * Redirect a URL
  */
 function redirect($url) {
