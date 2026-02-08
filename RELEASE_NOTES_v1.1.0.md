@@ -203,6 +203,25 @@ git pull origin main
   - Visualizza Calendario → Redirect calendario settimana
   - Report Mensile → Generazione report
 
+### **Sistema Audit & Logging:**
+- [ ] **Tabella Audit:** Tracciamento completo azioni utenti
+  - Inserimento/modifica/cancellazione allievi
+  - Inserimento/modifica/cancellazione docenti
+  - Creazione/modifica/cancellazione lezioni
+  - Registrazione assenze e recuperi
+  - Modifiche dati sensibili
+  - Login/Logout utenti
+- [ ] **Pagina Audit Log (Admin):** Visualizzazione log completo
+  - Filtro per tipo azione (INSERT/UPDATE/DELETE/LOGIN)
+  - Filtro per utente esecutore
+  - Filtro per data/range date
+  - Ricerca full-text
+  - Export CSV/Excel
+  - Dettaglio modifiche (before/after)
+- [ ] **Voce Menu Audit:** Dropdown admin con accesso rapido
+- [ ] **AuditHelper Class:** Helper centralizzato per logging
+- [ ] **Retention Policy:** Pulizia automatica log vecchi (es. >1 anno)
+
 ### **Notifiche & Analytics:**
 - [ ] **Notifiche Push:** Alert per assenze e recuperi
 - [ ] **Dashboard Analytics:** Grafici e statistiche avanzate
