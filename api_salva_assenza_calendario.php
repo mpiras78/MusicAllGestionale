@@ -1,9 +1,14 @@
 <?php
+// Cattura qualsiasi output indesiderato
+ob_start();
+
 require_once 'includes/bootstrap.php';
 
 // Richiede login
 $auth->requireLogin();
 
+// Pulisci buffer e imposta header JSON
+ob_clean();
 header('Content-Type: application/json');
 
 try {
@@ -85,9 +90,26 @@ try {
     ]);
     
 } catch (Exception $e) {
+    // Pulisci buffer per rimuovere HTML errori
+    ob_clean();
+    
     http_response_code(400);
     echo json_encode([
         'success' => false,
-        'error' => $e->getMessage()
+        'error' => $e->getMessage(),
+        'trace' => DEBUG_MODE ? $e->getTraceAsString() : null
+    ]);
+} catch (Error $e) {
+    // Cattura anche errori PHP fatali
+    ob_clean();
+    
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Errore interno del server',
+        'details' => DEBUG_MODE ? $e->getMessage() : null
     ]);
 }
+
+// Invia output e termina
+ob_end_flush();
