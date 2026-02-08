@@ -341,6 +341,52 @@ include 'includes/header.php';
     </div>
 </div>
 
+<!-- Modal Segna Assenza -->
+<div class="modal fade" id="segnaAssenzaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle"></i> Segna Assenza
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info" id="assenzaInfo">
+                    <!-- Info lezione compilata da JS -->
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Causale Assenza *</label>
+                    <select class="form-select" id="causaleAssenza" required>
+                        <option value="allievo">Causata da Allievo</option>
+                        <option value="docente">Causata da Docente (genera recupero automatico)</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="noteAssenza" class="form-label">Note (opzionale)</label>
+                    <textarea class="form-control" id="noteAssenza" rows="3" 
+                              placeholder="Aggiungi eventuali note..."></textarea>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Attenzione:</strong> L'assenza verrà registrata immediatamente.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Annulla
+                </button>
+                <button type="button" class="btn btn-warning" onclick="confermaAssenza()">
+                    <i class="bi bi-check-circle"></i> Conferma Assenza
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal Info Allievo -->
 <div class="modal fade" id="infoAllieviModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
@@ -589,21 +635,25 @@ function segnaAssenza() {
     // Chiudi modal info allievo
     chiudiModalInfoAllievo();
     
-    // Apri modal crea assenza con dati pre-compilati
+    // Apri modal segna assenza
     setTimeout(() => {
-        const modalElement = document.getElementById('creaAssenzaModal');
+        const assenzaInfo = document.getElementById('assenzaInfo');
+        assenzaInfo.innerHTML = `
+            <strong>Allievo:</strong> ${currentLezioneData.allievo_nome}<br>
+            <strong>Materia:</strong> ${currentLezioneData.materia}<br>
+            <strong>Data:</strong> ${new Date(currentLezioneData.data).toLocaleDateString('it-IT')}
+        `;
         
-        if (!modalElement) {
-            alert('Funzionalità "Segna Assenza" disponibile solo dalla pagina Gestione Assenze');
-            return;
-        }
+        // Reset form
+        document.getElementById('causaleAssenza').value = 'allievo';
+        document.getElementById('noteAssenza').value = '';
         
+        // Apri modal
+        const modalElement = document.getElementById('segnaAssenzaModal');
         if (typeof bootstrap !== 'undefined') {
-            // Usa Bootstrap se disponibile
-            const assenzaModal = new bootstrap.Modal(modalElement);
-            assenzaModal.show();
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
         } else {
-            // Fallback manuale
             modalElement.classList.add('show');
             modalElement.style.display = 'block';
             document.body.classList.add('modal-open');
@@ -613,17 +663,71 @@ function segnaAssenza() {
             backdrop.id = 'assenzaBackdrop';
             document.body.appendChild(backdrop);
         }
-        
-        // Pre-compila campi se disponibili
-        const lezioneSelect = document.getElementById('lezioneSelectFinal');
-        const dataInput = document.getElementById('dataAssenza');
-        
-        if (lezioneSelect && dataInput) {
-            // Non possiamo pre-compilare qui perché serve prima selezionare l'allievo
-            // che poi carica le sue lezioni
-            console.log('Modal assenza aperta, seleziona manualmente allievo e lezione');
-        }
     }, 300);
+}
+
+function confermaAssenza() {
+    if (!currentLezioneData) {
+        alert('Errore: nessuna lezione selezionata');
+        return;
+    }
+    
+    const causale = document.getElementById('causaleAssenza').value;
+    const note = document.getElementById('noteAssenza').value;
+    
+    // Disabilita pulsante
+    const btnConferma = event.target;
+    btnConferma.disabled = true;
+    btnConferma.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Salvataggio...';
+    
+    // Invia richiesta
+    fetch('<?= BASE_URL ?>/api_salva_assenza_calendario.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            lezione_id: currentLezioneData.lezione_id,
+            data_lezione: currentLezioneData.data,
+            causale: causale,
+            note: note
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Chiudi modal
+            const modalElement = document.getElementById('segnaAssenzaModal');
+            if (typeof bootstrap !== 'undefined') {
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                if (modal) modal.hide();
+            } else {
+                modalElement.classList.remove('show');
+                modalElement.style.display = 'none';
+                document.body.classList.remove('modal-open');
+                const backdrop = document.getElementById('assenzaBackdrop');
+                if (backdrop) backdrop.remove();
+            }
+            
+            // Mostra messaggio successo
+            let messaggio = 'Assenza registrata con successo!';
+            if (data.recupero_creato) {
+                messaggio += ' È stato creato automaticamente un recupero da programmare.';
+            }
+            
+            alert(messaggio);
+            
+            // Ricarica pagina per aggiornare statistiche
+            location.reload();
+        } else {
+            throw new Error(data.error || 'Errore durante il salvataggio');
+        }
+    })
+    .catch(error => {
+        alert('Errore: ' + error.message);
+        btnConferma.disabled = false;
+        btnConferma.innerHTML = '<i class="bi bi-check-circle"></i> Conferma Assenza';
+    });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
