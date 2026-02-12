@@ -600,3 +600,55 @@ body {
         box-shadow: 0 0 0 4px rgba(255, 193, 7, 0);
     }
 }
+
+/* Pulsante + per celle vuote calendario */
+.empty-slot-add {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.empty-slot-add i {
+    color: white;
+    font-size: 1.2rem;
+    line-height: 28px;
+    display: block;
+    text-align: center;
+}
+
+.calendario-cell-hoverable:hover .empty-slot-add {
+    display: block;
+    animation: fadeInScale 0.2s ease;
+}
+
+.empty-slot-add:hover {
+    transform: scale(1.15);
+    background: linear-gradient(135deg, #66bb6a 0%, #81c784 100%);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Effetto hover su cella vuota */
+.calendario-cell-hoverable:hover {
+    background-color: #f5f5f5;
+    transition: background-color 0.2s ease;
+}

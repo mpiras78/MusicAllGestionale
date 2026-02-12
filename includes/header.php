@@ -75,6 +75,13 @@
                                 <i class="bi bi-book"></i> Lezioni
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>/gestione_iscrizioni.php">
+                                <i class="bi bi-card-checklist"></i> Iscrizioni
+                            </a></li>
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>/gestione_pagamenti.php">
+                                <i class="bi bi-cash-coin"></i> Pagamenti
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="<?= BASE_URL ?>/aule/index.php">
                                 <i class="bi bi-door-open"></i> Aule
                             </a></li>

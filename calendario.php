@@ -11,8 +11,8 @@ $current_page = 'calendario';
 $lezioniCtrl = new LezioniController();
 $auleCtrl = new AuleController();
 
-// Gestione settimana
-$settimana_offset = (int)get('settimana', 0); // 0 = settimana corrente, -1 = precedente, +1 = successiva
+// Gestione settimana - Supporta sia GET che POST
+$settimana_offset = isset($_POST['settimana']) ? (int)$_POST['settimana'] : (int)get('settimana', 0);
 
 // Calcola lunedì della settimana selezionata
 $oggi = new DateTime();
@@ -42,8 +42,8 @@ for ($i = 0; $i < 6; $i++) {
     $giorno_corrente->modify('+1 day');
 }
 
-// Giorno selezionato (default: oggi se nella settimana corrente, altrimenti lunedì)
-$giorno_selezionato = get('giorno', '');
+// Giorno selezionato - Supporta sia GET che POST
+$giorno_selezionato = isset($_POST['giorno']) ? $_POST['giorno'] : get('giorno', '');
 if (empty($giorno_selezionato)) {
     $oggi_key = strtolower(date('l'));
     $mapping = [
@@ -76,6 +76,7 @@ $aule = $auleCtrl->getAule();
 $slots = generaSlotOrari(ORA_INIZIO_SCUOLA, ORA_FINE_SCUOLA, DURATA_SLOT_DEFAULT);
 
 // Ottieni lezioni per il giorno selezionato tramite controller
+// IMPORTANTE: Passa la data specifica per il JOIN con assenze
 // Se docente e configurazione lo richiede, filtra solo sue lezioni
 if ($auth->hasRole('docente') && !DOCENTE_VIEW_ALL_CALENDAR) {
     $docentiCtrl = new DocentiController();
@@ -87,7 +88,8 @@ if ($auth->hasRole('docente') && !DOCENTE_VIEW_ALL_CALENDAR) {
         $lezioni = []; // Nessuna lezione se docente non collegato
     }
 } else {
-    $lezioni = $lezioniCtrl->getLezioniPerGiorno($giorno_selezionato);
+    // Passa la data selezionata per check assenze
+    $lezioni = $lezioniCtrl->getLezioniPerGiorno($giorno_selezionato, true, $data_selezionata);
 }
 
 // Organizza lezioni per aula e ora
@@ -147,9 +149,13 @@ include 'includes/header.php';
     <div class="card mb-4">
         <div class="card-body py-2">
             <div class="d-flex align-items-center justify-content-between mb-3">
-                <a href="?settimana=<?= $settimana_offset - 1 ?>" class="btn btn-outline-primary btn-sm">
-                    <i class="bi bi-chevron-left"></i> Settimana Precedente
-                </a>
+                <form method="POST" style="display: inline;">
+                    <input type="hidden" name="settimana" value="<?= $settimana_offset - 1 ?>">
+                    <input type="hidden" name="giorno" value="<?= $giorno_selezionato ?>">
+                    <button type="submit" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-chevron-left"></i> Settimana Precedente
+                    </button>
+                </form>
                 <h5 class="mb-0">
                     <i class="bi bi-calendar-week"></i> 
                     Settimana dal <?= $giorni_settimana[0]['data_display'] ?> al <?= $giorni_settimana[5]['data_display'] ?>
@@ -157,32 +163,72 @@ include 'includes/header.php';
                         <span class="badge bg-success ms-2">Corrente</span>
                     <?php endif; ?>
                 </h5>
-                <a href="?settimana=<?= $settimana_offset + 1 ?>" class="btn btn-outline-primary btn-sm">
-                    Settimana Successiva <i class="bi bi-chevron-right"></i>
-                </a>
+                <form method="POST" style="display: inline;">
+                    <input type="hidden" name="settimana" value="<?= $settimana_offset + 1 ?>">
+                    <input type="hidden" name="giorno" value="<?= $giorno_selezionato ?>">
+                    <button type="submit" class="btn btn-outline-primary btn-sm">
+                        Settimana Successiva <i class="bi bi-chevron-right"></i>
+                    </button>
+                </form>
             </div>
             
             <!-- Tab Giorni Orizzontali -->
             <ul class="nav nav-tabs nav-fill" role="tablist">
                 <?php foreach ($giorni_settimana as $giorno): ?>
                     <li class="nav-item" role="presentation">
-                        <a href="?settimana=<?= $settimana_offset ?>&giorno=<?= $giorno['key'] ?>" 
-                           class="nav-link <?= $giorno_selezionato == $giorno['key'] ? 'active' : '' ?> <?= $giorno['is_today'] ? 'fw-bold' : '' ?> <?= $giorno['festivita'] ? 'border-danger' : '' ?>"
-                           style="<?= $giorno['is_today'] ? 'background-color: #fff3cd; border-color: #ffc107;' : '' ?><?= $giorno['festivita'] ? 'border-width: 3px !important;' : '' ?>">
-                            <div class="d-flex flex-column align-items-center">
-                                <span class="fs-6"><?= $giorno['nome'] ?></span>
-                                <span class="badge bg-secondary mt-1"><?= $giorno['data_display'] ?></span>
-                                <?php if ($giorno['is_today']): ?>
-                                    <span class="badge bg-warning text-dark mt-1">OGGI</span>
-                                <?php endif; ?>
-                                <?php if ($giorno['festivita']): ?>
-                                    <span class="badge bg-danger mt-1" title="Festività Nazionale"><?= $giorno['festivita']['nome'] ?></span>
-                                <?php endif; ?>
-                            </div>
-                        </a>
+                        <form method="POST" style="display: inline;">
+                            <input type="hidden" name="settimana" value="<?= $settimana_offset ?>">
+                            <input type="hidden" name="giorno" value="<?= $giorno['key'] ?>">
+                            <button type="submit" 
+                                    class="nav-link <?= $giorno_selezionato == $giorno['key'] ? 'active' : '' ?> <?= $giorno['is_today'] ? 'fw-bold' : '' ?> <?= $giorno['festivita'] ? 'border-danger' : '' ?>"
+                                    style="<?= $giorno['is_today'] ? 'background-color: #fff3cd; border-color: #ffc107;' : '' ?><?= $giorno['festivita'] ? 'border-width: 3px !important;' : '' ?> border: none; width: 100%;">
+                                <div class="d-flex flex-column align-items-center">
+                                    <span class="fs-6"><?= $giorno['nome'] ?></span>
+                                    <span class="badge bg-secondary mt-1"><?= $giorno['data_display'] ?></span>
+                                    <?php if ($giorno['is_today']): ?>
+                                        <span class="badge bg-warning text-dark mt-1">OGGI</span>
+                                    <?php endif; ?>
+                                    <?php if ($giorno['festivita']): ?>
+                                        <span class="badge bg-danger mt-1" title="Festività Nazionale"><?= $giorno['festivita']['nome'] ?></span>
+                                    <?php endif; ?>
+                                </div>
+                            </button>
+                        </form>
                     </li>
                 <?php endforeach; ?>
             </ul>
+            
+            <!-- Legenda -->
+            <div class="mt-3 mb-2">
+                <h6 class="mb-2"><i class="bi bi-info-circle"></i> Legenda</h6>
+                <div class="row g-2">
+                    <div class="col-auto">
+                        <span class="badge" style="background-color: #fff5f0; color: #333; border-left: 3px solid #ff6b35;">
+                            Regolare
+                        </span>
+                    </div>
+                    <div class="col-auto">
+                        <span class="badge" style="background-color: #e3f2fd; color: #333; border-left: 3px solid #2196f3;">
+                            Custom
+                        </span>
+                    </div>
+                    <div class="col-auto">
+                        <span class="badge" style="background-color: #e8f5e9; color: #333; border-left: 3px solid #4caf50;">
+                            Recupero
+                        </span>
+                    </div>
+                    <div class="col-auto">
+                        <span class="badge" style="background-color: #f3e5f5; color: #333; border-left: 3px solid #9c27b0;">
+                            Laboratorio
+                        </span>
+                    </div>
+                    <div class="col-auto">
+                        <span class="badge" style="background-color: #e0e0e0; color: #757575; border-left: 3px solid #9e9e9e;">
+                            <i class="bi bi-x-circle"></i> Festività/Assenza
+                        </span>
+                    </div>
+                </div>
+            </div>
             
             <div class="mt-3 text-center">
                 <span class="badge bg-primary fs-6">
@@ -233,9 +279,12 @@ include 'includes/header.php';
                                     <small class="text-muted"><?= $slot['fine'] ?></small>
                                 </td>
                                 <?php foreach ($aule as $aula): ?>
-                                    <td class="calendario-cell" 
+                                    <td class="calendario-cell calendario-cell-hoverable" 
                                         data-aula-id="<?= $aula['id'] ?>" 
-                                        data-ora="<?= $slot['inizio'] ?>">
+                                        data-aula-nome="<?= e($aula['nome']) ?>"
+                                        data-ora="<?= $slot['inizio'] ?>"
+                                        data-giorno="<?= $giorno_selezionato ?>"
+                                        data-data="<?= $data_selezionata ?>">
                                         <?php
                                         // Trova lezione che INIZIA in questo slot o prima della fine dello slot
                                         $lezione_slot = null;
@@ -293,6 +342,19 @@ include 'includes/header.php';
                                                         <?= e($lezione_slot['materia']) ?>
                                                     </div>
                                                 </div>
+                                                
+                                                <?php if ($is_annullata): ?>
+                                                    <!-- Lezione annullata = slot libero → mostra + -->
+                                                    <div class="empty-slot-add slot-libero-assenza" 
+                                                         onclick="apriModalNuovaPrenotazione(<?= $aula['id'] ?>, '<?= e($aula['nome']) ?>', '<?= $slot['inizio'] ?>', '<?= $giorno_selezionato ?>', '<?= $data_selezionata ?>')">
+                                                        <i class="bi bi-plus-circle"></i>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php else: ?>
+                                            <!-- Cella vuota - mostra + al hover -->
+                                            <div class="empty-slot-add" onclick="apriModalNuovaPrenotazione(<?= $aula['id'] ?>, '<?= e($aula['nome']) ?>', '<?= $slot['inizio'] ?>', '<?= $giorno_selezionato ?>', '<?= $data_selezionata ?>')">
+                                                <i class="bi bi-plus-circle"></i>
                                             </div>
                                         <?php endif; ?>
                                     </td>
@@ -305,34 +367,6 @@ include 'includes/header.php';
         </div>
     </div>
 
-    <!-- Legenda -->
-    <div class="card mt-3">
-        <div class="card-body">
-            <h6 class="card-title"><i class="bi bi-info-circle"></i> Legenda</h6>
-            <div class="row g-2">
-                <div class="col-auto">
-                    <span class="badge" style="background-color: #e3f2fd; color: #333; border-left: 3px solid #2196f3;">
-                        Regolare
-                    </span>
-                </div>
-                <div class="col-auto">
-                    <span class="badge" style="background-color: #fff3e0; color: #333; border-left: 3px solid #ff9800;">
-                        Custom
-                    </span>
-                </div>
-                <div class="col-auto">
-                    <span class="badge" style="background-color: #e8f5e9; color: #333; border-left: 3px solid #4caf50;">
-                        Recupero
-                    </span>
-                </div>
-                <div class="col-auto">
-                    <span class="badge" style="background-color: #f3e5f5; color: #333; border-left: 3px solid #9c27b0;">
-                        Laboratorio
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- Modal Aggiungi Lezione (placeholder) -->
@@ -411,11 +445,11 @@ include 'includes/header.php';
 <div class="modal fade" id="infoAllieviModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-primary bg-opacity-10">
+            <div class="modal-header" style="background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%); color: white;">
                 <h5 class="modal-title">
                     <i class="bi bi-person-circle"></i> <span id="modalAllieviNome">Info Allievo</span>
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="modalAllieviBody">
                 <div class="text-center py-5">
@@ -433,8 +467,147 @@ include 'includes/header.php';
     </div>
 </div>
 
+<!-- Modal Nuova Prenotazione Rapida -->
+<div class="modal fade" id="nuovaPrenotazioneModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-plus-circle"></i> Nuova Prenotazione Rapida
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    <strong id="slotInfo"></strong>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Nota:</strong> Questa è una funzionalità semplificata. Per creare lezioni complete con tutte le opzioni, 
+                    usa la sezione <a href="<?= BASE_URL ?>/gestione_lezioni.php" class="alert-link">Gestione Lezioni</a>.
+                </div>
+                
+                <form id="formNuovaPrenotazione">
+                    <input type="hidden" id="prenotAulaId" name="aula_id">
+                    <input type="hidden" id="prenotOra" name="ora_inizio">
+                    <input type="hidden" id="prenotGiorno" name="giorno">
+                    <input type="hidden" id="prenotData" name="data">
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Allievo *</label>
+                            <select class="form-select" id="prenotAllievoId" name="allievo_id" required>
+                                <option value="">Seleziona allievo...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Docente *</label>
+                            <select class="form-select" id="prenotDocenteId" name="docente_id" required>
+                                <option value="">Seleziona docente...</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Materia *</label>
+                            <select class="form-select" id="prenotMateriaId" name="materia_id" required>
+                                <option value="">Seleziona materia...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Durata (minuti) *</label>
+                            <select class="form-select" id="prenotDurata" name="durata" required>
+                                <option value="30">30 minuti</option>
+                                <option value="45">45 minuti</option>
+                                <option value="60" selected>60 minuti</option>
+                                <option value="90">90 minuti</option>
+                                <option value="120">120 minuti</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Note (opzionale)</label>
+                        <textarea class="form-control" id="prenotNote" name="note" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Annulla
+                </button>
+                <button type="button" class="btn btn-success" onclick="salvaPrenotazione()">
+                    <i class="bi bi-check-circle"></i> Crea Prenotazione
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 let currentLezioneData = null;
+
+function apriModalNuovaPrenotazione(aulaId, aulaNome, ora, giorno, data) {
+    // Popola info slot
+    const giornoNice = {
+        'lunedi': 'Lunedì',
+        'martedi': 'Martedì',
+        'mercoledi': 'Mercoledì',
+        'giovedi': 'Giovedì',
+        'venerdi': 'Venerdì',
+        'sabato': 'Sabato'
+    };
+    
+    document.getElementById('slotInfo').textContent = 
+        `Aula: ${aulaNome} - ${giornoNice[giorno]} ${new Date(data).toLocaleDateString('it-IT')} alle ${ora}`;
+    
+    // Popola campi hidden
+    document.getElementById('prenotAulaId').value = aulaId;
+    document.getElementById('prenotOra').value = ora;
+    document.getElementById('prenotGiorno').value = giorno;
+    document.getElementById('prenotData').value = data;
+    
+    // Carica select allievi, docenti, materie
+    caricaOpzioniPrenotazione();
+    
+    // Apri modal
+    const modalElement = document.getElementById('nuovaPrenotazioneModal');
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+}
+
+function caricaOpzioniPrenotazione() {
+    // TODO: Implementare chiamate API per caricare allievi, docenti, materie
+    // Per ora placeholder
+    const selectAllievo = document.getElementById('prenotAllievoId');
+    const selectDocente = document.getElementById('prenotDocenteId');
+    const selectMateria = document.getElementById('prenotMateriaId');
+    
+    // Placeholder options
+    selectAllievo.innerHTML = '<option value="">Caricamento...</option>';
+    selectDocente.innerHTML = '<option value="">Caricamento...</option>';
+    selectMateria.innerHTML = '<option value="">Caricamento...</option>';
+    
+    // Simulazione
+    setTimeout(() => {
+        selectAllievo.innerHTML = '<option value="">Seleziona allievo...</option><option value="1">Allievo 1</option>';
+        selectDocente.innerHTML = '<option value="">Seleziona docente...</option><option value="1">Docente 1</option>';
+        selectMateria.innerHTML = '<option value="">Seleziona materia...</option><option value="1">Chitarra</option><option value="2">Pianoforte</option>';
+    }, 500);
+}
+
+function salvaPrenotazione() {
+    mostraToast('Info', 'Funzionalità in sviluppo. Usa "Gestione Lezioni" per ora.', 'info');
+    
+    // TODO: Implementare salvataggio prenotazione
+    // const formData = new FormData(document.getElementById('formNuovaPrenotazione'));
+    // fetch('api_crea_prenotazione.php', { method: 'POST', body: formData })
+}
 
 function caricaInfoAllievo(allieviId, lezioneId = null, nomeAllievo = '', materiaLezione = '', dataLezione = '') {
     const modalBody = document.getElementById('modalAllieviBody');

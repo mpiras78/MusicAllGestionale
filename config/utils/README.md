@@ -24,6 +24,65 @@ php -S localhost:8000
 
 ## 📁 Script Disponibili
 
+### 🚀 Gestione Applicativo
+
+#### `app-start.sh` - Avvio Server
+**Cosa fa:**
+- ✅ Avvia server PHP built-in
+- ✅ Verifica porta disponibile
+- ✅ Controlla presenza database
+- ✅ Mostra URL e credenziali
+
+**Uso:**
+```bash
+# Avvio standard (porta 8000)
+bash config/utils/app-start.sh
+
+# Avvio su porta personalizzata
+bash config/utils/app-start.sh 8080
+```
+
+---
+
+#### `app-stop.sh` - Stop Server
+**Cosa fa:**
+- ✅ Trova processi PHP sulla porta
+- ✅ Termina processi
+- ✅ Cleanup automatico
+
+**Uso:**
+```bash
+bash config/utils/app-stop.sh
+```
+
+---
+
+#### `user-activate.sh` - Attivazione Utente
+**Cosa fa:**
+- ✅ Genera token attivazione (24h)
+- ✅ Mostra link attivazione
+
+**Uso:**
+```bash
+bash config/utils/user-activate.sh mario.rossi
+```
+
+---
+
+#### `user-reset-password.sh` - Reset Password
+**Cosa fa:**
+- ✅ Reimposta password utente
+- ✅ Attiva utente se necessario
+
+**Uso:**
+```bash
+bash config/utils/user-reset-password.sh mario.rossi
+```
+
+---
+
+### 💾 Gestione Database
+
 ### 1️⃣ `db-import-all.sh` - Import Completo
 
 **Cosa fa:**

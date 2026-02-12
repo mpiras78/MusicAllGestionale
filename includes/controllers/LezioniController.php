@@ -37,25 +37,50 @@ class LezioniController {
     }
     
     /**
-     * Ottiene lezioni per un giorno specifico
+     * Ottiene lezioni per un giorno specifico con info assenze
+     * @param string $giorno Nome giorno (lunedi, martedi, etc)
+     * @param bool $attive_only Se true, filtra solo lezioni attive
+     * @param string|null $data_specifica Data specifica per check assenze (Y-m-d)
      */
-    public function getLezioniPerGiorno($giorno, $attive_only = true) {
+    public function getLezioniPerGiorno($giorno, $attive_only = true, $data_specifica = null) {
         $where = $attive_only ? "AND l.attiva = 1" : "";
         
-        return $this->db->query("
-            SELECT l.*, 
-                   al.cognome || ' ' || al.nome as allievo,
-                   d.cognome || ' ' || d.nome as docente,
-                   m.nome as materia,
-                   a.nome as aula
-            FROM lezioni l
-            JOIN allievi al ON l.allievo_id = al.id
-            JOIN docenti d ON l.docente_id = d.id
-            JOIN materie m ON l.materia_id = m.id
-            JOIN aule a ON l.aula_id = a.id
-            WHERE l.giorno_settimana = ? $where
-            ORDER BY l.ora_inizio
-        ", [$giorno]);
+        // Se c'è una data specifica, aggiungi LEFT JOIN con assenze
+        if ($data_specifica) {
+            return $this->db->query("
+                SELECT l.*, 
+                       al.cognome || ' ' || al.nome as allievo,
+                       d.cognome || ' ' || d.nome as docente,
+                       m.nome as materia,
+                       a.nome as aula,
+                       ass.id as assenza_id,
+                       CASE WHEN ass.id IS NOT NULL THEN 0 ELSE l.attiva END as attiva
+                FROM lezioni l
+                JOIN allievi al ON l.allievo_id = al.id
+                JOIN docenti d ON l.docente_id = d.id
+                JOIN materie m ON l.materia_id = m.id
+                JOIN aule a ON l.aula_id = a.id
+                LEFT JOIN assenze ass ON ass.lezione_id = l.id AND ass.data_assenza = ?
+                WHERE l.giorno_settimana = ? $where
+                ORDER BY l.ora_inizio
+            ", [$data_specifica, $giorno]);
+        } else {
+            // Query normale senza check assenze
+            return $this->db->query("
+                SELECT l.*, 
+                       al.cognome || ' ' || al.nome as allievo,
+                       d.cognome || ' ' || d.nome as docente,
+                       m.nome as materia,
+                       a.nome as aula
+                FROM lezioni l
+                JOIN allievi al ON l.allievo_id = al.id
+                JOIN docenti d ON l.docente_id = d.id
+                JOIN materie m ON l.materia_id = m.id
+                JOIN aule a ON l.aula_id = a.id
+                WHERE l.giorno_settimana = ? $where
+                ORDER BY l.ora_inizio
+            ", [$giorno]);
+        }
     }
     
     /**

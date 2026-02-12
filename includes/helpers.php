@@ -136,6 +136,31 @@ function formatDate($data) {
 }
 
 /**
+ * Formatta orario HH:MM
+ */
+function formatTime($time) {
+    if (empty($time)) return '';
+    
+    // Se è già nel formato HH:MM, ritorna così
+    if (preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $time)) {
+        return substr($time, 0, 5); // Prende solo HH:MM
+    }
+    
+    // Se è un timestamp, converti
+    if (is_numeric($time)) {
+        return date('H:i', $time);
+    }
+    
+    // Prova a parsare come stringa
+    $timestamp = strtotime($time);
+    if ($timestamp !== false) {
+        return date('H:i', $timestamp);
+    }
+    
+    return $time;
+}
+
+/**
  * Formatta data e ora italiana
  */
 function formatDataOraItaliana($datetime) {

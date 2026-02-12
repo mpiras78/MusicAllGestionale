@@ -75,7 +75,7 @@ INSERT INTO lezioni (allievo_id, docente_id, materia_id, aula_id, giorno_settima
 -- =============================================
 
 -- MIDI: TESSITORE+MARCANTE Chitarra
-INSERT INTO lezioni (allievo_id, docente_id, materia_id, aula_id, giorno_settimana, ora_inizio, ora_fine, tipo, attiva) SELECT (SELECT id FROM allievi WHERE UPPER(cognome) LIKE '%FERRANTE%' AND UPPER(nome) LIKE '%FABRIZIO%' LIMIT 1), (SELECT id FROM docenti WHERE UPPER(cognome) LIKE '%TESSITORE%' LIMIT 1), (SELECT id FROM materie WHERE UPPER(nome) LIKE '%CHITAR%' LIMIT 1), (SELECT id FROM aule WHERE UPPER(nome) LIKE '%MIDI%' LIMIT 1), 'martedi', '10:00', '11:00', 'regolare', 1;
+INSERT INTO lezioni (allievo_id, docente_id, materia_id, aula_id, giorno_settimana, ora_inizio, ora_fine, tipo, attiva) SELECT (SELECT id FROM allievi WHERE UPPER(cognome) LIKE '%FERRANTE%' AND UPPER(nome) LIKE '%FABRIZIO%' LIMIT 1), (SELECT id FROM docenti WHERE UPPER(cognome) LIKE '%TESSITORE%' LIMIT 1), (SELECT id FROM materie WHERE UPPER(nome) LIKE '%CHITAR%' LIMIT 1), (SELECT id FROM aule WHERE UPPER(nome) LIKE '%MIDI%' LIMIT 1), 'martedi', '10:00', '10:45', 'regolare', 1;
 INSERT INTO lezioni (allievo_id, docente_id, materia_id, aula_id, giorno_settimana, ora_inizio, ora_fine, tipo, attiva) SELECT (SELECT id FROM allievi WHERE UPPER(cognome) LIKE '%CARDONI%' LIMIT 1), (SELECT id FROM docenti WHERE UPPER(cognome) LIKE '%MARCANTE%' LIMIT 1), (SELECT id FROM materie WHERE UPPER(nome) LIKE '%CHITAR%' LIMIT 1), (SELECT id FROM aule WHERE UPPER(nome) LIKE '%MIDI%' LIMIT 1), 'martedi', '15:45', '16:45', 'regolare', 1;
 
 -- PIANO: SALVUCCI+PACCHIAROTTI  
