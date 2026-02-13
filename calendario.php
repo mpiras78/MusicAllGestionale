@@ -914,9 +914,15 @@ function caricaOpzioniPrenotazione() {
 
 function salvaPrenotazione() {
     const form = document.getElementById('formNuovaPrenotazione');
-    const formData = new FormData(form);
+    const tipo = document.getElementById('prenotTipo').value;
     
-    // Valida form
+    // Valida tipo selezionato
+    if (!tipo) {
+        mostraToast('Errore', 'Seleziona un tipo di prenotazione', 'danger');
+        return;
+    }
+    
+    // Valida form base
     if (!form.checkValidity()) {
         form.reportValidity();
         return;
@@ -927,18 +933,66 @@ function salvaPrenotazione() {
     btnSalva.disabled = true;
     btnSalva.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Salvataggio...';
     
-    // Converti FormData in JSON
+    // Costruisci payload in base al tipo
+    const formData = new FormData(form);
     const data = {
+        tipo: tipo,
         aula_id: formData.get('aula_id'),
         ora_inizio: formData.get('ora_inizio'),
         giorno: formData.get('giorno'),
         data: formData.get('data'),
-        allievo_id: formData.get('allievo_id'),
-        docente_id: formData.get('docente_id'),
-        materia_id: formData.get('materia_id'),
         durata: parseInt(formData.get('durata')),
         note: formData.get('note')
     };
+    
+    // Aggiungi campi specifici per tipo
+    if (tipo === 'PREN_SALA') {
+        // Prenotazione Allievi - richiede allievo, docente, materia
+        const allieviId = formData.get('allievo_id');
+        const docenteId = formData.get('docente_id');
+        const materiaId = formData.get('materia_id');
+        
+        if (!allieviId || !docenteId || !materiaId) {
+            mostraToast('Errore', 'Compila tutti i campi richiesti (Allievo, Docente, Materia)', 'danger');
+            btnSalva.disabled = false;
+            btnSalva.innerHTML = '<i class="bi bi-check-circle"></i> Crea Prenotazione';
+            return;
+        }
+        
+        data.allievo_id = parseInt(allieviId);
+        data.docente_id = parseInt(docenteId);
+        data.materia_id = parseInt(materiaId);
+        
+    } else if (tipo === 'PREN_DOCENTE') {
+        // Prenotazione Docente - richiede solo docente
+        const docenteSoloId = formData.get('docente_solo_id');
+        
+        if (!docenteSoloId) {
+            mostraToast('Errore', 'Seleziona un docente', 'danger');
+            btnSalva.disabled = false;
+            btnSalva.innerHTML = '<i class="bi bi-check-circle"></i> Crea Prenotazione';
+            return;
+        }
+        
+        data.docente_id = parseInt(docenteSoloId);
+        data.motivo = formData.get('motivo_docente') || '';
+        
+    } else if (tipo === 'PREN_ESTERNO') {
+        // Prenotazione Esterno - richiede nome, opzionali email/telefono/org
+        const nomeEsterno = formData.get('nome_esterno');
+        
+        if (!nomeEsterno || nomeEsterno.trim() === '') {
+            mostraToast('Errore', 'Inserisci il nome completo', 'danger');
+            btnSalva.disabled = false;
+            btnSalva.innerHTML = '<i class="bi bi-check-circle"></i> Crea Prenotazione';
+            return;
+        }
+        
+        data.nome_esterno = nomeEsterno.trim();
+        data.email_esterno = formData.get('email_esterno') || '';
+        data.telefono_esterno = formData.get('telefono_esterno') || '';
+        data.organizzazione_esterno = formData.get('organizzazione_esterno') || '';
+    }
     
     // Invia richiesta
     fetch('<?= BASE_URL ?>/api_salva_prenotazione.php', {
