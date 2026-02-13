@@ -429,12 +429,17 @@ include 'includes/header.php';
                                                 }
                                             }
                                             
+                                            // Determina azione click: recuperi vanno su info allievo, prenotazioni su info evento
+                                            $is_recupero = (strpos(strtolower($evento_slot['tipo'] ?? ''), 'recupero') !== false || strtolower($evento_slot['tipo'] ?? '') === 'lez_recupero');
                                             $is_prenotazione = (strpos(strtolower($evento_slot['tipo'] ?? ''), 'pren_') === 0);
-                                            $onclick_action = $is_prenotazione 
-                                                ? "mostraInfoEvento({$evento_slot['id']}); return false;"
-                                                : ($evento_slot['allievo_id'] > 0 
-                                                    ? "caricaInfoAllievo({$evento_slot['allievo_id']}, {$evento_slot['id']}, '" . addslashes($evento_slot['allievo']) . "', '" . addslashes($evento_slot['materia']) . "', '{$data_selezionata}'); return false."
-                                                    : "mostraInfoEvento({$evento_slot['id']}); return false;");
+                                            
+                                            if ($is_recupero && $evento_slot['allievo_id'] > 0) {
+                                                $onclick_action = "caricaInfoAllievo({$evento_slot['allievo_id']}, {$evento_slot['id']}, '" . addslashes($evento_slot['allievo']) . "', '" . addslashes($evento_slot['materia']) . "', '{$data_selezionata}'); return false.";
+                                            } elseif ($is_prenotazione) {
+                                                $onclick_action = "mostraInfoEvento({$evento_slot['id']}, 'evento'); return false.";
+                                            } else {
+                                                $onclick_action = "mostraInfoEvento({$evento_slot['id']}, 'evento'); return false.";
+                                            }
                                         ?>
                                             <div class="lezione-slot tipo-<?= e($tipo_css) ?><?= $classe_annullata ?>" 
                                                  data-lezione-id="<?= $evento_slot['id'] ?>"
@@ -690,57 +695,103 @@ include 'includes/header.php';
                     <strong id="slotInfo"></strong>
                 </div>
                 
-                <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle"></i>
-                    <strong>Nota:</strong> Questa è una funzionalità semplificata. Per creare lezioni complete con tutte le opzioni, 
-                    usa la sezione <a href="<?= BASE_URL ?>/gestione_lezioni.php" class="alert-link">Gestione Lezioni</a>.
-                </div>
-                
                 <form id="formNuovaPrenotazione">
                     <input type="hidden" id="prenotAulaId" name="aula_id">
                     <input type="hidden" id="prenotOra" name="ora_inizio">
                     <input type="hidden" id="prenotGiorno" name="giorno">
                     <input type="hidden" id="prenotData" name="data">
                     
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Allievo *</label>
-                            <select class="form-select" id="prenotAllievoId" name="allievo_id" required>
-                                <option value="">Seleziona allievo...</option>
-                            </select>
-                        </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Docente *</label>
-                            <select class="form-select" id="prenotDocenteId" name="docente_id" required>
-                                <option value="">Seleziona docente...</option>
-                            </select>
-                        </div>
+                    <!-- Tipo Prenotazione -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tipo Prenotazione *</label>
+                        <select class="form-select" id="prenotTipo" name="tipo" required onchange="cambiaTipoPrenotazione()">
+                            <option value="">Seleziona tipo...</option>
+                            <option value="PREN_SALA">🎓 Prenotazione Allievi (lezione)</option>
+                            <option value="PREN_DOCENTE">💼 Prenotazione Docente (personale)</option>
+                            <option value="PREN_ESTERNO">👤 Prenotazione Esterno</option>
+                        </select>
                     </div>
                     
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                    <!-- Campi Prenotazione Allievi -->
+                    <div id="campiAllievi" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Allievo *</label>
+                                <select class="form-select" id="prenotAllievoId" name="allievo_id">
+                                    <option value="">Caricamento...</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Docente *</label>
+                                <select class="form-select" id="prenotDocenteId" name="docente_id">
+                                    <option value="">Caricamento...</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
                             <label class="form-label fw-bold">Materia *</label>
-                            <select class="form-select" id="prenotMateriaId" name="materia_id" required>
-                                <option value="">Seleziona materia...</option>
-                            </select>
-                        </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Durata (minuti) *</label>
-                            <select class="form-select" id="prenotDurata" name="durata" required>
-                                <option value="30">30 minuti</option>
-                                <option value="45">45 minuti</option>
-                                <option value="60" selected>60 minuti</option>
-                                <option value="90">90 minuti</option>
-                                <option value="120">120 minuti</option>
+                            <select class="form-select" id="prenotMateriaId" name="materia_id">
+                                <option value="">Caricamento...</option>
                             </select>
                         </div>
                     </div>
                     
+                    <!-- Campi Prenotazione Docente -->
+                    <div id="campiDocente" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Docente *</label>
+                            <select class="form-select" id="prenotDocenteSoloId" name="docente_solo_id">
+                                <option value="">Caricamento...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Motivo Prenotazione</label>
+                            <input type="text" class="form-control" id="prenotMotivoDocente" name="motivo_docente" placeholder="Es: Preparazione esami, Studio personale...">
+                        </div>
+                    </div>
+                    
+                    <!-- Campi Prenotazione Esterno -->
+                    <div id="campiEsterno" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Nome Completo *</label>
+                                <input type="text" class="form-control" id="prenotNomeEsterno" name="nome_esterno" placeholder="Nome e Cognome">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="prenotEmailEsterno" name="email_esterno" placeholder="email@example.com">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Telefono</label>
+                                <input type="tel" class="form-control" id="prenotTelefonoEsterno" name="telefono_esterno" placeholder="+39 ...">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Organizzazione</label>
+                                <input type="text" class="form-control" id="prenotOrganizzazioneEsterno" name="organizzazione_esterno" placeholder="Es: Conservatorio, Band...">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Durata (comune a tutti) -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Durata (minuti) *</label>
+                        <select class="form-select" id="prenotDurata" name="durata" required>
+                            <option value="30">30 minuti</option>
+                            <option value="45">45 minuti</option>
+                            <option value="60" selected>60 minuti</option>
+                            <option value="90">90 minuti</option>
+                            <option value="120">120 minuti</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Note (comuni a tutti) -->
                     <div class="mb-3">
                         <label class="form-label">Note (opzionale)</label>
-                        <textarea class="form-control" id="prenotNote" name="note" rows="2"></textarea>
+                        <textarea class="form-control" id="prenotNote" name="note" rows="2" placeholder="Eventuali note aggiuntive..."></textarea>
                     </div>
                 </form>
             </div>
@@ -788,14 +839,37 @@ function apriModalNuovaPrenotazione(aulaId, aulaNome, ora, giorno, data) {
     modal.show();
 }
 
+function cambiaTipoPrenotazione() {
+    const tipo = document.getElementById('prenotTipo').value;
+    const campiAllievi = document.getElementById('campiAllievi');
+    const campiDocente = document.getElementById('campiDocente');
+    const campiEsterno = document.getElementById('campiEsterno');
+    
+    // Nascondi tutti
+    campiAllievi.style.display = 'none';
+    campiDocente.style.display = 'none';
+    campiEsterno.style.display = 'none';
+    
+    // Mostra in base al tipo
+    if (tipo === 'PREN_SALA') {
+        campiAllievi.style.display = 'block';
+    } else if (tipo === 'PREN_DOCENTE') {
+        campiDocente.style.display = 'block';
+    } else if (tipo === 'PREN_ESTERNO') {
+        campiEsterno.style.display = 'block';
+    }
+}
+
 function caricaOpzioniPrenotazione() {
     const selectAllievo = document.getElementById('prenotAllievoId');
     const selectDocente = document.getElementById('prenotDocenteId');
+    const selectDocenteSolo = document.getElementById('prenotDocenteSoloId');
     const selectMateria = document.getElementById('prenotMateriaId');
     
     // Mostra loading
     selectAllievo.innerHTML = '<option value="">Caricamento...</option>';
     selectDocente.innerHTML = '<option value="">Caricamento...</option>';
+    selectDocenteSolo.innerHTML = '<option value="">Caricamento...</option>';
     selectMateria.innerHTML = '<option value="">Caricamento...</option>';
     
     // Chiama API per caricare dati
@@ -810,12 +884,13 @@ function caricaOpzioniPrenotazione() {
                 });
                 selectAllievo.innerHTML = htmlAllievi;
                 
-                // Popola docenti
+                // Popola docenti (per prenotazione allievi)
                 let htmlDocenti = '<option value="">Seleziona docente...</option>';
                 data.docenti.forEach(d => {
                     htmlDocenti += `<option value="${d.id}">${d.cognome} ${d.nome}</option>`;
                 });
                 selectDocente.innerHTML = htmlDocenti;
+                selectDocenteSolo.innerHTML = htmlDocenti; // Stesso HTML per prenotazione docente
                 
                 // Popola materie
                 let htmlMaterie = '<option value="">Seleziona materia...</option>';
@@ -831,6 +906,7 @@ function caricaOpzioniPrenotazione() {
             console.error('Errore caricamento helpers:', error);
             selectAllievo.innerHTML = '<option value="">Errore caricamento</option>';
             selectDocente.innerHTML = '<option value="">Errore caricamento</option>';
+            selectDocenteSolo.innerHTML = '<option value="">Errore caricamento</option>';
             selectMateria.innerHTML = '<option value="">Errore caricamento</option>';
             mostraToast('Errore', 'Impossibile caricare i dati: ' + error.message, 'danger');
         });
