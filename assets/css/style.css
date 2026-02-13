@@ -142,6 +142,11 @@ body {
     max-width: 150px;
 }
 
+/* Override per celle con positioning assoluto */
+.calendario-cell .lezione-slot[style*="position: absolute"] {
+    margin: 0 !important;
+}
+
 .lezione-slot {
     padding: 0.35rem;
     margin: 2px;
@@ -194,6 +199,35 @@ body {
 .lezione-slot.tipo-laboratorio {
     background-color: #f3e5f5;
     border-left: 3px solid #9c27b0;
+}
+
+/* Prenotazioni - TUTTE GIALLE come da legenda */
+.lezione-slot.tipo-prenotazione-allievi,
+.lezione-slot.tipo-prenotazione-docente,
+.lezione-slot.tipo-prenotazione-esterno {
+    background-color: #fff9c4;
+    border-left: 3px solid #fdd835;
+}
+
+/* Icona tipo prenotazione */
+.prenotazione-tipo-icon {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    font-size: 1.1rem;
+    z-index: 5;
+}
+
+.prenotazione-tipo-icon.tipo-allievi {
+    color: #4caf50; /* Verde per allievi */
+}
+
+.prenotazione-tipo-icon.tipo-docente {
+    color: #2196f3; /* Blu per docenti */
+}
+
+.prenotazione-tipo-icon.tipo-esterno {
+    color: #f44336; /* Rosso per esterni */
 }
 
 /* Lezione annullata - grigio */
@@ -607,8 +641,8 @@ body {
     position: absolute;
     top: 4px;
     right: 4px;
-    width: 28px;
-    height: 28px;
+    width: 20px;
+    height: 20px;
     background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
     border-radius: 50%;
     cursor: pointer;
@@ -619,8 +653,8 @@ body {
 
 .empty-slot-add i {
     color: white;
-    font-size: 1.2rem;
-    line-height: 28px;
+    font-size: 0.75rem;
+    line-height: 20px;
     display: block;
     text-align: center;
 }
@@ -631,7 +665,7 @@ body {
 }
 
 .empty-slot-add:hover {
-    transform: scale(1.15);
+    transform: scale(1.1);
     background: linear-gradient(135deg, #66bb6a 0%, #81c784 100%);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
@@ -651,4 +685,45 @@ body {
 .calendario-cell-hoverable:hover {
     background-color: #f5f5f5;
     transition: background-color 0.2s ease;
+}
+
+/* Slot sovrapposto (evento su lezione annullata) */
+.slot-sovrapposto {
+    position: absolute;
+    width: 80% !important;
+    height: 80% !important;
+    top: 10% !important;
+    left: 10% !important;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    border: 2px solid white !important;
+}
+
+.slot-sovrapposto:hover {
+    transform: scale(1.05) !important;
+    z-index: 100;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Cella con sovrapposizione - position relative */
+.calendario-cell-hoverable {
+    position: relative;
+}
+
+/* Badge note su evento */
+.lezione-note-badge {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    background-color: rgba(255, 193, 7, 0.9);
+    color: #000;
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    z-index: 5;
+    cursor: help;
+}
+
+.lezione-note-badge i {
+    font-size: 0.85rem;
 }

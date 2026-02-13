@@ -261,6 +261,11 @@ include 'includes/header.php';
                         </span>
                     </div>
                     <div class="col-auto">
+                        <span class="badge" style="background-color: #fff9c4; color: #333; border-left: 3px solid #fdd835;">
+                            <i class="bi bi-calendar-plus"></i> Prenotazioni
+                        </span>
+                    </div>
+                    <div class="col-auto">
                         <span class="badge" style="background-color: #f3e5f5; color: #333; border-left: 3px solid #9c27b0;">
                             Laboratorio
                         </span>
@@ -410,6 +415,8 @@ include 'includes/header.php';
                                             $tipo_css = 'regolare';
                                             $icona_prenotazione = '';
                                             $classe_icona_pren = '';
+                                            $is_prenotazione = false;
+                                            
                                             if (isset($evento_slot['tipo'])) {
                                                 $tipo_lower = strtolower($evento_slot['tipo']);
                                                 if (strpos($tipo_lower, 'recupero') !== false || $tipo_lower === 'lez_recupero') {
@@ -418,14 +425,17 @@ include 'includes/header.php';
                                                     $tipo_css = 'prenotazione-allievi';
                                                     $icona_prenotazione = 'bi-mortarboard';
                                                     $classe_icona_pren = 'tipo-allievi';
+                                                    $is_prenotazione = true;
                                                 } elseif (strpos($tipo_lower, 'pren_docente') !== false) {
                                                     $tipo_css = 'prenotazione-docente';
                                                     $icona_prenotazione = 'bi-person-workspace';
                                                     $classe_icona_pren = 'tipo-docente';
+                                                    $is_prenotazione = true;
                                                 } elseif (strpos($tipo_lower, 'pren_esterno') !== false) {
                                                     $tipo_css = 'prenotazione-esterno';
                                                     $icona_prenotazione = 'bi-person-x';
                                                     $classe_icona_pren = 'tipo-esterno';
+                                                    $is_prenotazione = true;
                                                 }
                                             }
                                             
@@ -444,7 +454,7 @@ include 'includes/header.php';
                                             <div class="lezione-slot tipo-<?= e($tipo_css) ?><?= $classe_annullata ?>" 
                                                  data-lezione-id="<?= $evento_slot['id'] ?>"
                                                  data-evento-id="<?= $evento_slot['id'] ?>"
-                                                 title="<?= e($evento_slot['allievo'] ?: 'Prenotazione') ?> - <?= e($evento_slot['materia']) ?>"
+                                                 title="<?= e($evento_slot['allievo'] ?: $evento_slot['docente'] ?: 'Prenotazione') ?>"
                                                  style="cursor: pointer;"
                                                  onclick="<?= $onclick_action ?>">
                                                 <?php if ($icona_prenotazione): ?>
@@ -453,23 +463,42 @@ include 'includes/header.php';
                                                 <div class="lezione-orario-badge">
                                                     <?= date('H:i', strtotime($evento_slot['ora_inizio'])) ?>-<?= date('H:i', strtotime($evento_slot['ora_fine'])) ?>
                                                 </div>
-                                                <div class="lezione-header">
-                                                    <i class="bi <?= $icona ?> icona-strumento"></i>
-                                                    <span class="lezione-allievo">
-                                                        <?= e($evento_slot['allievo'] ?: 'Prenotazione') ?>
+                                                
+                                                <?php if ($is_prenotazione): ?>
+                                                    <!-- Layout uniforme per PRENOTAZIONI -->
+                                                    <div class="lezione-header">
+                                                        <span class="lezione-allievo">PRENOTAZIONE</span>
                                                         <?php if (isset($evento_slot['confermato']) && $evento_slot['confermato'] == 0): ?>
                                                             <i class="bi bi-clock-history text-warning" title="Da confermare"></i>
                                                         <?php endif; ?>
-                                                    </span>
-                                                </div>
-                                                <div class="lezione-info-row">
-                                                    <div class="lezione-docente">
-                                                        <i class="bi bi-person-fill"></i> <?= e($evento_slot['docente']) ?>
                                                     </div>
-                                                    <div class="lezione-materia-inline">
-                                                        <?= e($evento_slot['materia']) ?>
+                                                    <div class="lezione-info-row">
+                                                        <div class="lezione-docente">
+                                                            <i class="bi bi-person-fill"></i> 
+                                                            <?= e($evento_slot['allievo'] ?: $evento_slot['docente'] ?: 'Esterno') ?>
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                <?php else: ?>
+                                                    <!-- Layout standard per RECUPERI e altri eventi -->
+                                                    <div class="lezione-header">
+                                                        <i class="bi <?= $icona ?> icona-strumento"></i>
+                                                        <span class="lezione-allievo">
+                                                            <?= e($evento_slot['allievo'] ?: 'Evento') ?>
+                                                            <?php if (isset($evento_slot['confermato']) && $evento_slot['confermato'] == 0): ?>
+                                                                <i class="bi bi-clock-history text-warning" title="Da confermare"></i>
+                                                            <?php endif; ?>
+                                                        </span>
+                                                    </div>
+                                                    <div class="lezione-info-row">
+                                                        <div class="lezione-docente">
+                                                            <i class="bi bi-person-fill"></i> <?= e($evento_slot['docente']) ?>
+                                                        </div>
+                                                        <div class="lezione-materia-inline">
+                                                            <?= e($evento_slot['materia']) ?>
+                                                        </div>
+                                                    </div>
+                                                <?php endif; ?>
+                                                
                                                 <?php if ($evento_slot['note']): ?>
                                                     <div class="lezione-note-badge">
                                                         <i class="bi bi-sticky" title="<?= e($evento_slot['note']) ?>"></i>
