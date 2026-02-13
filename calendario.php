@@ -855,13 +855,11 @@ function cambiaTipoPrenotazione() {
 
 function caricaOpzioniPrenotazione() {
     const selectAllievo = document.getElementById('prenotAllievoId');
-    const selectDocente = document.getElementById('prenotDocenteId');
     const selectDocenteSolo = document.getElementById('prenotDocenteSoloId');
     const selectMateria = document.getElementById('prenotMateriaId');
     
     // Mostra loading
     selectAllievo.innerHTML = '<option value="">Caricamento...</option>';
-    selectDocente.innerHTML = '<option value="">Caricamento...</option>';
     selectDocenteSolo.innerHTML = '<option value="">Caricamento...</option>';
     selectMateria.innerHTML = '<option value="">Caricamento...</option>';
     
@@ -893,15 +891,13 @@ function caricaOpzioniPrenotazione() {
                 data.data.forEach(d => {
                     htmlDocenti += `<option value="${d.id}">${d.cognome} ${d.nome}</option>`;
                 });
-                selectDocente.innerHTML = htmlDocenti;
-                selectDocenteSolo.innerHTML = htmlDocenti; // Stesso HTML
+                selectDocenteSolo.innerHTML = htmlDocenti;
             } else {
                 throw new Error(data.error);
             }
         })
         .catch(error => {
             console.error('Errore caricamento docenti:', error);
-            selectDocente.innerHTML = '<option value="">Errore caricamento</option>';
             selectDocenteSolo.innerHTML = '<option value="">Errore caricamento</option>';
         });
     
