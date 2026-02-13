@@ -723,18 +723,11 @@ include 'includes/header.php';
                             </div>
                             
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Docente *</label>
-                                <select class="form-select" id="prenotDocenteId" name="docente_id">
+                                <label class="form-label fw-bold">Materia *</label>
+                                <select class="form-select" id="prenotMateriaId" name="materia_id">
                                     <option value="">Caricamento...</option>
                                 </select>
                             </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Materia *</label>
-                            <select class="form-select" id="prenotMateriaId" name="materia_id">
-                                <option value="">Caricamento...</option>
-                            </select>
                         </div>
                     </div>
                     
@@ -756,22 +749,22 @@ include 'includes/header.php';
                     <div id="campiEsterno" style="display: none;">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Nome Completo *</label>
-                                <input type="text" class="form-control" id="prenotNomeEsterno" name="nome_esterno" placeholder="Nome e Cognome">
+                                <label class="form-label fw-bold">Nome *</label>
+                                <input type="text" class="form-control" id="prenotNomeEsterno" name="nome_esterno" placeholder="Nome">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Email</label>
-                                <input type="email" class="form-control" id="prenotEmailEsterno" name="email_esterno" placeholder="email@example.com">
+                                <label class="form-label fw-bold">Cognome *</label>
+                                <input type="text" class="form-control" id="prenotCognomeEsterno" name="cognome_esterno" placeholder="Cognome">
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Telefono</label>
-                                <input type="tel" class="form-control" id="prenotTelefonoEsterno" name="telefono_esterno" placeholder="+39 ...">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="prenotEmailEsterno" name="email_esterno" placeholder="email@example.com">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Organizzazione</label>
-                                <input type="text" class="form-control" id="prenotOrganizzazioneEsterno" name="organizzazione_esterno" placeholder="Es: Conservatorio, Band...">
+                                <label class="form-label">Telefono</label>
+                                <input type="tel" class="form-control" id="prenotTelefonoEsterno" name="telefono_esterno" placeholder="+39 ...">
                             </div>
                         </div>
                     </div>
@@ -967,20 +960,18 @@ function salvaPrenotazione() {
     
     // Aggiungi campi specifici per tipo
     if (tipo === 'PREN_SALA') {
-        // Prenotazione Allievi - richiede allievo, docente, materia
+        // Prenotazione Allievi - richiede allievo e materia (NO docente)
         const allieviId = formData.get('allievo_id');
-        const docenteId = formData.get('docente_id');
         const materiaId = formData.get('materia_id');
         
-        if (!allieviId || !docenteId || !materiaId) {
-            mostraToast('Errore', 'Compila tutti i campi richiesti (Allievo, Docente, Materia)', 'danger');
+        if (!allieviId || !materiaId) {
+            mostraToast('Errore', 'Compila tutti i campi richiesti (Allievo, Materia)', 'danger');
             btnSalva.disabled = false;
             btnSalva.innerHTML = '<i class="bi bi-check-circle"></i> Crea Prenotazione';
             return;
         }
         
         data.allievo_id = parseInt(allieviId);
-        data.docente_id = parseInt(docenteId);
         data.materia_id = parseInt(materiaId);
         
     } else if (tipo === 'PREN_DOCENTE') {
@@ -998,20 +989,21 @@ function salvaPrenotazione() {
         data.motivo = formData.get('motivo_docente') || '';
         
     } else if (tipo === 'PREN_ESTERNO') {
-        // Prenotazione Esterno - richiede nome, opzionali email/telefono/org
+        // Prenotazione Esterno - richiede nome e cognome, opzionali email/telefono
         const nomeEsterno = formData.get('nome_esterno');
+        const cognomeEsterno = formData.get('cognome_esterno');
         
-        if (!nomeEsterno || nomeEsterno.trim() === '') {
-            mostraToast('Errore', 'Inserisci il nome completo', 'danger');
+        if (!nomeEsterno || nomeEsterno.trim() === '' || !cognomeEsterno || cognomeEsterno.trim() === '') {
+            mostraToast('Errore', 'Inserisci nome e cognome', 'danger');
             btnSalva.disabled = false;
             btnSalva.innerHTML = '<i class="bi bi-check-circle"></i> Crea Prenotazione';
             return;
         }
         
         data.nome_esterno = nomeEsterno.trim();
+        data.cognome_esterno = cognomeEsterno.trim();
         data.email_esterno = formData.get('email_esterno') || '';
         data.telefono_esterno = formData.get('telefono_esterno') || '';
-        data.organizzazione_esterno = formData.get('organizzazione_esterno') || '';
     }
     
     // Invia richiesta
