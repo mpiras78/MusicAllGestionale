@@ -1098,8 +1098,8 @@ function mostraInfoEvento(eventoId) {
     fetch(`<?= BASE_URL ?>/api_eventi.php?id=${eventoId}`)
         .then(response => response.json())
         .then(data => {
-            if (data.success && data.evento) {
-                const evt = data.evento;
+            if (data.success && data.data) {
+                const evt = data.data;
                 
                 // Crea contenuto modal
                 let html = `
@@ -1108,10 +1108,11 @@ function mostraInfoEvento(eventoId) {
                         <p class="mb-0">
                             <strong>Data:</strong> ${new Date(evt.data_evento).toLocaleDateString('it-IT')}<br>
                             <strong>Orario:</strong> ${evt.ora_inizio.substr(0,5)} - ${evt.ora_fine.substr(0,5)}<br>
-                            <strong>Aula:</strong> ${evt.aula || 'N/D'}<br>
-                            ${evt.allievo ? `<strong>Allievo:</strong> ${evt.allievo}<br>` : ''}
-                            ${evt.docente ? `<strong>Docente:</strong> ${evt.docente}<br>` : ''}
-                            ${evt.materia ? `<strong>Materia:</strong> ${evt.materia}<br>` : ''}
+                            <strong>Aula:</strong> ${evt.aula_nome || 'N/D'}<br>
+                            ${evt.allievo_id && evt.docente_nome ? `<strong>Allievo:</strong> ${evt.docente_nome.split(' ').reverse().join(' ')}<br>` : ''}
+                            ${evt.docente_nome && !evt.allievo_id ? `<strong>Docente:</strong> ${evt.docente_nome}<br>` : ''}
+                            ${evt.materia_nome ? `<strong>Materia:</strong> ${evt.materia_nome}<br>` : ''}
+                            ${evt.titolo ? `<strong>Titolo:</strong> ${evt.titolo}<br>` : ''}
                             ${evt.note ? `<strong>Note:</strong> ${evt.note}<br>` : ''}
                             <strong>Stato:</strong> ${evt.confermato ? '<span class="badge bg-success">Confermato</span>' : '<span class="badge bg-warning">Da confermare</span>'}
                         </p>
