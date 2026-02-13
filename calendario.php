@@ -872,43 +872,63 @@ function caricaOpzioniPrenotazione() {
     selectDocenteSolo.innerHTML = '<option value="">Caricamento...</option>';
     selectMateria.innerHTML = '<option value="">Caricamento...</option>';
     
-    // Chiama API per caricare dati
-    fetch('<?= BASE_URL ?>/api_get_helpers.php')
+    // Carica allievi
+    fetch('<?= BASE_URL ?>/api_get_helpers.php?type=allievi')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Popola allievi
                 let htmlAllievi = '<option value="">Seleziona allievo...</option>';
-                data.allievi.forEach(a => {
+                data.data.forEach(a => {
                     htmlAllievi += `<option value="${a.id}">${a.cognome} ${a.nome}</option>`;
                 });
                 selectAllievo.innerHTML = htmlAllievi;
-                
-                // Popola docenti (per prenotazione allievi)
+            } else {
+                throw new Error(data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Errore caricamento allievi:', error);
+            selectAllievo.innerHTML = '<option value="">Errore caricamento</option>';
+        });
+    
+    // Carica docenti
+    fetch('<?= BASE_URL ?>/api_get_helpers.php?type=docenti')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
                 let htmlDocenti = '<option value="">Seleziona docente...</option>';
-                data.docenti.forEach(d => {
+                data.data.forEach(d => {
                     htmlDocenti += `<option value="${d.id}">${d.cognome} ${d.nome}</option>`;
                 });
                 selectDocente.innerHTML = htmlDocenti;
-                selectDocenteSolo.innerHTML = htmlDocenti; // Stesso HTML per prenotazione docente
-                
-                // Popola materie
+                selectDocenteSolo.innerHTML = htmlDocenti; // Stesso HTML
+            } else {
+                throw new Error(data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Errore caricamento docenti:', error);
+            selectDocente.innerHTML = '<option value="">Errore caricamento</option>';
+            selectDocenteSolo.innerHTML = '<option value="">Errore caricamento</option>';
+        });
+    
+    // Carica materie
+    fetch('<?= BASE_URL ?>/api_get_helpers.php?type=materie')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
                 let htmlMaterie = '<option value="">Seleziona materia...</option>';
-                data.materie.forEach(m => {
+                data.data.forEach(m => {
                     htmlMaterie += `<option value="${m.id}">${m.nome}</option>`;
                 });
                 selectMateria.innerHTML = htmlMaterie;
             } else {
-                throw new Error(data.error || 'Errore nel caricamento dati');
+                throw new Error(data.error);
             }
         })
         .catch(error => {
-            console.error('Errore caricamento helpers:', error);
-            selectAllievo.innerHTML = '<option value="">Errore caricamento</option>';
-            selectDocente.innerHTML = '<option value="">Errore caricamento</option>';
-            selectDocenteSolo.innerHTML = '<option value="">Errore caricamento</option>';
+            console.error('Errore caricamento materie:', error);
             selectMateria.innerHTML = '<option value="">Errore caricamento</option>';
-            mostraToast('Errore', 'Impossibile caricare i dati: ' + error.message, 'danger');
         });
 }
 
