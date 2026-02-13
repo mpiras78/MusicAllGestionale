@@ -1002,13 +1002,43 @@ function salvaPrenotazione() {
         data.telefono_esterno = formData.get('telefono_esterno') || '';
     }
     
+    // Converti tipo in tipologia_id (ID reali dal database)
+    const tipoToTipologiaId = {
+        'PREN_SALA': 6,  // ID 6 = PREN_SALA_ALLIEVI
+        'PREN_DOCENTE': 7,  // ID 7 = PREN_DOCENTE
+        'PREN_ESTERNO': 8   // ID 8 = PREN_ESTERNO
+    };
+    
+    // Crea FormData invece di JSON
+    const formDataToSend = new FormData();
+    formDataToSend.append('tipologia_id', tipoToTipologiaId[tipo]);
+    formDataToSend.append('aula_id', data.aula_id);
+    formDataToSend.append('ora_inizio', data.ora_inizio);
+    formDataToSend.append('giorno', data.giorno);
+    formDataToSend.append('data', data.data);
+    formDataToSend.append('durata', data.durata);
+    formDataToSend.append('note', data.note || '');
+    
+    // Aggiungi campi specifici per tipo con nomi corretti per API
+    if (tipo === 'PREN_SALA') {
+        formDataToSend.append('allievo_id_pren', data.allievo_id);
+        formDataToSend.append('materia_id', data.materia_id);
+    } else if (tipo === 'PREN_DOCENTE') {
+        formDataToSend.append('docente_id_pren', data.docente_id);
+        formDataToSend.append('titolo', data.motivo || 'Prenotazione Docente');
+    } else if (tipo === 'PREN_ESTERNO') {
+        // Per esterno, prima dobbiamo creare il socio occasionale
+        // TODO: Implementare creazione socio occasionale
+        mostraToast('Errore', 'Prenotazione esterno richiede implementazione soci occasionali', 'warning');
+        btnSalva.disabled = false;
+        btnSalva.innerHTML = '<i class="bi bi-check-circle"></i> Crea Prenotazione';
+        return;
+    }
+    
     // Invia richiesta
     fetch('<?= BASE_URL ?>/api_salva_prenotazione.php', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
+        body: formDataToSend
     })
     .then(response => response.json())
     .then(result => {
