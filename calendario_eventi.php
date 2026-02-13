@@ -331,9 +331,12 @@ include 'includes/header.php';
                                     <small class="text-muted"><?= $slot['fine'] ?></small>
                                 </td>
                                 <?php foreach ($aule as $aula): ?>
-                                    <td class="calendario-cell" 
+                                <td class="calendario-cell" 
                                         data-aula-id="<?= $aula['id'] ?>" 
-                                        data-ora="<?= $slot['inizio'] ?>">
+                                        data-ora="<?= $slot['inizio'] ?>"
+                                        onclick="apriModalCreaEvento('<?= $data_selezionata ?>', <?= $aula['id'] ?>, '<?= $slot['inizio'] ?>')"
+                                        style="cursor: pointer;"
+                                        title="Click per creare un nuovo evento">
                                         <?php
                                         $evento_slot = null;
                                         if (isset($calendario[$aula['id']])) {
@@ -356,9 +359,16 @@ include 'includes/header.php';
                                         ?>
                                             <div class="lezione-slot<?= $classe_annullata ?>" 
                                                  data-evento-id="<?= $evento_slot['id'] ?>"
-                                                 ondblclick="apriModalModificaEvento(<?= $evento_slot['id'] ?>)"
-                                                 style="background-color: <?= $evento_slot['colore_bg'] ?>; border-left: 3px solid <?= $evento_slot['colore_border'] ?>; cursor: pointer;"
-                                                 title="Doppio click per modificare • <?= e($evento_slot['partecipante_nome'] ?? 'N/D') ?> - <?= e($evento_slot['tipologia_nome']) ?>">
+                                                 style="background-color: <?= $evento_slot['colore_bg'] ?>; border-left: 3px solid <?= $evento_slot['colore_border'] ?>; position: relative;"
+                                                 title="<?= e($evento_slot['partecipante_nome'] ?? 'N/D') ?> - <?= e($evento_slot['tipologia_nome']) ?>">
+                                                
+                                                <!-- Pulsante Modifica -->
+                                                <button class="btn btn-sm btn-light position-absolute top-0 end-0 m-1" 
+                                                        onclick="apriModalModificaEvento(<?= $evento_slot['id'] ?>); event.stopPropagation();"
+                                                        title="Modifica evento"
+                                                        style="opacity: 0.7; padding: 2px 6px; font-size: 0.75rem; z-index: 10;">
+                                                    <i class="bi bi-pencil-fill"></i>
+                                                </button>
                                                 
                                                 <div class="lezione-orario-badge">
                                                     <?= substr($evento_slot['ora_inizio'], 0, 5) ?>-<?= substr($evento_slot['ora_fine'], 0, 5) ?>

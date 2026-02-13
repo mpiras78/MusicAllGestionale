@@ -185,7 +185,7 @@ class RecuperiController {
         }
         
         // Inserisci recupero - GIÀ CONFERMATO (flusso semplificato)
-        return $this->db->execute("
+        $result = $this->db->execute("
             INSERT INTO recuperi (
                 assenza_id, lezione_originale_id, allievo_id, docente_id, materia_id,
                 data_recupero, ora_inizio, ora_fine, aula_id,
@@ -206,6 +206,41 @@ class RecuperiController {
             $_SESSION['user_id'],
             $_SESSION['user_id']
         ]);
+        
+        // FIX: Inserisci ANCHE in eventi_calendario per renderlo visibile nel calendario
+        // Trova ID tipologia recupero
+        $tipologia_recupero = $this->db->queryOne("SELECT id FROM tipologie_evento WHERE codice = 'LEZ_RECUPERO' LIMIT 1");
+        
+        if ($tipologia_recupero) {
+            $recupero_id = $this->db->lastInsertId();
+            
+            // Ottieni data assenza per le note
+            $data_assenza_formattata = date('d/m/Y', strtotime($assenza['data_assenza']));
+            $note_recupero = "Recupero lezione del {$data_assenza_formattata}";
+            if (!empty($data['note_segreteria'])) {
+                $note_recupero .= " - " . $data['note_segreteria'];
+            }
+            
+            $this->db->execute("
+                INSERT INTO eventi_calendario (
+                    tipologia_id, ricorrente, giorno_settimana, data_evento,
+                    ora_inizio, ora_fine, aula_id, docente_id, allievo_id, materia_id,
+                    titolo, note, confermato, attivo, created_at
+                ) VALUES (?, 0, NULL, ?, ?, ?, ?, ?, ?, ?, 'Recupero', ?, 1, 1, datetime('now', 'localtime'))
+            ", [
+                $tipologia_recupero['id'],
+                $data['data_recupero'],
+                $data['ora_inizio'],
+                $data['ora_fine'],
+                $data['aula_id'] ?? null,
+                $assenza['docente_id'],
+                $assenza['allievo_id'],
+                $assenza['materia_id'],
+                $note_recupero
+            ]);
+        }
+        
+        return $result;
     }
     
     /**

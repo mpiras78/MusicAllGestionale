@@ -6,8 +6,6 @@
 
 require_once 'includes/bootstrap.php';
 
-use MusicAll\Models\TipologiaEvento;
-
 header('Content-Type: application/json');
 
 // Autenticazione richiesta
@@ -18,26 +16,22 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 try {
-    $tipologie = TipologiaEvento::where('attivo', true)
-        ->orderBy('categoria')
-        ->orderBy('nome')
-        ->get();
+    $db = Database::getInstance()->getConnection();
     
-    $result = $tipologie->map(function($tip) {
-        return [
-            'id' => $tip->id,
-            'nome' => $tip->nome,
-            'categoria' => $tip->categoria,
-            'colore_bg' => $tip->colore_bg,
-            'colore_border' => $tip->colore_border,
-            'icona' => $tip->icona,
-            'descrizione' => $tip->descrizione
-        ];
-    });
+    $stmt = $db->prepare("
+        SELECT id, codice, nome, categoria, descrizione, 
+               colore_bg, colore_border, icona
+        FROM tipologie_evento 
+        WHERE attiva = 1 AND categoria = 'prenotazione'
+        ORDER BY ordine_visualizzazione, nome
+    ");
+    
+    $stmt->execute();
+    $tipologie = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     echo json_encode([
         'success' => true,
-        'data' => $result
+        'data' => $tipologie
     ]);
     
 } catch (Exception $e) {

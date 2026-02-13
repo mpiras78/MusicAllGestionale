@@ -59,13 +59,18 @@ async function loadFormData() {
 /**
  * Apri modal crea evento
  */
-function apriModalCreaEvento(dataPreselezionata = null, aulaId = null, oraInizio = null) {
+async function apriModalCreaEvento(dataPreselezionata = null, aulaId = null, oraInizio = null) {
     currentEventData = {
         mode: 'create',
         data: dataPreselezionata || new Date().toISOString().split('T')[0],
         aula_id: aulaId,
         ora_inizio: oraInizio
     };
+    
+    // Ricarica dati se necessario
+    if (tipologieEventi.length === 0 || allieviList.length === 0 || docentiList.length === 0) {
+        await loadFormData();
+    }
     
     // Popola form
     popolaFormCreaEvento();
@@ -456,7 +461,7 @@ function mostraToast(titolo, messaggio, tipo = 'info') {
     toastContainer.insertAdjacentHTML('beforeend', toastHTML);
     
     const toastElement = document.getElementById(toastId);
-    const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 5000 });
+    const toast = new bootstrap.Toast(toastElement, { autohide: false });
     toast.show();
     
     toastElement.addEventListener('hidden.bs.toast', () => {

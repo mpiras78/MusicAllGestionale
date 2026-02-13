@@ -1,4 +1,4 @@
-/**
+    /**
  * MusicAll - Main JavaScript
  */
 
@@ -8,9 +8,10 @@
     // Inizializzazione al caricamento del DOM
     $(document).ready(function() {
         
-        // Auto-dismiss alerts dopo 5 secondi
+        // Auto-dismiss solo flash messages (success/error temporanei)
+        // Gli alert nella pagina non spariscono automaticamente
         setTimeout(function() {
-            $('.alert:not(.alert-permanent)').fadeOut('slow');
+            $('.alert.flash-message').fadeOut('slow');
         }, 5000);
 
         // Conferma eliminazione
@@ -112,25 +113,22 @@
     // Toast notification
     window.showToast = function(message, type = 'info') {
         var bgClass = 'bg-' + type;
+        var toastId = 'toast-' + Date.now();
         var toast = `
-            <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+            <div id="${toastId}" class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
                 <div class="toast show ${bgClass} text-white" role="alert">
                     <div class="toast-header ${bgClass} text-white">
                         <strong class="me-auto">Notifica</strong>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" onclick="$('#${toastId}').remove()"></button>
                     </div>
-                    <div class="toast-body">
+                    <div class="toast-body" style="cursor: pointer;" onclick="$('#${toastId}').fadeOut(function() { $(this).remove(); })">
                         ${message}
                     </div>
                 </div>
             </div>
         `;
         $('body').append(toast);
-        setTimeout(function() {
-            $('.toast').fadeOut(function() {
-                $(this).parent().remove();
-            });
-        }, 3000);
+        // Toast non sparisce automaticamente - si chiude cliccandoci sopra o sulla X
     };
 
     // AJAX form submit

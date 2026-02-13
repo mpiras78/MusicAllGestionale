@@ -24,7 +24,12 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$action = $_GET['action'] ?? $_POST['action'] ?? 'list';
+// Se c'è solo ?id=X senza action, assume action=get
+if (isset($_GET['id']) && !isset($_GET['action']) && !isset($_POST['action'])) {
+    $action = 'get';
+} else {
+    $action = $_GET['action'] ?? $_POST['action'] ?? 'list';
+}
 
 try {
     switch ($action) {
@@ -198,6 +203,27 @@ try {
             
             if (!$evento) throw new Exception('Evento non trovato');
             
+            // Se è un recupero, carica anche i dati dell'assenza originale
+            $assenza_originale = null;
+            if ($evento->tipologia && $evento->tipologia->categoria === 'recupero') {
+                $db = \Database::getInstance()->getConnection();
+                $stmt = $db->prepare("
+                    SELECT a.data_assenza, a.tipo as causata_da
+                    FROM recuperi r
+                    INNER JOIN assenze a ON r.assenza_id = a.id
+                    WHERE r.data_recupero = ? 
+                    AND r.ora_inizio = ?
+                    AND r.allievo_id = ?
+                    LIMIT 1
+                ");
+                $stmt->execute([
+                    $evento->data_evento ? $evento->data_evento->format('Y-m-d') : null,
+                    $evento->ora_inizio,
+                    $evento->allievo_id
+                ]);
+                $assenza_originale = $stmt->fetch(PDO::FETCH_ASSOC);
+            }
+            
             // Trasforma in array per compatibilità
             $eventoArray = [
                 'id' => $evento->id,
@@ -230,6 +256,8 @@ try {
                 'created_by' => $evento->created_by,
                 'created_at' => $evento->created_at ? $evento->created_at->format('Y-m-d H:i:s') : null,
                 'updated_at' => $evento->updated_at ? $evento->updated_at->format('Y-m-d H:i:s') : null,
+                'assenza_data' => $assenza_originale['data_assenza'] ?? null,
+                'assenza_causata_da' => $assenza_originale['causata_da'] ?? null,
             ];
             
             echo json_encode([

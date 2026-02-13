@@ -444,11 +444,11 @@ include 'includes/header.php';
                                             $is_prenotazione = (strpos(strtolower($evento_slot['tipo'] ?? ''), 'pren_') === 0);
                                             
                                             if ($is_recupero && $evento_slot['allievo_id'] > 0) {
-                                                $onclick_action = "caricaInfoAllievo({$evento_slot['allievo_id']}, {$evento_slot['id']}, '" . addslashes($evento_slot['allievo']) . "', '" . addslashes($evento_slot['materia']) . "', '{$data_selezionata}'); return false.";
+                                                $onclick_action = "caricaInfoAllievo({$evento_slot['allievo_id']}, {$evento_slot['id']}, '" . addslashes($evento_slot['allievo']) . "', '" . addslashes($evento_slot['materia']) . "', '{$data_selezionata}'); return false;";
                                             } elseif ($is_prenotazione) {
-                                                $onclick_action = "mostraInfoEvento({$evento_slot['id']}, 'evento'); return false.";
+                                                $onclick_action = "mostraInfoEvento({$evento_slot['id']}); return false;";
                                             } else {
-                                                $onclick_action = "mostraInfoEvento({$evento_slot['id']}, 'evento'); return false.";
+                                                $onclick_action = "mostraInfoEvento({$evento_slot['id']}); return false;";
                                             }
                                         ?>
                                             <div class="lezione-slot tipo-<?= e($tipo_css) ?><?= $classe_annullata ?>" 
@@ -483,7 +483,7 @@ include 'includes/header.php';
                                                     <div class="lezione-header">
                                                         <i class="bi <?= $icona ?> icona-strumento"></i>
                                                         <span class="lezione-allievo">
-                                                            <?= e($evento_slot['allievo'] ?: 'Evento') ?>
+                                                            <?= e($evento_slot['allievo'] ?: ($evento_slot['docente'] ?: 'Evento')) ?>
                                                             <?php if (isset($evento_slot['confermato']) && $evento_slot['confermato'] == 0): ?>
                                                                 <i class="bi bi-clock-history text-warning" title="Da confermare"></i>
                                                             <?php endif; ?>
@@ -493,9 +493,11 @@ include 'includes/header.php';
                                                         <div class="lezione-docente">
                                                             <i class="bi bi-person-fill"></i> <?= e($evento_slot['docente']) ?>
                                                         </div>
-                                                        <div class="lezione-materia-inline">
-                                                            <?= e($evento_slot['materia']) ?>
-                                                        </div>
+                                                        <?php if ($evento_slot['materia']): ?>
+                                                            <div class="lezione-materia-inline">
+                                                                <?= e($evento_slot['materia']) ?>
+                                                            </div>
+                                                        <?php endif; ?>
                                                     </div>
                                                 <?php endif; ?>
                                                 
@@ -682,6 +684,35 @@ include 'includes/header.php';
     </div>
 </div>
 
+<!-- Modal Conferma Annullamento -->
+<div class="modal fade" id="confermaAnnullamentoModal" tabindex="-1" style="z-index: 1060;">
+    <div class="modal-dialog" style="z-index: 1060;">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle"></i> Conferma Annullamento
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3">Sei sicuro di voler annullare questo evento?</p>
+                <div class="alert alert-warning">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Attenzione:</strong> Questa azione non può essere annullata.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> No, torna indietro
+                </button>
+                <button type="button" class="btn btn-danger" id="btnConfermaAnnullamento">
+                    <i class="bi bi-trash"></i> Sì, annulla evento
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal Info Allievo -->
 <div class="modal fade" id="infoAllieviModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
@@ -743,20 +774,11 @@ include 'includes/header.php';
                     
                     <!-- Campi Prenotazione Allievi -->
                     <div id="campiAllievi" style="display: none;">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Allievo *</label>
-                                <select class="form-select" id="prenotAllievoId" name="allievo_id">
-                                    <option value="">Caricamento...</option>
-                                </select>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Materia *</label>
-                                <select class="form-select" id="prenotMateriaId" name="materia_id">
-                                    <option value="">Caricamento...</option>
-                                </select>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Allievo *</label>
+                            <select class="form-select" id="prenotAllievoId" name="allievo_id">
+                                <option value="">Caricamento...</option>
+                            </select>
                         </div>
                     </div>
                     
@@ -885,12 +907,11 @@ function cambiaTipoPrenotazione() {
 function caricaOpzioniPrenotazione() {
     const selectAllievo = document.getElementById('prenotAllievoId');
     const selectDocenteSolo = document.getElementById('prenotDocenteSoloId');
-    const selectMateria = document.getElementById('prenotMateriaId');
+    const selectTipo = document.getElementById('prenotTipo');
     
     // Mostra loading
     selectAllievo.innerHTML = '<option value="">Caricamento...</option>';
     selectDocenteSolo.innerHTML = '<option value="">Caricamento...</option>';
-    selectMateria.innerHTML = '<option value="">Caricamento...</option>';
     
     // Carica allievi
     fetch('<?= BASE_URL ?>/api_get_helpers.php?type=allievi')
@@ -929,25 +950,6 @@ function caricaOpzioniPrenotazione() {
             console.error('Errore caricamento docenti:', error);
             selectDocenteSolo.innerHTML = '<option value="">Errore caricamento</option>';
         });
-    
-    // Carica materie
-    fetch('<?= BASE_URL ?>/api_get_helpers.php?type=materie')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                let htmlMaterie = '<option value="">Seleziona materia...</option>';
-                data.data.forEach(m => {
-                    htmlMaterie += `<option value="${m.id}">${m.nome}</option>`;
-                });
-                selectMateria.innerHTML = htmlMaterie;
-            } else {
-                throw new Error(data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Errore caricamento materie:', error);
-            selectMateria.innerHTML = '<option value="">Errore caricamento</option>';
-        });
 }
 
 function salvaPrenotazione() {
@@ -985,19 +987,17 @@ function salvaPrenotazione() {
     
     // Aggiungi campi specifici per tipo
     if (tipo === 'PREN_SALA') {
-        // Prenotazione Allievi - richiede allievo e materia (NO docente)
+        // Prenotazione Allievi - richiede solo allievo (materia rimossa)
         const allieviId = formData.get('allievo_id');
-        const materiaId = formData.get('materia_id');
         
-        if (!allieviId || !materiaId) {
-            mostraToast('Errore', 'Compila tutti i campi richiesti (Allievo, Materia)', 'danger');
+        if (!allieviId) {
+            mostraToast('Errore', 'Seleziona un allievo', 'danger');
             btnSalva.disabled = false;
             btnSalva.innerHTML = '<i class="bi bi-check-circle"></i> Crea Prenotazione';
             return;
         }
         
         data.allievo_id = parseInt(allieviId);
-        data.materia_id = parseInt(materiaId);
         
     } else if (tipo === 'PREN_DOCENTE') {
         // Prenotazione Docente - richiede solo docente
@@ -1051,17 +1051,15 @@ function salvaPrenotazione() {
     // Aggiungi campi specifici per tipo con nomi corretti per API
     if (tipo === 'PREN_SALA') {
         formDataToSend.append('allievo_id_pren', data.allievo_id);
-        formDataToSend.append('materia_id', data.materia_id);
     } else if (tipo === 'PREN_DOCENTE') {
         formDataToSend.append('docente_id_pren', data.docente_id);
         formDataToSend.append('titolo', data.motivo || 'Prenotazione Docente');
     } else if (tipo === 'PREN_ESTERNO') {
-        // Per esterno, prima dobbiamo creare il socio occasionale
-        // TODO: Implementare creazione socio occasionale
-        mostraToast('Errore', 'Prenotazione esterno richiede implementazione soci occasionali', 'warning');
-        btnSalva.disabled = false;
-        btnSalva.innerHTML = '<i class="bi bi-check-circle"></i> Crea Prenotazione';
-        return;
+        // Per esterno, invia dati per creazione/utilizzo partecipante
+        formDataToSend.append('nome_esterno', data.nome_esterno);
+        formDataToSend.append('cognome_esterno', data.cognome_esterno);
+        formDataToSend.append('email_esterno', data.email_esterno);
+        formDataToSend.append('telefono_esterno', data.telefono_esterno);
     }
     
     // Invia richiesta
@@ -1101,25 +1099,74 @@ function mostraInfoEvento(eventoId) {
             if (data.success && data.data) {
                 const evt = data.data;
                 
-                // Crea contenuto modal
-                let html = `
-                    <div class="alert alert-info">
-                        <h5><i class="bi bi-calendar-event"></i> ${evt.tipologia_nome}</h5>
-                        <p class="mb-0">
-                            <strong>Data:</strong> ${new Date(evt.data_evento).toLocaleDateString('it-IT')}<br>
-                            <strong>Orario:</strong> ${evt.ora_inizio.substr(0,5)} - ${evt.ora_fine.substr(0,5)}<br>
-                            <strong>Aula:</strong> ${evt.aula_nome || 'N/D'}<br>
-                            ${evt.allievo_id && evt.docente_nome ? `<strong>Allievo:</strong> ${evt.docente_nome.split(' ').reverse().join(' ')}<br>` : ''}
-                            ${evt.docente_nome && !evt.allievo_id ? `<strong>Docente:</strong> ${evt.docente_nome}<br>` : ''}
-                            ${evt.materia_nome ? `<strong>Materia:</strong> ${evt.materia_nome}<br>` : ''}
-                            ${evt.titolo ? `<strong>Titolo:</strong> ${evt.titolo}<br>` : ''}
-                            ${evt.note ? `<strong>Note:</strong> ${evt.note}<br>` : ''}
-                            <strong>Stato:</strong> ${evt.confermato ? '<span class="badge bg-success">Confermato</span>' : '<span class="badge bg-warning">Da confermare</span>'}
-                        </p>
-                    </div>
+                // Determina se è recupero o prenotazione
+                const isRecupero = evt.tipologia_categoria === 'recupero' || evt.tipologia_nome.toLowerCase().includes('recupero');
+                const isPrenotazione = evt.tipologia_categoria === 'prenotazione' || evt.tipologia_nome.toLowerCase().includes('prenotazione');
+                
+                // Titolo modal e pulsante in base al tipo
+                let titoloModal = evt.tipologia_nome;
+                let testoPulsante = 'Annulla Evento';
+                
+                if (isRecupero) {
+                    titoloModal = 'Dettagli Recupero';
+                    testoPulsante = 'Annulla Recupero';
+                } else if (isPrenotazione) {
+                    titoloModal = 'Dettagli Prenotazione';
+                    testoPulsante = 'Annulla Prenotazione';
+                }
+                
+                // Nome partecipante (recupera da API con formato corretto)
+                let nomePartecipante = '';
+                if (evt.partecipante_nome) {
+                    nomePartecipante = evt.partecipante_nome;
+                } else if (evt.allievo_id && evt.docente_nome) {
+                    // Se allievo_id è presente, docente_nome contiene in realtà "Cognome Nome" dell'allievo
+                    nomePartecipante = evt.docente_nome;
+                } else if (evt.docente_nome) {
+                    nomePartecipante = evt.docente_nome;
+                }
+                
+                // Crea contenuto modal - FORMATO SPECIALE PER RECUPERI
+                let html = '';
+                
+                if (isRecupero) {
+                    // RECUPERI: UPPERCASE + data assenza
+                    html = `
+                        <div class="alert alert-success">
+                            <h5><i class="bi bi-calendar-check"></i> RECUPERO LEZIONE</h5>
+                            <p class="mb-0" style="text-transform: uppercase;">
+                                ${nomePartecipante ? `<strong>ALLIEVO:</strong> ${nomePartecipante}<br>` : ''}
+                                <strong>DATA RECUPERO:</strong> ${new Date(evt.data_evento).toLocaleDateString('it-IT')}<br>
+                                <strong>ORARIO:</strong> ${evt.ora_inizio.substr(0,5)} - ${evt.ora_fine.substr(0,5)}<br>
+                                <strong>AULA:</strong> ${evt.aula_nome || 'N/D'}<br>
+                                ${evt.materia_nome ? `<strong>MATERIA:</strong> ${evt.materia_nome}<br>` : ''}
+                                ${evt.assenza_data ? `<strong>ASSENZA DEL:</strong> ${new Date(evt.assenza_data).toLocaleDateString('it-IT')} 
+                                    ${evt.assenza_causata_da ? `(${evt.assenza_causata_da === 'allievo' ? 'causata da allievo' : 'causata da docente'})` : ''}<br>` : ''}
+                            </p>
+                            ${evt.note ? `<p class="mb-0 mt-2"><strong>NOTE:</strong><br>${evt.note}</p>` : ''}
+                        </div>
+                    `;
+                } else {
+                    // PRENOTAZIONI: formato standard
+                    html = `
+                        <div class="alert alert-info">
+                            <h5><i class="bi bi-calendar-event"></i> ${evt.tipologia_nome}</h5>
+                            <p class="mb-0">
+                                ${nomePartecipante ? `<strong>${evt.allievo_id ? 'Allievo' : 'Docente'}:</strong> ${nomePartecipante}<br>` : ''}
+                                <strong>Data:</strong> ${new Date(evt.data_evento).toLocaleDateString('it-IT')}<br>
+                                <strong>Orario:</strong> ${evt.ora_inizio.substr(0,5)} - ${evt.ora_fine.substr(0,5)}<br>
+                                <strong>Aula:</strong> ${evt.aula_nome || 'N/D'}<br>
+                                ${evt.materia_nome ? `<strong>Materia:</strong> ${evt.materia_nome}<br>` : ''}
+                                <strong>Stato:</strong> ${evt.confermato ? '<span class="badge bg-success">Confermato</span>' : '<span class="badge bg-warning">Da confermare</span>'}
+                            </p>
+                            ${evt.note ? `<p class="mb-0 mt-2"><strong>Note:</strong><br>${evt.note}</p>` : ''}
+                        </div>
+                    `;
+                }
+                html += `
                     <div class="d-grid gap-2">
                         <button class="btn btn-danger" onclick="annullaEvento(${eventoId})">
-                            <i class="bi bi-trash"></i> Annulla Prenotazione
+                            <i class="bi bi-trash"></i> ${testoPulsante}
                         </button>
                     </div>
                 `;
@@ -1127,7 +1174,7 @@ function mostraInfoEvento(eventoId) {
                 // Usa modal info allievo per mostrare info evento
                 const modalBody = document.getElementById('modalAllieviBody');
                 const modalNome = document.getElementById('modalAllieviNome');
-                modalNome.textContent = 'Dettagli Prenotazione';
+                modalNome.textContent = titoloModal;
                 modalBody.innerHTML = html;
                 
                 const modalElement = document.getElementById('infoAllieviModal');
@@ -1143,30 +1190,57 @@ function mostraInfoEvento(eventoId) {
 }
 
 function annullaEvento(eventoId) {
-    if (!confirm('Sei sicuro di voler annullare questa prenotazione?')) {
-        return;
-    }
+    // Memorizza evento ID per conferma
+    window.eventoIdDaAnnullare = eventoId;
     
-    fetch(`<?= BASE_URL ?>/api_annulla_prenotazione.php`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ evento_id: eventoId })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            mostraToast('Successo', 'Prenotazione annullata', 'success');
-            setTimeout(() => location.reload(), 1500);
-        } else {
-            throw new Error(data.error || 'Errore durante l\'annullamento');
-        }
-    })
-    .catch(error => {
-        mostraToast('Errore', error.message, 'danger');
-    });
+    // Apri modal conferma annullamento
+    const modalConferma = new bootstrap.Modal(document.getElementById('confermaAnnullamentoModal'));
+    modalConferma.show();
 }
+
+// Gestisci click su pulsante conferma annullamento
+document.addEventListener('DOMContentLoaded', function() {
+    const btnConferma = document.getElementById('btnConfermaAnnullamento');
+    if (btnConferma) {
+        btnConferma.addEventListener('click', function() {
+            const eventoId = window.eventoIdDaAnnullare;
+            if (!eventoId) return;
+            
+            // Disabilita pulsante
+            const originalHTML = btnConferma.innerHTML;
+            btnConferma.disabled = true;
+            btnConferma.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Annullamento...';
+            
+            fetch(`<?= BASE_URL ?>/api_annulla_prenotazione.php`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ evento_id: eventoId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Chiudi entrambe le modal
+                    const modalConferma = bootstrap.Modal.getInstance(document.getElementById('confermaAnnullamentoModal'));
+                    const modalInfo = bootstrap.Modal.getInstance(document.getElementById('infoAllieviModal'));
+                    if (modalConferma) modalConferma.hide();
+                    if (modalInfo) modalInfo.hide();
+                    
+                    mostraToast('Successo', 'Prenotazione annullata', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    throw new Error(data.error || 'Errore durante l\'annullamento');
+                }
+            })
+            .catch(error => {
+                mostraToast('Errore', error.message, 'danger');
+                btnConferma.disabled = false;
+                btnConferma.innerHTML = originalHTML;
+            });
+        });
+    }
+});
 
 function caricaInfoAllievo(allieviId, lezioneId = null, nomeAllievo = '', materiaLezione = '', dataLezione = '') {
     const modalBody = document.getElementById('modalAllieviBody');
@@ -1376,6 +1450,12 @@ function chiudiModalInfoAllievo() {
             backdrop.remove();
         }
     }
+    
+    // FIX: Rimuovi tutti i backdrop rimasti (bug Bootstrap)
+    document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
 }
 
 function segnaAssenza() {
