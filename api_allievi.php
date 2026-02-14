@@ -73,12 +73,14 @@ try {
                 throw new Exception('Nome e cognome sono obbligatori');
             }
             
-            // Aggiorna allievo
-            $result = $allieviCtrl->updateAllievo($data['id'], $data);
-            
-            if (!$result) {
-                throw new Exception('Errore durante l\'aggiornamento dell\'allievo');
+            // Verifica che allievo esista
+            $allievo = $allieviCtrl->getAllievoById($data['id']);
+            if (!$allievo) {
+                throw new Exception('Allievo non trovato');
             }
+            
+            // Aggiorna allievo (può restituire false se nessuna riga modificata, ma non è errore)
+            $allieviCtrl->updateAllievo($data['id'], $data);
             
             echo json_encode([
                 'success' => true,
