@@ -106,7 +106,7 @@ $stmt = $db->prepare("
         t.colore_border,
         COALESCE(a.cognome || ' ' || a.nome, '') as allievo,
         COALESCE(a.id, 0) as allievo_id,
-        COALESCE(d.cognome || ' ' || d.nome, '') as docente,
+        COALESCE(d.cognome || ' ' || d.nome, se.cognome || ' ' || se.nome, '') as docente,
         COALESCE(m.nome, e.titolo, 'Prenotazione') as materia,
         au.nome as aula,
         e.note,
@@ -117,6 +117,7 @@ $stmt = $db->prepare("
     INNER JOIN tipologie_evento t ON e.tipologia_id = t.id
     LEFT JOIN allievi a ON e.allievo_id = a.id
     LEFT JOIN docenti d ON e.docente_id = d.id
+    LEFT JOIN soci_esterni se ON e.socio_occasionale_id = se.id
     LEFT JOIN materie m ON e.materia_id = m.id
     LEFT JOIN aule au ON e.aula_id = au.id
     WHERE e.data_evento = ?
@@ -439,17 +440,8 @@ include 'includes/header.php';
                                                 }
                                             }
                                             
-                                            // Determina azione click: recuperi vanno su info allievo, prenotazioni su info evento
-                                            $is_recupero = (strpos(strtolower($evento_slot['tipo'] ?? ''), 'recupero') !== false || strtolower($evento_slot['tipo'] ?? '') === 'lez_recupero');
-                                            $is_prenotazione = (strpos(strtolower($evento_slot['tipo'] ?? ''), 'pren_') === 0);
-                                            
-                                            if ($is_recupero && $evento_slot['allievo_id'] > 0) {
-                                                $onclick_action = "caricaInfoAllievo({$evento_slot['allievo_id']}, {$evento_slot['id']}, '" . addslashes($evento_slot['allievo']) . "', '" . addslashes($evento_slot['materia']) . "', '{$data_selezionata}'); return false;";
-                                            } elseif ($is_prenotazione) {
-                                                $onclick_action = "mostraInfoEvento({$evento_slot['id']}); return false;";
-                                            } else {
-                                                $onclick_action = "mostraInfoEvento({$evento_slot['id']}); return false;";
-                                            }
+                                            // TUTTI gli eventi (recuperi E prenotazioni) vanno su mostraInfoEvento
+                                            $onclick_action = "mostraInfoEvento({$evento_slot['id']}); return false;";
                                         ?>
                                             <div class="lezione-slot tipo-<?= e($tipo_css) ?><?= $classe_annullata ?>" 
                                                  data-lezione-id="<?= $evento_slot['id'] ?>"
@@ -798,24 +790,38 @@ include 'includes/header.php';
                     
                     <!-- Campi Prenotazione Esterno -->
                     <div id="campiEsterno" style="display: none;">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Nome *</label>
-                                <input type="text" class="form-control" id="prenotNomeEsterno" name="nome_esterno" placeholder="Nome">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Cognome *</label>
-                                <input type="text" class="form-control" id="prenotCognomeEsterno" name="cognome_esterno" placeholder="Cognome">
-                            </div>
+                        <!-- Select Socio Esistente -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Socio Esterno *</label>
+                            <select class="form-select" id="prenotSocioEsternoId" name="socio_esterno_id" onchange="toggleNuovoSocioEsterno()">
+                                <option value="">Caricamento...</option>
+                            </select>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Email</label>
-                                <input type="email" class="form-control" id="prenotEmailEsterno" name="email_esterno" placeholder="email@example.com">
+                        
+                        <!-- Campi Nuovo Socio (nascosti di default) -->
+                        <div id="campiNuovoSocioEsterno" style="display: none;">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> Inserisci i dati del nuovo socio esterno
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Telefono</label>
-                                <input type="tel" class="form-control" id="prenotTelefonoEsterno" name="telefono_esterno" placeholder="+39 ...">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Nome *</label>
+                                    <input type="text" class="form-control" id="prenotNomeEsterno" name="nome_esterno" placeholder="Nome">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Cognome *</label>
+                                    <input type="text" class="form-control" id="prenotCognomeEsterno" name="cognome_esterno" placeholder="Cognome">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="prenotEmailEsterno" name="email_esterno" placeholder="email@example.com">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Telefono</label>
+                                    <input type="tel" class="form-control" id="prenotTelefonoEsterno" name="telefono_esterno" placeholder="+39 ...">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -904,14 +910,32 @@ function cambiaTipoPrenotazione() {
     }
 }
 
+function toggleNuovoSocioEsterno() {
+    const selectSocio = document.getElementById('prenotSocioEsternoId');
+    const campiNuovo = document.getElementById('campiNuovoSocioEsterno');
+    
+    // Se selezionato "NUOVO", mostra campi
+    if (selectSocio.value === 'NUOVO') {
+        campiNuovo.style.display = 'block';
+    } else {
+        campiNuovo.style.display = 'none';
+        // Pulisci campi quando si seleziona un socio esistente
+        document.getElementById('prenotNomeEsterno').value = '';
+        document.getElementById('prenotCognomeEsterno').value = '';
+        document.getElementById('prenotEmailEsterno').value = '';
+        document.getElementById('prenotTelefonoEsterno').value = '';
+    }
+}
+
 function caricaOpzioniPrenotazione() {
     const selectAllievo = document.getElementById('prenotAllievoId');
     const selectDocenteSolo = document.getElementById('prenotDocenteSoloId');
-    const selectTipo = document.getElementById('prenotTipo');
+    const selectSocioEsterno = document.getElementById('prenotSocioEsternoId');
     
     // Mostra loading
     selectAllievo.innerHTML = '<option value="">Caricamento...</option>';
     selectDocenteSolo.innerHTML = '<option value="">Caricamento...</option>';
+    selectSocioEsterno.innerHTML = '<option value="">Caricamento...</option>';
     
     // Carica allievi
     fetch('<?= BASE_URL ?>/api_get_helpers.php?type=allievi')
@@ -949,6 +973,26 @@ function caricaOpzioniPrenotazione() {
         .catch(error => {
             console.error('Errore caricamento docenti:', error);
             selectDocenteSolo.innerHTML = '<option value="">Errore caricamento</option>';
+        });
+    
+    // Carica soci esterni
+    fetch('<?= BASE_URL ?>/api_get_soci_esterni.php')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                let htmlSoci = '<option value="">Seleziona socio...</option>';
+                data.data.forEach(s => {
+                    htmlSoci += `<option value="${s.id}">${s.cognome} ${s.nome}</option>`;
+                });
+                htmlSoci += '<option value="NUOVO">➕ Nuovo Socio Esterno</option>';
+                selectSocioEsterno.innerHTML = htmlSoci;
+            } else {
+                throw new Error(data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Errore caricamento soci esterni:', error);
+            selectSocioEsterno.innerHTML = '<option value="">Errore caricamento</option>';
         });
 }
 
@@ -1014,21 +1058,36 @@ function salvaPrenotazione() {
         data.motivo = formData.get('motivo_docente') || '';
         
     } else if (tipo === 'PREN_ESTERNO') {
-        // Prenotazione Esterno - richiede nome e cognome, opzionali email/telefono
-        const nomeEsterno = formData.get('nome_esterno');
-        const cognomeEsterno = formData.get('cognome_esterno');
+        // Prenotazione Esterno - può essere socio esistente o nuovo
+        const socioEsternoId = formData.get('socio_esterno_id');
         
-        if (!nomeEsterno || nomeEsterno.trim() === '' || !cognomeEsterno || cognomeEsterno.trim() === '') {
-            mostraToast('Errore', 'Inserisci nome e cognome', 'danger');
+        if (!socioEsternoId) {
+            mostraToast('Errore', 'Seleziona un socio esterno', 'danger');
             btnSalva.disabled = false;
             btnSalva.innerHTML = '<i class="bi bi-check-circle"></i> Crea Prenotazione';
             return;
         }
         
-        data.nome_esterno = nomeEsterno.trim();
-        data.cognome_esterno = cognomeEsterno.trim();
-        data.email_esterno = formData.get('email_esterno') || '';
-        data.telefono_esterno = formData.get('telefono_esterno') || '';
+        if (socioEsternoId === 'NUOVO') {
+            // Nuovo socio - valida nome e cognome
+            const nomeEsterno = formData.get('nome_esterno');
+            const cognomeEsterno = formData.get('cognome_esterno');
+            
+            if (!nomeEsterno || nomeEsterno.trim() === '' || !cognomeEsterno || cognomeEsterno.trim() === '') {
+                mostraToast('Errore', 'Inserisci nome e cognome del nuovo socio', 'danger');
+                btnSalva.disabled = false;
+                btnSalva.innerHTML = '<i class="bi bi-check-circle"></i> Crea Prenotazione';
+                return;
+            }
+            
+            data.nome_esterno = nomeEsterno.trim();
+            data.cognome_esterno = cognomeEsterno.trim();
+            data.email_esterno = formData.get('email_esterno') || '';
+            data.telefono_esterno = formData.get('telefono_esterno') || '';
+        } else {
+            // Socio esistente - passa solo ID
+            data.socio_esterno_id = parseInt(socioEsternoId);
+        }
     }
     
     // Converti tipo in tipologia_id (ID reali dal database)
@@ -1076,10 +1135,10 @@ function salvaPrenotazione() {
             if (modal) modal.hide();
             
             // Mostra toast successo
-            mostraToast('Successo', 'Prenotazione creata correttamente', 'success');
-            
-            // Ricarica pagina dopo breve pausa
-            setTimeout(() => location.reload(), 1500);
+                mostraToast('Successo', 'Prenotazione creata correttamente', 'success');
+                
+                // Ricarica pagina dopo breve pausa (SENZA attendere chiusura toast)
+                setTimeout(() => location.reload(), 800);
         } else {
             throw new Error(result.error || 'Errore durante il salvataggio');
         }
@@ -1630,6 +1689,20 @@ document.addEventListener('DOMContentLoaded', function() {
             if (allieviSpan) {
                 allieviSpan.click();
             }
+        });
+    });
+    
+    // FIX: Pulisci backdrop e body quando QUALSIASI modal si chiude
+    const allModals = document.querySelectorAll('.modal');
+    allModals.forEach(modal => {
+        modal.addEventListener('hidden.bs.modal', function() {
+            // Rimuovi TUTTI i backdrop rimasti
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+            
+            // Ripristina body
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
         });
     });
 });

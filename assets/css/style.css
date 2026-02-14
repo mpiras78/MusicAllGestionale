@@ -259,6 +259,13 @@ body {
     padding-right: 60px; /* Spazio per badge orario */
 }
 
+/* Header prenotazioni - padding extra per icona */
+.tipo-prenotazione-allievi .lezione-header,
+.tipo-prenotazione-docente .lezione-header,
+.tipo-prenotazione-esterno .lezione-header {
+    padding-left: 30px; /* Spazio per icona tipo prenotazione */
+}
+
 .icona-strumento {
     font-size: 1.2rem;
     color: #ff6b35;
