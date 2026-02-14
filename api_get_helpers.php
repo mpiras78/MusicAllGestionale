@@ -83,6 +83,12 @@ try {
             $allieviCtrl = new AllieviController();
             $data = $allieviCtrl->getAllieviConLezioni();
             break;
+
+        case 'docenti_con_lezioni':
+            // Usa DocentiController per ottenere docenti con statistiche lezioni
+            $docentiCtrl = new DocentiController();
+            $data = $docentiCtrl->getDocentiConLezioni();
+            break;
             
         default:
             throw new Exception('Tipo non valido');

@@ -14,7 +14,7 @@
         </div>
         <div class="card-body">
             <div class="d-grid gap-2">
-                <a href="<?= BASE_URL ?>/allievi/add.php" class="btn btn-outline-primary">
+                <a href="<?= BASE_URL ?>/gestione_allievi.php" class="btn btn-outline-primary">
                     <i class="bi bi-person-plus"></i> Aggiungi Nuovo Allievo
                 </a>
                 <a href="<?= BASE_URL ?>/lezioni/add.php" class="btn btn-outline-success">
