@@ -144,7 +144,8 @@ class AllieviController {
      */
     public function getStatisticheLezioni() {
         $totale = $this->countAllievi(true);
-        $con_lezioni = count($this->getAllieviConLezioni());
+        $allievi_con_lezioni = $this->getAllieviConLezioni();
+        $con_lezioni = is_array($allievi_con_lezioni) ? count($allievi_con_lezioni) : 0;
         
         return [
             'totale' => $totale,
