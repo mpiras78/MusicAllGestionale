@@ -77,7 +77,7 @@ body {
 
 .calendario-table td {
     width: auto;
-    min-width: 120px;
+    min-width: 60px;
 }
 
 .calendario-table th {
@@ -210,13 +210,12 @@ body {
     border-left: 3px solid #fdd835;
 }
 
-/* Icona tipo prenotazione */
+/* Icona tipo prenotazione - INLINE con testo */
 .prenotazione-tipo-icon {
-    position: absolute;
-    top: 4px;
-    left: 4px;
     font-size: 1.1rem;
-    z-index: 5;
+    margin-right: 4px;
+    display: inline-block;
+    vertical-align: middle;
 }
 
 .prenotazione-tipo-icon.tipo-allievi {
@@ -260,11 +259,11 @@ body {
     padding-right: 60px; /* Spazio per badge orario */
 }
 
-/* Header prenotazioni - padding extra per icona */
+/* Header prenotazioni - NO padding extra, icona inline */
 .tipo-prenotazione-allievi .lezione-header,
 .tipo-prenotazione-docente .lezione-header,
 .tipo-prenotazione-esterno .lezione-header {
-    padding-left: 30px; /* Spazio per icona tipo prenotazione */
+    padding-left: 0; /* Icona inline, no spazio extra */
 }
 
 .icona-strumento {

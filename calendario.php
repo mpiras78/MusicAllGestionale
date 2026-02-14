@@ -10,6 +10,7 @@ $current_page = 'calendario';
 // Inizializza Controllers
 $lezioniCtrl = new LezioniController();
 $auleCtrl = new AuleController();
+$eventiCtrl = new EventiController();
 
 // Gestione settimana - Supporta sia GET che POST
 $settimana_offset = isset($_POST['settimana']) ? (int)$_POST['settimana'] : (int)get('settimana', 0);
@@ -92,40 +93,8 @@ if ($auth->hasRole('docente') && !DOCENTE_VIEW_ALL_CALENDAR) {
     $lezioni = $lezioniCtrl->getLezioniPerGiorno($giorno_selezionato, true, $data_selezionata);
 }
 
-// NUOVO: Carica anche eventi specifici da eventi_calendario
-$db = Database::getInstance()->getConnection();
-$stmt = $db->prepare("
-    SELECT 
-        e.id,
-        e.ora_inizio,
-        e.ora_fine,
-        e.aula_id,
-        t.codice as tipo,
-        t.nome as tipologia_nome,
-        t.colore_bg,
-        t.colore_border,
-        COALESCE(a.cognome || ' ' || a.nome, '') as allievo,
-        COALESCE(a.id, 0) as allievo_id,
-        COALESCE(d.cognome || ' ' || d.nome, se.cognome || ' ' || se.nome, '') as docente,
-        COALESCE(m.nome, e.titolo, 'Prenotazione') as materia,
-        au.nome as aula,
-        e.note,
-        e.attivo as attiva,
-        e.confermato,
-        'evento' as source_type
-    FROM eventi_calendario e
-    INNER JOIN tipologie_evento t ON e.tipologia_id = t.id
-    LEFT JOIN allievi a ON e.allievo_id = a.id
-    LEFT JOIN docenti d ON e.docente_id = d.id
-    LEFT JOIN soci_esterni se ON e.socio_occasionale_id = se.id
-    LEFT JOIN materie m ON e.materia_id = m.id
-    LEFT JOIN aule au ON e.aula_id = au.id
-    WHERE e.data_evento = ?
-    AND e.attivo = 1
-    AND t.attiva = 1
-");
-$stmt->execute([$data_selezionata]);
-$eventi = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Carica eventi specifici da eventi_calendario tramite controller
+$eventi = $eventiCtrl->getEventiPerData($data_selezionata);
 
 // Aggiungi marker source_type alle lezioni ricorrenti
 foreach ($lezioni as &$lez) {
@@ -329,8 +298,7 @@ include 'includes/header.php';
                         <?php foreach ($slots as $slot_index => $slot): ?>
                             <tr>
                                 <td class="time-col text-center">
-                                    <strong><?= $slot['inizio'] ?></strong><br>
-                                    <small class="text-muted"><?= $slot['fine'] ?></small>
+                                    <strong><?= $slot['inizio'] ?></strong>
                                 </td>
                                 <?php foreach ($aule as $aula): ?>
                                     <?php
@@ -487,9 +455,6 @@ include 'includes/header.php';
                                                  title="<?= e($evento_slot['allievo'] ?: $evento_slot['docente'] ?: 'Prenotazione') ?>"
                                                  style="cursor: pointer;"
                                                  onclick="<?= $onclick_action ?>">
-                                                <?php if ($icona_prenotazione): ?>
-                                                    <i class="<?= $icona_prenotazione ?> prenotazione-tipo-icon <?= $classe_icona_pren ?>"></i>
-                                                <?php endif; ?>
                                                 <div class="lezione-orario-badge">
                                                     <?= date('H:i', strtotime($evento_slot['ora_inizio'])) ?>-<?= date('H:i', strtotime($evento_slot['ora_fine'])) ?>
                                                 </div>
@@ -497,7 +462,12 @@ include 'includes/header.php';
                                                 <?php if ($is_prenotazione): ?>
                                                     <!-- Layout uniforme per PRENOTAZIONI -->
                                                     <div class="lezione-header">
-                                                        <span class="lezione-allievo">PRENOTAZIONE</span>
+                                                        <span class="lezione-allievo">
+                                                            <?php if ($icona_prenotazione): ?>
+                                                                <i class="<?= $icona_prenotazione ?> prenotazione-tipo-icon <?= $classe_icona_pren ?>"></i>
+                                                            <?php endif; ?>
+                                                            PRENOTAZIONE
+                                                        </span>
                                                         <?php if (isset($evento_slot['confermato']) && $evento_slot['confermato'] == 0): ?>
                                                             <i class="bi bi-clock-history text-warning" title="Da confermare"></i>
                                                         <?php endif; ?>
