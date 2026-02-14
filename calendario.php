@@ -209,47 +209,39 @@ include 'includes/header.php';
                 <?php endforeach; ?>
             </ul>
             
-            <!-- Legenda -->
-            <div class="mt-2 mb-1">
-                <h6 class="mb-1" style="font-size: 0.9rem;"><i class="bi bi-info-circle"></i> Legenda</h6>
-                <div class="row g-1">
-                    <div class="col-auto">
+            <!-- Contatore + Legenda sulla stessa riga -->
+            <div class="mt-2 mb-1 d-flex justify-content-between align-items-center">
+                <!-- Contatore a sinistra -->
+                <div>
+                    <span class="badge bg-primary" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                        <i class="bi bi-calendar-check"></i> <?= count($lezioni) ?> lezioni programmate
+                    </span>
+                </div>
+                
+                <!-- Legenda a destra -->
+                <div>
+                    <h6 class="mb-1" style="font-size: 0.9rem;"><i class="bi bi-info-circle"></i> Legenda</h6>
+                    <div class="d-flex flex-wrap gap-1">
                         <span class="badge" style="background-color: #fff5f0; color: #333; border-left: 3px solid #ff6b35;">
                             Regolare
                         </span>
-                    </div>
-                    <div class="col-auto">
                         <span class="badge" style="background-color: #e3f2fd; color: #333; border-left: 3px solid #2196f3;">
                             Custom
                         </span>
-                    </div>
-                    <div class="col-auto">
                         <span class="badge" style="background-color: #e8f5e9; color: #333; border-left: 3px solid #4caf50;">
                             Recupero
                         </span>
-                    </div>
-                    <div class="col-auto">
                         <span class="badge" style="background-color: #fff9c4; color: #333; border-left: 3px solid #fdd835;">
                             <i class="bi bi-calendar-plus"></i> Prenotazioni
                         </span>
-                    </div>
-                    <div class="col-auto">
                         <span class="badge" style="background-color: #f3e5f5; color: #333; border-left: 3px solid #9c27b0;">
                             Laboratorio
                         </span>
-                    </div>
-                    <div class="col-auto">
                         <span class="badge" style="background-color: #e0e0e0; color: #757575; border-left: 3px solid #9e9e9e;">
                             <i class="bi bi-x-circle"></i> Festività/Assenza
                         </span>
                     </div>
                 </div>
-            </div>
-            
-            <div class="mt-2 mb-1 text-center">
-                <span class="badge bg-primary" style="font-size: 0.85rem;">
-                    <?= count($lezioni) ?> lezioni programmate
-                </span>
             </div>
         </div>
     </div>
