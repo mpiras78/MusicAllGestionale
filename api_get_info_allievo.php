@@ -28,7 +28,7 @@ try {
     
     // Dati allievo
     $allievo = $db->queryOne("
-        SELECT id, cognome, nome, email, telefono
+        SELECT id, cognome, nome, email, telefono, data_nascita, indirizzo, note
         FROM allievi
         WHERE id = ?
     ", [$allievo_id]);
@@ -118,7 +118,10 @@ try {
             'cognome' => $allievo['cognome'],
             'nome' => $allievo['nome'],
             'email' => $allievo['email'],
-            'telefono' => $allievo['telefono']
+            'telefono' => $allievo['telefono'],
+            'data_nascita' => $allievo['data_nascita'],
+            'indirizzo' => $allievo['indirizzo'],
+            'note' => $allievo['note']
         ],
         'statistiche' => [
             'assenze' => [

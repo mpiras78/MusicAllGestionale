@@ -94,7 +94,7 @@ class AllieviController {
     public function updateAllievo($id, $data) {
         $sql = "UPDATE allievi SET 
             nome = ?, cognome = ?, data_nascita = ?, email = ?, 
-            telefono = ?, indirizzo = ?, note = ?, updated_at = datetime('now')
+            telefono = ?, indirizzo = ?, note = ?
             WHERE id = ?";
         
         return $this->db->execute($sql, [
@@ -114,7 +114,7 @@ class AllieviController {
      */
     public function disattivaAllievo($id) {
         return $this->db->execute(
-            "UPDATE allievi SET attivo = 0, updated_at = datetime('now') WHERE id = ?",
+            "UPDATE allievi SET attivo = 0 WHERE id = ?",
             [$id]
         );
     }
@@ -128,8 +128,8 @@ class AllieviController {
                 a.id,
                 a.cognome || ' ' || a.nome as nome_completo,
                 COUNT(DISTINCT l.id) as num_lezioni,
-                GROUP_CONCAT(DISTINCT m.nome, ', ') as materie,
-                GROUP_CONCAT(DISTINCT l.giorno_settimana, ', ') as giorni
+                GROUP_CONCAT(DISTINCT m.nome) as materie,
+                GROUP_CONCAT(DISTINCT l.giorno_settimana) as giorni
             FROM allievi a
             JOIN lezioni l ON a.id = l.allievo_id
             JOIN materie m ON l.materia_id = m.id

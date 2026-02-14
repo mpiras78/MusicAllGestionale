@@ -560,10 +560,12 @@ function visualizzaAllievo(id) {
                             <div class="col-md-6"><strong>Email:</strong> ${data.allievo.email || '-'}</div>
                             <div class="col-md-6"><strong>Telefono:</strong> ${data.allievo.telefono || '-'}</div>
                         </div>
+                        ${data.allievo.data_nascita || data.allievo.indirizzo ? `
                         <div class="row mt-2">
-                            <div class="col-md-6"><strong>Data Nascita:</strong> ${data.allievo.data_nascita || '-'}</div>
-                            <div class="col-md-6"><strong>Indirizzo:</strong> ${data.allievo.indirizzo || '-'}</div>
+                            ${data.allievo.data_nascita ? `<div class="col-md-6"><strong>Data Nascita:</strong> ${new Date(data.allievo.data_nascita).toLocaleDateString('it-IT')}</div>` : ''}
+                            ${data.allievo.indirizzo ? `<div class="col-md-6"><strong>Indirizzo:</strong> ${data.allievo.indirizzo}</div>` : ''}
                         </div>
+                        ` : ''}
                         ${data.allievo.note ? `<div class="row mt-2"><div class="col-12"><strong>Note:</strong> ${data.allievo.note}</div></div>` : ''}
                     </div>
                 </div>

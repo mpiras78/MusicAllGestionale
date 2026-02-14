@@ -79,7 +79,7 @@ try {
                 throw new Exception('Allievo non trovato');
             }
             
-            // Aggiorna allievo (può restituire false se nessuna riga modificata, ma non è errore)
+            // Aggiorna allievo
             $allieviCtrl->updateAllievo($data['id'], $data);
             
             echo json_encode([
