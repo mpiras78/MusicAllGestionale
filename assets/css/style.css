@@ -66,7 +66,10 @@ body {
 
 /* Calendario Settimanale */
 .calendario-container {
+    max-height: calc(100vh - 400px); /* Altezza viewport - spazio per header/nav */
+    overflow-y: auto;
     overflow-x: auto;
+    position: relative;
 }
 
 .calendario-table {
@@ -85,8 +88,9 @@ body {
     top: 0;
     background-color: white;
     z-index: 10;
-    padding: 4px; /* Ridotto da 0.5rem (8px) a 4px */
+    padding: 4px;
     vertical-align: middle;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Ombra per evidenziare header fisso */
 }
 
 .calendario-table .time-col {

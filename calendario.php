@@ -290,7 +290,7 @@ include 'includes/header.php';
                         <?php foreach ($slots as $slot_index => $slot): ?>
                             <tr>
                                 <td class="time-col text-center">
-                                    <strong><?= $slot['inizio'] ?></strong>
+                                    <strong><?= substr($slot['inizio'], 0, 5) ?></strong>
                                 </td>
                                 <?php foreach ($aule as $aula): ?>
                                     <?php
