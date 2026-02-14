@@ -65,7 +65,7 @@
                             <i class="bi bi-gear"></i> Gestione
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="<?= BASE_URL ?>/allievi/index.php">
+                            <li><a class="dropdown-item <?= ($current_page ?? '') == 'allievi' ? 'active' : '' ?>" href="<?= BASE_URL ?>/gestione_allievi.php">
                                 <i class="bi bi-people"></i> Allievi
                             </a></li>
                             <li><a class="dropdown-item" href="<?= BASE_URL ?>/docenti/index.php">
