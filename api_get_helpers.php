@@ -78,6 +78,12 @@ try {
                 });
             break;
             
+        case 'allievi_con_lezioni':
+            // Usa AllieviController per ottenere allievi con statistiche lezioni
+            $allieviCtrl = new AllieviController();
+            $data = $allieviCtrl->getAllieviConLezioni();
+            break;
+            
         default:
             throw new Exception('Tipo non valido');
     }
