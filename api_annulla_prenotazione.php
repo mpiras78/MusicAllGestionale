@@ -52,9 +52,10 @@ try {
         throw new Exception('Evento non trovato');
     }
     
-    // Verifica che sia una prenotazione o recupero (non lezione ricorrente)
-    if ($evento['categoria'] !== 'prenotazione' && $evento['categoria'] !== 'recupero') {
-        throw new Exception('Questo evento non può essere annullato da qui. Usa la funzione "Segna Assenza" per le lezioni ricorrenti.');
+    // Verifica che l'evento sia nella tabella eventi_calendario (non lezioni ricorrenti)
+    // Se è in eventi_calendario, può essere annullato (prenotazione, recupero, evento custom)
+    if (!$evento) {
+        throw new Exception('Questo evento non può essere annullato');
     }
     
     // Annulla prenotazione (disattiva)

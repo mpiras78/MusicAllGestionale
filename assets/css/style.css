@@ -85,7 +85,7 @@ body {
     top: 0;
     background-color: white;
     z-index: 10;
-    padding: 0.5rem;
+    padding: 4px; /* Ridotto da 0.5rem (8px) a 4px */
     vertical-align: middle;
 }
 
@@ -104,7 +104,7 @@ body {
     color: white;
     font-weight: 600;
     text-align: center;
-    padding: 0.75rem;
+    padding: 4px; /* Ridotto da 0.75rem (12px) a 4px */
 }
 
 /* Colori specifici per aule */
@@ -135,7 +135,8 @@ body {
 .calendario-cell {
     border: 1px solid #dee2e6;
     padding: 0;
-    height: 60px;
+    height: 10px; /* Ultra-compatto */
+    min-height: 10px;
     vertical-align: top;
     position: relative;
     width: 140px;
@@ -148,10 +149,10 @@ body {
 }
 
 .lezione-slot {
-    padding: 0.35rem;
-    margin: 2px;
-    border-radius: 4px;
-    font-size: 0.7rem;
+    padding: 2px; /* Minimo padding in px */
+    margin: 0px; /* Nessun margin */
+    border-radius: 2px;
+    font-size: 9px; /* Font minimo leggibile */
     cursor: pointer;
     transition: all 0.2s;
     height: 100%;

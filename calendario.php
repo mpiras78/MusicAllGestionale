@@ -144,15 +144,13 @@ foreach ($lezioni as $lezione) {
     $calendario[$aula_id][$ora] = $lezione;
 }
 
-// Funzione per calcolare quanti slot occupa una lezione
-function calcolaRowspan($ora_inizio, $ora_fine, $slots) {
-    $count = 0;
-    foreach ($slots as $slot) {
-        if ($slot['inizio'] >= $ora_inizio && $slot['inizio'] < $ora_fine) {
-            $count++;
-        }
-    }
-    return max(1, $count);
+// Funzione per calcolare quanti slot da 15' occupa una lezione
+function calcolaRowspan($ora_inizio, $ora_fine) {
+    $start = strtotime($ora_inizio);
+    $end = strtotime($ora_fine);
+    $durata_minuti = ($end - $start) / 60;
+    $rowspan = ceil($durata_minuti / 15); // Ogni slot = 15 minuti
+    return max(1, $rowspan);
 }
 
 // Mappa icone strumenti (Bootstrap Icons)
@@ -190,9 +188,9 @@ include 'includes/header.php';
     </div>
 
     <!-- Navigazione Settimana -->
-    <div class="card mb-4">
-        <div class="card-body py-2">
-            <div class="d-flex align-items-center justify-content-between mb-3">
+    <div class="card mb-2">
+        <div class="card-body py-1" style="padding-left: 8px; padding-right: 8px;">
+            <div class="d-flex align-items-center justify-content-between mb-1">
                 <form method="POST" style="display: inline;">
                     <input type="hidden" name="settimana" value="<?= $settimana_offset - 1 ?>">
                     <input type="hidden" name="giorno" value="<?= $giorno_selezionato ?>">
@@ -243,9 +241,9 @@ include 'includes/header.php';
             </ul>
             
             <!-- Legenda -->
-            <div class="mt-3 mb-2">
-                <h6 class="mb-2"><i class="bi bi-info-circle"></i> Legenda</h6>
-                <div class="row g-2">
+            <div class="mt-2 mb-1">
+                <h6 class="mb-1" style="font-size: 0.9rem;"><i class="bi bi-info-circle"></i> Legenda</h6>
+                <div class="row g-1">
                     <div class="col-auto">
                         <span class="badge" style="background-color: #fff5f0; color: #333; border-left: 3px solid #ff6b35;">
                             Regolare
@@ -279,8 +277,8 @@ include 'includes/header.php';
                 </div>
             </div>
             
-            <div class="mt-3 text-center">
-                <span class="badge bg-primary fs-6">
+            <div class="mt-2 mb-1 text-center">
+                <span class="badge bg-primary" style="font-size: 0.85rem;">
                     <?= count($lezioni) ?> lezioni programmate
                 </span>
             </div>
@@ -321,14 +319,54 @@ include 'includes/header.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($slots as $slot): ?>
+                        <?php 
+                        // Array per tracciare celle occupate da rowspan: [aula_id][slot_index] = rowspan_rimanente
+                        $celle_occupate = [];
+                        foreach ($aule as $aula) {
+                            $celle_occupate[$aula['id']] = [];
+                        }
+                        ?>
+                        <?php foreach ($slots as $slot_index => $slot): ?>
                             <tr>
                                 <td class="time-col text-center">
                                     <strong><?= $slot['inizio'] ?></strong><br>
                                     <small class="text-muted"><?= $slot['fine'] ?></small>
                                 </td>
                                 <?php foreach ($aule as $aula): ?>
+                                    <?php
+                                    // Verifica se cella è occupata da rowspan precedente
+                                    if (isset($celle_occupate[$aula['id']][$slot_index]) && $celle_occupate[$aula['id']][$slot_index] > 0) {
+                                        // Decrementa contatore e salta rendering
+                                        $celle_occupate[$aula['id']][$slot_index]--;
+                                        continue; // Salta questa <td>, è coperta da rowspan
+                                    }
+                                    
+                                    // Calcola rowspan per lezione che inizia in questo slot
+                                    $rowspan = 1;
+                                    $lezione_trovata = false;
+                                    
+                                    if (isset($calendario[$aula['id']])) {
+                                        $slot_start = strtotime($slot['inizio']);
+                                        $slot_end = strtotime($slot['fine']);
+                                        
+                                        foreach ($calendario[$aula['id']] as $ora => $lez) {
+                                            $lezione_start = strtotime($ora);
+                                            if ($lezione_start >= $slot_start && $lezione_start < $slot_end) {
+                                                // Lezione inizia in questo slot - calcola rowspan
+                                                $rowspan = calcolaRowspan($lez['ora_inizio'], $lez['ora_fine']);
+                                                $lezione_trovata = true;
+                                                
+                                                // Marca celle successive come occupate
+                                                for ($i = 1; $i < $rowspan; $i++) {
+                                                    $celle_occupate[$aula['id']][$slot_index + $i] = $rowspan - $i;
+                                                }
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    ?>
                                     <td class="calendario-cell calendario-cell-hoverable" 
+                                        rowspan="<?= $rowspan ?>"
                                         data-aula-id="<?= $aula['id'] ?>" 
                                         data-aula-nome="<?= e($aula['nome']) ?>"
                                         data-ora="<?= $slot['inizio'] ?>"

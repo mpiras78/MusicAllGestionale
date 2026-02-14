@@ -19,7 +19,7 @@ define('DB_PATH', __DIR__ . '/../database/musicall.sqlite');
 
 // Configurazione Applicazione
 define('APP_NAME', 'MusicAll');
-define('APP_VERSION', '1.1.0');
+define('APP_VERSION', '2.2.0');
 define('BASE_URL', 'http://localhost:8000');
 define('BASE_PATH', dirname(__DIR__));
 
@@ -76,7 +76,7 @@ define('GIORNI_SETTIMANA', [
 // Orari
 define('ORA_INIZIO_SCUOLA', '09:15');
 define('ORA_FINE_SCUOLA', '22:00');
-define('DURATA_SLOT_DEFAULT', 45); // minuti
+define('DURATA_SLOT_DEFAULT', 15); // minuti (granularità del calendario)
 
 // Modalità Debug
 define('DEBUG_MODE', true);
