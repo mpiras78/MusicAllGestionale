@@ -105,12 +105,29 @@ unset($lez);
 // Unisci lezioni ricorrenti + eventi specifici
 $lezioni = array_merge($lezioni, $eventi);
 
-// Organizza lezioni per aula e ora
+// Organizza lezioni per aula (array di tutte le lezioni per aula)
 $calendario = [];
 foreach ($lezioni as $lezione) {
     $aula_id = $lezione['aula_id'];
-    $ora = $lezione['ora_inizio'];
-    $calendario[$aula_id][$ora] = $lezione;
+    if (!isset($calendario[$aula_id])) {
+        $calendario[$aula_id] = [];
+    }
+    $calendario[$aula_id][] = $lezione;
+}
+
+// LOG: Debug array calendario per aula Piano
+$log_file = __DIR__ . '/tests/caso3_debug.log';
+$aula_piano_id = 2; // AULA PIANO
+if (isset($calendario[$aula_piano_id]) && $data_selezionata == '2026-02-10') {
+    $log_msg = "\n=== ARRAY CALENDARIO PER AULA PIANO (ID $aula_piano_id) ===\n";
+    $log_msg .= "Numero elementi: " . count($calendario[$aula_piano_id]) . "\n\n";
+    foreach ($calendario[$aula_piano_id] as $idx => $elem) {
+        $log_msg .= "[$idx] " . ($elem['source_type'] == 'evento' ? 'EVENTO' : 'LEZIONE') . " ID {$elem['id']}: ";
+        $log_msg .= "{$elem['ora_inizio']}-{$elem['ora_fine']} ";
+        $log_msg .= "(" . ($elem['allievo'] ?? 'N/D') . ")\n";
+    }
+    $log_msg .= "\n";
+    file_put_contents($log_file, $log_msg, FILE_APPEND);
 }
 
 // Funzione per calcolare quanti slot da 15' occupa una lezione
@@ -296,31 +313,75 @@ include 'includes/header.php';
                                     <?php
                                     // Verifica se cella è occupata da rowspan precedente
                                     if (isset($celle_occupate[$aula['id']][$slot_index]) && $celle_occupate[$aula['id']][$slot_index] > 0) {
+                                        // LOG: Slot saltato per rowspan
+                                        $log_file = __DIR__ . '/tests/caso3_debug.log';
+                                        $log_msg = "SLOT SALTATO (rowspan): {$slot['inizio']} in aula {$aula['nome']}\n";
+                                        file_put_contents($log_file, $log_msg, FILE_APPEND);
+                                        
                                         // Decrementa contatore e salta rendering
                                         $celle_occupate[$aula['id']][$slot_index]--;
                                         continue; // Salta questa <td>, è coperta da rowspan
                                     }
                                     
-                                    // Calcola rowspan per lezione che inizia in questo slot
+                                    // Calcola rowspan per lezione/evento che inizia in questo slot
                                     $rowspan = 1;
                                     $lezione_trovata = false;
+                                    $evento_trovato_in_slot = null;
                                     
                                     if (isset($calendario[$aula['id']])) {
                                         $slot_start = strtotime($slot['inizio']);
                                         $slot_end = strtotime($slot['fine']);
                                         
-                                        foreach ($calendario[$aula['id']] as $ora => $lez) {
-                                            $lezione_start = strtotime($ora);
-                                            if ($lezione_start >= $slot_start && $lezione_start < $slot_end) {
-                                                // Lezione inizia in questo slot - calcola rowspan
-                                                $rowspan = calcolaRowspan($lez['ora_inizio'], $lez['ora_fine']);
-                                                $lezione_trovata = true;
-                                                
-                                                // Marca celle successive come occupate
-                                                for ($i = 1; $i < $rowspan; $i++) {
-                                                    $celle_occupate[$aula['id']][$slot_index + $i] = $rowspan - $i;
+                                        // PRIORITÀ: cerca PRIMA eventi (per calcolare il loro rowspan corretto)
+                                        foreach ($calendario[$aula['id']] as $lez) {
+                                            if (isset($lez['source_type']) && $lez['source_type'] == 'evento') {
+                                                $evento_start = strtotime($lez['ora_inizio']);
+                                                if ($evento_start >= $slot_start && $evento_start < $slot_end) {
+                                                    $evento_trovato_in_slot = $lez;
+                                                    $rowspan = calcolaRowspan($lez['ora_inizio'], $lez['ora_fine']);
+                                                    break;
                                                 }
-                                                break;
+                                            }
+                                        }
+                                        
+                                        // Se NON c'è evento, cerca lezione che inizia qui
+                                        if (!$evento_trovato_in_slot) {
+                                            foreach ($calendario[$aula['id']] as $lez) {
+                                                $lezione_start = strtotime($lez['ora_inizio']);
+                                                if ($lezione_start >= $slot_start && $lezione_start < $slot_end) {
+                                                    if (!isset($lez['source_type']) || $lez['source_type'] != 'evento') {
+                                                        // Lezione inizia in questo slot
+                                                        // FIX: Se lezione annullata, rowspan=1 (non occupa slot successivi)
+                                                        $is_annullata_lez = (isset($lez['attiva']) && $lez['attiva'] == 0) || $giorno_festivita;
+                                                        $rowspan = $is_annullata_lez ? 1 : calcolaRowspan($lez['ora_inizio'], $lez['ora_fine']);
+                                                        $lezione_trovata = true;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        
+                                        // Marca celle successive come occupate, MA solo se NON c'è un evento che inizia lì
+                                        for ($i = 1; $i < $rowspan; $i++) {
+                                            $next_slot_index = $slot_index + $i;
+                                            $next_slot_start = strtotime($slots[$next_slot_index]['inizio']);
+                                            $next_slot_end = strtotime($slots[$next_slot_index]['fine']);
+                                            
+                                            // Controlla se c'è un evento che inizia in quel slot
+                                            $evento_inizia_li = false;
+                                            foreach ($calendario[$aula['id']] as $lez) {
+                                                if (isset($lez['source_type']) && $lez['source_type'] == 'evento') {
+                                                    $evt_start = strtotime($lez['ora_inizio']);
+                                                    if ($evt_start >= $next_slot_start && $evt_start < $next_slot_end) {
+                                                        $evento_inizia_li = true;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            
+                                            // Marca come occupato SOLO se NON c'è evento
+                                            if (!$evento_inizia_li) {
+                                                $celle_occupate[$aula['id']][$next_slot_index] = $rowspan - $i;
                                             }
                                         }
                                     }
@@ -333,24 +394,54 @@ include 'includes/header.php';
                                         data-giorno="<?= $giorno_selezionato ?>"
                                         data-data="<?= $data_selezionata ?>">
                                         <?php
-                                        // Trova lezione che INIZIA in questo slot o prima della fine dello slot
+                                        // Trova lezione/evento per questo slot
+                                        // IMPORTANTE: Cerca eventi sovrapposti in TUTTA la durata della lezione che inizia qui
                                         $lezione_slot = null;
                                         $evento_slot = null;
                                         if (isset($calendario[$aula['id']])) {
                                             $slot_start = strtotime($slot['inizio']);
                                             $slot_end = strtotime($slot['fine']);
                                             
-                                            foreach ($calendario[$aula['id']] as $ora => $lez) {
-                                                $lezione_start = strtotime($ora);
-                                                // La lezione inizia nello slot se:
-                                                // - inizia esattamente all'inizio dello slot
-                                                // - inizia dopo l'inizio ma prima della fine dello slot
-                                                if ($lezione_start >= $slot_start && $lezione_start < $slot_end) {
-                                                    // Separa lezioni ricorrenti da eventi
-                                                    if (isset($lez['source_type']) && $lez['source_type'] == 'evento') {
+                                            // LOG: Debug slot corrente
+                                            $log_file = __DIR__ . '/tests/caso3_debug.log';
+                                            
+                                            // FILTRA solo lezioni/eventi che hanno relazione con questo slot
+                                            $elementi_rilevanti = array_filter($calendario[$aula['id']], function($lez) use ($slot_start, $slot_end) {
+                                                $lez_start = strtotime($lez['ora_inizio']);
+                                                $lez_end = strtotime($lez['ora_fine']);
+                                                // FIX: usa <= per includere eventi che iniziano ESATTAMENTE alla fine dello slot
+                                                return ($lez_start <= $slot_end && $lez_end > $slot_start);
+                                            });
+                                            
+                                            if (count($elementi_rilevanti) > 0) {
+                                                $num_elementi = count($elementi_rilevanti);
+                                                $log_msg = "DEBUG Slot: {$slot['inizio']} in aula {$aula['nome']} ($num_elementi elementi)\n";
+                                                file_put_contents($log_file, $log_msg, FILE_APPEND);
+                                            }
+                                            
+                                            // PRIORITÀ: Cerca PRIMA eventi, POI lezioni
+                                            // Se evento inizia qui, mostra solo l'evento (ignora lezione annullata)
+                                            foreach ($elementi_rilevanti as $lez) {
+                                                if (isset($lez['source_type']) && $lez['source_type'] == 'evento') {
+                                                    $evento_start = strtotime($lez['ora_inizio']);
+                                                    if ($evento_start >= $slot_start && $evento_start < $slot_end) {
                                                         $evento_slot = $lez;
-                                                    } else {
-                                                        $lezione_slot = $lez;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            
+                                            // Solo se NON c'è evento, cerca lezione
+                                            if (!$evento_slot) {
+                                                foreach ($elementi_rilevanti as $lez) {
+                                                    $lezione_start = strtotime($lez['ora_inizio']);
+                                                    $inizia_in_slot = ($lezione_start >= $slot_start && $lezione_start < $slot_end);
+                                                    
+                                                    if (!isset($lez['source_type']) || $lez['source_type'] != 'evento') {
+                                                        if ($inizia_in_slot) {
+                                                            $lezione_slot = $lez;
+                                                            break;
+                                                        }
                                                     }
                                                 }
                                             }
@@ -361,19 +452,31 @@ include 'includes/header.php';
                                             $icona = getIconaMateria($lezione_slot['materia']);
                                             // Determina se lezione è annullata (attiva = 0 O giorno festività)
                                             $is_annullata = (isset($lezione_slot['attiva']) && $lezione_slot['attiva'] == 0) || $giorno_festivita;
-                                            $classe_annullata = $is_annullata ? ' lezione-annullata' : '';
-                                            $motivo_annullamento = '';
-                                            if ($is_annullata) {
-                                                if ($giorno_festivita) {
-                                                    $motivo_annullamento = ' (' . $giorno_festivita['nome'] . ')';
-                                                } elseif (isset($lezione_slot['attiva']) && $lezione_slot['attiva'] == 0) {
-                                                    $motivo_annullamento = ' (ANNULLATA)';
-                                                }
-                                            }
+                                            
+                                            if ($is_annullata):
+                                                // Lezione ANNULLATA: mostra solo icona piccola + pulsante +
+                                                $motivo = $giorno_festivita ? $giorno_festivita['nome'] : 'Assenza';
+                                                $tooltip = e($lezione_slot['allievo']) . ' - ' . e($lezione_slot['materia']) . ' (' . $motivo . ')';
                                         ?>
-                                            <div class="lezione-slot tipo-<?= e($lezione_slot['tipo']) ?><?= $classe_annullata ?>" 
+                                                <!-- Icona lezione annullata piccola in alto a sinistra -->
+                                                <div style="position: absolute; top: 5px; left: 5px; z-index: 10;">
+                                                    <i class="bi bi-calendar-x text-muted" 
+                                                       style="font-size: 1.2rem; opacity: 0.5;" 
+                                                       title="<?= $tooltip ?>"></i>
+                                                </div>
+                                                
+                                                <!-- Slot disponibile per prenotazione -->
+                                                <div class="empty-slot-add" 
+                                                     onclick="apriModalNuovaPrenotazione(<?= $aula['id'] ?>, '<?= e($aula['nome']) ?>', '<?= $slot['inizio'] ?>', '<?= $giorno_selezionato ?>', '<?= $data_selezionata ?>', '<?= $lezione_slot['ora_inizio'] ?>', '<?= $lezione_slot['ora_fine'] ?>')">
+                                                    <i class="bi bi-plus-circle"></i>
+                                                </div>
+                                        <?php
+                                            else:
+                                                // Lezione ATTIVA: mostra card completa
+                                        ?>
+                                            <div class="lezione-slot tipo-<?= e($lezione_slot['tipo']) ?>" 
                                                  data-lezione-id="<?= $lezione_slot['id'] ?>"
-                                                 title="<?= e($lezione_slot['allievo']) ?> - <?= e($lezione_slot['materia']) ?><?= $motivo_annullamento ?>">
+                                                 title="<?= e($lezione_slot['allievo']) ?> - <?= e($lezione_slot['materia']) ?>">
                                                 <div class="lezione-orario-badge">
                                                     <?= date('H:i', strtotime($lezione_slot['ora_inizio'])) ?>-<?= date('H:i', strtotime($lezione_slot['ora_fine'])) ?>
                                                 </div>
@@ -395,16 +498,12 @@ include 'includes/header.php';
                                                         <?= e($lezione_slot['materia']) ?>
                                                     </div>
                                                 </div>
-                                                
-                                                <?php if ($is_annullata): ?>
-                                                    <!-- Lezione annullata = slot libero → mostra + -->
-                                                    <div class="empty-slot-add slot-libero-assenza" 
-                                                         onclick="apriModalNuovaPrenotazione(<?= $aula['id'] ?>, '<?= e($aula['nome']) ?>', '<?= $slot['inizio'] ?>', '<?= $giorno_selezionato ?>', '<?= $data_selezionata ?>')">
-                                                        <i class="bi bi-plus-circle"></i>
-                                                    </div>
-                                                <?php endif; ?>
                                             </div>
-                                        <?php elseif ($evento_slot && !$lezione_slot): ?>
+                                        <?php
+                                            endif; // Fine if ($is_annullata)
+                                        endif; // Fine if ($lezione_slot && !$evento_slot)
+                                        ?>
+                                        <?php if ($evento_slot && !$lezione_slot): ?>
                                             <!-- Caso 2: Solo evento (senza lezione) - CLICCABILE -->
                                             <?php
                                             $icona = getIconaMateria($evento_slot['materia']);
@@ -451,7 +550,7 @@ include 'includes/header.php';
                                                     <?= date('H:i', strtotime($evento_slot['ora_inizio'])) ?>-<?= date('H:i', strtotime($evento_slot['ora_fine'])) ?>
                                                 </div>
                                                 
-                                                <?php if ($is_prenotazione): ?>
+                                            <?php if ($is_prenotazione): ?>
                                                     <!-- Layout uniforme per PRENOTAZIONI -->
                                                     <div class="lezione-header">
                                                         <span class="lezione-allievo">
@@ -467,7 +566,7 @@ include 'includes/header.php';
                                                     <div class="lezione-info-row">
                                                         <div class="lezione-docente">
                                                             <i class="bi bi-person-fill"></i> 
-                                                            <?= e($evento_slot['allievo'] ?: $evento_slot['docente'] ?: 'Esterno') ?>
+                                                            <?= e($evento_slot['allievo'] ?: $evento_slot['docente'] ?: 'Partecipante') ?>
                                                         </div>
                                                     </div>
                                                 <?php else: ?>
@@ -501,8 +600,28 @@ include 'includes/header.php';
                                             </div>
                                         
                                         <?php elseif ($lezione_slot && $evento_slot): ?>
-                                            <!-- Caso 3: Lezione annullata + Evento sovrapposto -->
+                                            <!-- Caso 3: Evento sopra lezione annullata - SOLO ICONA per lezione annullata -->
                                             <?php
+                                            // LOG: Caso 3 rilevato
+                                            $log_msg = "\n=== CASO 3 RILEVATO ===\n";
+                                            $log_msg .= "Data: {$data_selezionata}, Aula: {$aula['nome']}, Slot: {$slot['inizio']}\n";
+                                            $log_msg .= "Lezione: " . json_encode([
+                                                'id' => $lezione_slot['id'],
+                                                'allievo' => $lezione_slot['allievo'],
+                                                'materia' => $lezione_slot['materia'],
+                                                'ora_inizio' => $lezione_slot['ora_inizio'],
+                                                'ora_fine' => $lezione_slot['ora_fine'],
+                                                'attiva' => $lezione_slot['attiva'] ?? 'N/D'
+                                            ]) . "\n";
+                                            $log_msg .= "Evento: " . json_encode([
+                                                'id' => $evento_slot['id'],
+                                                'tipo' => $evento_slot['tipo'] ?? 'N/D',
+                                                'allievo' => $evento_slot['allievo'] ?? 'N/D',
+                                                'ora_inizio' => $evento_slot['ora_inizio'],
+                                                'ora_fine' => $evento_slot['ora_fine']
+                                            ]) . "\n\n";
+                                            file_put_contents($log_file, $log_msg, FILE_APPEND);
+                                            
                                             $icona_lez = getIconaMateria($lezione_slot['materia']);
                                             $is_annullata_lez = (isset($lezione_slot['attiva']) && $lezione_slot['attiva'] == 0) || $giorno_festivita;
                                             
@@ -510,6 +629,7 @@ include 'includes/header.php';
                                             $tipo_css_evt = 'regolare';
                                             $icona_prenotazione_evt = '';
                                             $classe_icona_pren_evt = '';
+                                            $is_prenotazione_evt = false;
                                             if (isset($evento_slot['tipo'])) {
                                                 $tipo_lower = strtolower($evento_slot['tipo']);
                                                 if (strpos($tipo_lower, 'recupero') !== false) {
@@ -518,67 +638,82 @@ include 'includes/header.php';
                                                     $tipo_css_evt = 'prenotazione-allievi';
                                                     $icona_prenotazione_evt = 'bi-mortarboard';
                                                     $classe_icona_pren_evt = 'tipo-allievi';
+                                                    $is_prenotazione_evt = true;
                                                 } elseif (strpos($tipo_lower, 'pren_docente') !== false) {
                                                     $tipo_css_evt = 'prenotazione-docente';
                                                     $icona_prenotazione_evt = 'bi-person-workspace';
                                                     $classe_icona_pren_evt = 'tipo-docente';
+                                                    $is_prenotazione_evt = true;
                                                 } elseif (strpos($tipo_lower, 'pren_esterno') !== false) {
                                                     $tipo_css_evt = 'prenotazione-esterno';
                                                     $icona_prenotazione_evt = 'bi-person-x';
                                                     $classe_icona_pren_evt = 'tipo-esterno';
+                                                    $is_prenotazione_evt = true;
                                                 }
                                             }
+                                            
+                                            // Info tooltip lezione annullata
+                                            $tooltip_annullata = e($lezione_slot['allievo']) . ' - ' . e($lezione_slot['materia']) . ' (ANNULLATA)';
                                         ?>
-                                            <!-- Lezione annullata (sfondo, 100%) -->
-                                            <div class="lezione-slot lezione-annullata" 
-                                                 style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 1;">
-                                                <div class="lezione-orario-badge">
-                                                    <?= date('H:i', strtotime($lezione_slot['ora_inizio'])) ?>-<?= date('H:i', strtotime($lezione_slot['ora_fine'])) ?>
-                                                </div>
-                                                <div class="lezione-header">
-                                                    <i class="bi <?= $icona_lez ?> icona-strumento"></i>
-                                                    <span class="lezione-allievo"><?= e($lezione_slot['allievo']) ?></span>
-                                                </div>
-                                                <div class="lezione-info-row">
-                                                    <div class="lezione-docente">
-                                                        <i class="bi bi-person-fill"></i> <?= e($lezione_slot['docente']) ?>
-                                                    </div>
-                                                    <div class="lezione-materia-inline">
-                                                        <?= e($lezione_slot['materia']) ?>
-                                                    </div>
-                                                </div>
+                                            <!-- Piccola icona lezione annullata in alto a sinistra -->
+                                            <div class="lezione-annullata-indicator" 
+                                                 title="<?= $tooltip_annullata ?>">
+                                                <i class="bi bi-x-circle-fill"></i>
                                             </div>
                                             
-                                            <!-- Evento sovrapposto (primo piano, 80%) - CLICCABILE -->
-                                            <div class="lezione-slot tipo-<?= e($tipo_css_evt) ?> slot-sovrapposto" 
+                                            <!-- Evento occupa TUTTO lo spazio - CLICCABILE (SENZA classe slot-sovrapposto) -->
+                                            <div class="lezione-slot tipo-<?= e($tipo_css_evt) ?>"
                                                  data-lezione-id="<?= $evento_slot['id'] ?>"
                                                  data-evento-id="<?= $evento_slot['id'] ?>"
-                                                 title="<?= e($evento_slot['allievo'] ?: 'Prenotazione') ?> - <?= e($evento_slot['materia']) ?>"
+                                                 title="<?= e($evento_slot['allievo'] ?: ($evento_slot['docente'] ?: 'Prenotazione')) ?>"
                                                  style="cursor: pointer;"
                                                  onclick="mostraInfoEvento(<?= $evento_slot['id'] ?>); return false;">
-                                                <?php if ($icona_prenotazione_evt): ?>
-                                                    <i class="<?= $icona_prenotazione_evt ?> prenotazione-tipo-icon <?= $classe_icona_pren_evt ?>"></i>
-                                                <?php endif; ?>
                                                 <div class="lezione-orario-badge">
                                                     <?= date('H:i', strtotime($evento_slot['ora_inizio'])) ?>-<?= date('H:i', strtotime($evento_slot['ora_fine'])) ?>
                                                 </div>
-                                                <div class="lezione-header">
-                                                    <i class="bi <?= $icona_evt ?> icona-strumento"></i>
-                                                    <span class="lezione-allievo">
-                                                        <?= e($evento_slot['allievo'] ?: 'Prenotazione') ?>
+                                                
+                                                <?php if ($is_prenotazione_evt): ?>
+                                                    <!-- Layout uniforme per PRENOTAZIONI -->
+                                                    <div class="lezione-header">
+                                                        <span class="lezione-allievo">
+                                                            <?php if ($icona_prenotazione_evt): ?>
+                                                                <i class="<?= $icona_prenotazione_evt ?> prenotazione-tipo-icon <?= $classe_icona_pren_evt ?>"></i>
+                                                            <?php endif; ?>
+                                                            PRENOTAZIONE
+                                                        </span>
                                                         <?php if (isset($evento_slot['confermato']) && $evento_slot['confermato'] == 0): ?>
                                                             <i class="bi bi-clock-history text-warning" title="Da confermare"></i>
                                                         <?php endif; ?>
-                                                    </span>
-                                                </div>
-                                                <div class="lezione-info-row">
-                                                    <div class="lezione-docente">
-                                                        <i class="bi bi-person-fill"></i> <?= e($evento_slot['docente']) ?>
                                                     </div>
-                                                    <div class="lezione-materia-inline">
-                                                        <?= e($evento_slot['materia']) ?>
+                                                    <div class="lezione-info-row">
+                                                        <div class="lezione-docente">
+                                                            <i class="bi bi-person-fill"></i> 
+                                                            <?= e($evento_slot['allievo'] ?: $evento_slot['docente'] ?: 'Esterno') ?>
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                <?php else: ?>
+                                                    <!-- Layout standard per RECUPERI e altri eventi -->
+                                                    <div class="lezione-header">
+                                                        <i class="bi <?= $icona_evt ?> icona-strumento"></i>
+                                                        <span class="lezione-allievo">
+                                                            <?= e($evento_slot['allievo'] ?: ($evento_slot['docente'] ?: 'Evento')) ?>
+                                                            <?php if (isset($evento_slot['confermato']) && $evento_slot['confermato'] == 0): ?>
+                                                                <i class="bi bi-clock-history text-warning" title="Da confermare"></i>
+                                                            <?php endif; ?>
+                                                        </span>
+                                                    </div>
+                                                    <div class="lezione-info-row">
+                                                        <div class="lezione-docente">
+                                                            <i class="bi bi-person-fill"></i> <?= e($evento_slot['docente']) ?>
+                                                        </div>
+                                                        <?php if ($evento_slot['materia']): ?>
+                                                            <div class="lezione-materia-inline">
+                                                                <?= e($evento_slot['materia']) ?>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                                
                                                 <?php if ($evento_slot['note']): ?>
                                                     <div class="lezione-note-badge">
                                                         <i class="bi bi-sticky" title="<?= e($evento_slot['note']) ?>"></i>
@@ -753,6 +888,15 @@ include 'includes/header.php';
                     <input type="hidden" id="prenotGiorno" name="giorno">
                     <input type="hidden" id="prenotData" name="data">
                     
+                    <!-- Select Ora Inizio (visibile solo per lezioni annullate con più slot) -->
+                    <div id="selectOraContainer" style="display: none;" class="mb-3">
+                        <label class="form-label fw-bold">Orario Inizio *</label>
+                        <select class="form-select" id="prenotOraSelect" onchange="document.getElementById('prenotOra').value = this.value">
+                            <option value="">Seleziona orario...</option>
+                        </select>
+                        <small class="text-muted">Seleziona l'orario di inizio desiderato tra gli slot disponibili</small>
+                    </div>
+                    
                     <!-- Tipo Prenotazione -->
                     <div class="mb-3">
                         <label class="form-label fw-bold">Tipo Prenotazione *</label>
@@ -860,7 +1004,7 @@ include 'includes/header.php';
 <script>
 let currentLezioneData = null;
 
-function apriModalNuovaPrenotazione(aulaId, aulaNome, ora, giorno, data) {
+function apriModalNuovaPrenotazione(aulaId, aulaNome, ora, giorno, data, oraInizioLezione = null, oraFineLezione = null) {
     // Popola info slot
     const giornoNice = {
         'lunedi': 'Lunedì',
@@ -871,14 +1015,44 @@ function apriModalNuovaPrenotazione(aulaId, aulaNome, ora, giorno, data) {
         'sabato': 'Sabato'
     };
     
-    document.getElementById('slotInfo').textContent = 
-        `Aula: ${aulaNome} - ${giornoNice[giorno]} ${new Date(data).toLocaleDateString('it-IT')} alle ${ora}`;
+    // Se viene da lezione annullata, mostra range orario disponibile
+    let infoText = `Aula: ${aulaNome} - ${giornoNice[giorno]} ${new Date(data).toLocaleDateString('it-IT')}`;
+    if (oraInizioLezione && oraFineLezione) {
+        infoText += ` - Slot disponibile: ${oraInizioLezione.substr(0,5)}-${oraFineLezione.substr(0,5)}`;
+    } else {
+        infoText += ` alle ${ora}`;
+    }
+    
+    document.getElementById('slotInfo').textContent = infoText;
     
     // Popola campi hidden
     document.getElementById('prenotAulaId').value = aulaId;
-    document.getElementById('prenotOra').value = ora;
     document.getElementById('prenotGiorno').value = giorno;
     document.getElementById('prenotData').value = data;
+    
+    // Gestisci select ora di inizio
+    const selectOraContainer = document.getElementById('selectOraContainer');
+    const selectOra = document.getElementById('prenotOraSelect');
+    
+    if (oraInizioLezione && oraFineLezione) {
+        // Mostra select con slot da 15 minuti
+        selectOraContainer.style.display = 'block';
+        document.getElementById('prenotOra').value = ''; // Sarà popolato da select
+        
+        // Genera opzioni slot da 15 minuti
+        const slotOptions = generaSlotOrari(oraInizioLezione, oraFineLezione);
+        let htmlOptions = '<option value="">Seleziona orario...</option>';
+        slotOptions.forEach(slot => {
+            htmlOptions += `<option value="${slot}">${slot.substr(0,5)}</option>`;
+        });
+        selectOra.innerHTML = htmlOptions;
+        selectOra.required = true;
+    } else {
+        // Nascondi select, usa ora passata
+        selectOraContainer.style.display = 'none';
+        document.getElementById('prenotOra').value = ora;
+        selectOra.required = false;
+    }
     
     // Carica select allievi, docenti, materie
     caricaOpzioniPrenotazione();
@@ -887,6 +1061,22 @@ function apriModalNuovaPrenotazione(aulaId, aulaNome, ora, giorno, data) {
     const modalElement = document.getElementById('nuovaPrenotazioneModal');
     const modal = new bootstrap.Modal(modalElement);
     modal.show();
+}
+
+// Genera slot orari da 15 minuti tra ora inizio e fine
+function generaSlotOrari(oraInizio, oraFine) {
+    const slots = [];
+    let current = new Date(`2000-01-01 ${oraInizio}`);
+    const end = new Date(`2000-01-01 ${oraFine}`);
+    
+    while (current < end) {
+        const hours = current.getHours().toString().padStart(2, '0');
+        const minutes = current.getMinutes().toString().padStart(2, '0');
+        slots.push(`${hours}:${minutes}:00`);
+        current.setMinutes(current.getMinutes() + 15);
+    }
+    
+    return slots;
 }
 
 function cambiaTipoPrenotazione() {

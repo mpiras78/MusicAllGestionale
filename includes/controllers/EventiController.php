@@ -31,7 +31,11 @@ class EventiController {
                 t.colore_border,
                 COALESCE(a.cognome || ' ' || a.nome, '') as allievo,
                 COALESCE(a.id, 0) as allievo_id,
-                COALESCE(d.cognome || ' ' || d.nome, se.cognome || ' ' || se.nome, '') as docente,
+                CASE
+                    WHEN d.id IS NOT NULL THEN d.cognome || ' ' || d.nome
+                    WHEN se.id IS NOT NULL THEN se.cognome || ' ' || se.nome
+                    ELSE ''
+                END as docente,
                 COALESCE(m.nome, e.titolo, 'Prenotazione') as materia,
                 au.nome as aula,
                 e.note,
