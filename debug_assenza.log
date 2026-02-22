@@ -90,3 +90,36 @@ Dati assenza: {"lezione_id":87,"data":"2026-02-02","causata_da":"docente","neces
 Chiamata creaAssenza...
 Assenza creata ID: 1
 ✅ Assenza salvata con successo!
+2026-02-15 19:08:49 - Richiesta ricevuta
+Parametri: {"lezione_id":103,"data_lezione":"2026-02-09","causale":"allievo","note":"malattia"}
+Inizializzazione controllers...
+AssenzeController OK
+LezioniController OK
+Recupero lezione ID: 103
+Lezione trovata: {"id":103,"allievo_id":121,"docente_id":5,"materia_id":7,"aula_id":3,"giorno_settimana":"lunedi","ora_inizio":"14:00","ora_fine":"15:00","tipo":"regolare","attiva":1,"data_inizio":null,"data_fine":null,"note":null,"created_at":"2026-02-04 04:37:43","allievo":"LUCCHETTA Sara","docente":"BUONO Eleonora","materia":"Canto Pop","aula":"AULA MAGNA"}
+Dati assenza: {"lezione_id":103,"data":"2026-02-09","causata_da":"allievo","necessita_recupero":0,"note_annullamento":"malattia"}
+Chiamata creaAssenza...
+Assenza creata ID: 1
+✅ Assenza salvata con successo!
+2026-02-15 19:29:35 - Richiesta ricevuta
+Parametri: {"lezione_id":113,"data_lezione":"2026-02-10","causale":"allievo","note":""}
+Inizializzazione controllers...
+AssenzeController OK
+LezioniController OK
+Recupero lezione ID: 113
+Lezione trovata: {"id":113,"allievo_id":30,"docente_id":17,"materia_id":2,"aula_id":2,"giorno_settimana":"martedi","ora_inizio":"18:15","ora_fine":"19:15","tipo":"regolare","attiva":1,"data_inizio":null,"data_fine":null,"note":null,"created_at":"2026-02-04 04:37:43","allievo":"BRITTI Giulia","docente":"PACCHIAROTTI Alice","materia":"Pianoforte","aula":"AULA PIANO"}
+Dati assenza: {"lezione_id":113,"data":"2026-02-10","causata_da":"allievo","necessita_recupero":0,"note_annullamento":""}
+Chiamata creaAssenza...
+Assenza creata ID: 1
+✅ Assenza salvata con successo!
+2026-02-16 20:07:24 - Richiesta ricevuta
+Parametri: {"lezione_id":89,"data_lezione":"2026-01-26","causale":"allievo","note":"malattia"}
+Inizializzazione controllers...
+AssenzeController OK
+LezioniController OK
+Recupero lezione ID: 89
+Lezione trovata: {"id":89,"allievo_id":102,"docente_id":12,"materia_id":7,"aula_id":1,"giorno_settimana":"lunedi","ora_inizio":"14:15","ora_fine":"15:15","tipo":"regolare","attiva":1,"data_inizio":null,"data_fine":null,"note":null,"created_at":"2026-02-04 04:37:43","allievo":"GIBERTI Gabriele","docente":"LORITO Giorgio","materia":"Canto Pop","aula":"AULA MIDI"}
+Dati assenza: {"lezione_id":89,"data":"2026-01-26","causata_da":"allievo","necessita_recupero":0,"note_annullamento":"malattia"}
+Chiamata creaAssenza...
+Assenza creata ID: 1
+✅ Assenza salvata con successo!

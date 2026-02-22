@@ -81,12 +81,28 @@ try {
         throw new Exception('Assenza già registrata per questa lezione');
     }
     
+    // Determina se necessita recupero secondo la policy:
+    // - Assenze docente: sempre da recuperare
+    // - Assenze allievo: prime 3 assenze da recuperare, dalla 4a in poi a discrezione
+    $necessita_recupero = 1; // Default: sempre da recuperare
+    
+    if ($causale === 'allievo') {
+        // Conta assenze precedenti dell'allievo per questa lezione nell'anno scolastico corrente
+        $contatori = $assenzeCtrl->getContatoriAnnoScolastico($lezione['allievo_id'], $lezione_id);
+        $num_assenze_precedenti = $contatori['assenze'];
+        
+        // Se ha già 3+ assenze, dalla quarta in poi è a discrezione
+        if ($num_assenze_precedenti >= 3) {
+            $necessita_recupero = 0;
+        }
+    }
+    
     // Crea assenza - usa nomi parametri corretti per AssenzeController
     $assenza_data = [
         'lezione_id' => $lezione_id,
         'data' => $data_lezione,  // AssenzeController si aspetta 'data', non 'data_assenza'
         'causata_da' => $causale,  // AssenzeController si aspetta 'causata_da', non 'causale'
-        'necessita_recupero' => ($causale === 'docente') ? 1 : 0,
+        'necessita_recupero' => $necessita_recupero,
         'note_annullamento' => $note
     ];
     

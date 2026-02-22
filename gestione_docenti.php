@@ -16,6 +16,10 @@ $stats = $docentiCtrl->getStatisticheLezioni();
 // Ottieni tutti i docenti
 $docenti = $docentiCtrl->getDocenti(true);
 
+// Ottieni tutte le materie per il select
+use MusicAll\Models\Materia;
+$materie = Materia::where('attiva', true)->orderBy('nome')->get();
+
 include 'includes/header.php';
 ?>
 
@@ -109,10 +113,11 @@ include 'includes/header.php';
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <select class="form-select" id="filtroLezioni">
-                        <option value="tutti">Tutti i docenti</option>
-                        <option value="con_lezioni">Solo con lezioni</option>
-                        <option value="senza_lezioni">Solo senza lezioni</option>
+                    <select class="form-select" id="filtroMateria">
+                        <option value="">Tutte le materie</option>
+                        <?php foreach ($materie as $materia): ?>
+                            <option value="<?= e($materia->nome) ?>"><?= e($materia->nome) ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -139,6 +144,7 @@ include 'includes/header.php';
                         <tr>
                             <th>Nome</th>
                             <th>Cognome</th>
+                            <th>Materia</th>
                             <th>Email</th>
                             <th>Telefono</th>
                             <th class="text-center">Lezioni</th>
@@ -148,7 +154,7 @@ include 'includes/header.php';
                     <tbody>
                         <?php if (empty($docenti)): ?>
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-4">
+                                <td colspan="7" class="text-center text-muted py-4">
                                     <i class="bi bi-inbox" style="font-size: 2rem;"></i>
                                     <p class="mb-0 mt-2">Nessun docente trovato</p>
                                 </td>
@@ -158,12 +164,22 @@ include 'includes/header.php';
                                 <tr data-docente-id="<?= $docente['id'] ?>" data-has-lezioni="0">
                                     <td><?= e($docente['nome']) ?></td>
                                     <td><?= e($docente['cognome']) ?></td>
+                                    <td>
+                                        <?php if (!empty($docente['materie'])): ?>
+                                            <span class="badge bg-info text-dark"><?= e($docente['materie']) ?></span>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td><?= e($docente['email'] ?: '-') ?></td>
                                     <td><?= e($docente['telefono'] ?: '-') ?></td>
                                     <td class="text-center">
                                         <span class="badge bg-secondary lezioni-badge">-</span>
                                     </td>
                                     <td class="text-center">
+                                        <button class="btn btn-sm btn-info" onclick="visualizzaDettagli(<?= $docente['id'] ?>)" title="Visualizza Dettagli">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
                                         <button class="btn btn-sm btn-warning" onclick="modificaDocente(<?= $docente['id'] ?>)" title="Modifica">
                                             <i class="bi bi-pencil"></i>
                                         </button>
@@ -214,8 +230,13 @@ include 'includes/header.php';
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Indirizzo</label>
-                        <input type="text" class="form-control" name="indirizzo">
+                        <label class="form-label fw-bold">Materie Insegnate</label>
+                        <select class="form-select" id="materieSelect" name="materie[]" multiple size="6">
+                            <?php foreach ($materie as $materia): ?>
+                                <option value="<?= $materia->id ?>"><?= e($materia->nome) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <small class="text-muted">Tieni premuto Ctrl (Cmd su Mac) per selezionare più materie</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Note</label>
@@ -269,8 +290,13 @@ include 'includes/header.php';
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Indirizzo</label>
-                        <input type="text" class="form-control" name="indirizzo" id="editIndirizzo">
+                        <label class="form-label fw-bold">Materie Insegnate</label>
+                        <select class="form-select" id="editMaterieSelect" name="materie[]" multiple size="6">
+                            <?php foreach ($materie as $materia): ?>
+                                <option value="<?= $materia->id ?>"><?= e($materia->nome) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <small class="text-muted">Tieni premuto Ctrl (Cmd su Mac) per selezionare più materie</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Note</label>
@@ -284,6 +310,32 @@ include 'includes/header.php';
                 </button>
                 <button type="button" class="btn btn-warning" onclick="aggiornaDocente()">
                     <i class="bi bi-check-circle"></i> Aggiorna
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Visualizza Docente -->
+<div class="modal fade" id="viewDocenteModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #ff8c5a 0%, #ffad7a 100%); color: white;">
+                <h5 class="modal-title">
+                    <i class="bi bi-person-badge"></i> <span id="viewDocenteNome"></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="viewDocenteBody">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Caricamento...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Chiudi
                 </button>
             </div>
         </div>
@@ -366,27 +418,25 @@ document.getElementById('searchDocenti').addEventListener('input', function(e) {
     filtroTabella();
 });
 
-document.getElementById('filtroLezioni').addEventListener('change', function() {
+document.getElementById('filtroMateria').addEventListener('change', function() {
     filtroTabella();
 });
 
 function filtroTabella() {
     const query = document.getElementById('searchDocenti').value.toLowerCase();
-    const filtroLezioni = document.getElementById('filtroLezioni').value;
+    const filtroMateria = document.getElementById('filtroMateria').value.toLowerCase();
     
     let visibili = 0;
     document.querySelectorAll('#tabellaDocenti tbody tr[data-docente-id]').forEach(row => {
         const nome = row.cells[0].textContent.toLowerCase();
         const cognome = row.cells[1].textContent.toLowerCase();
-        const email = row.cells[2].textContent.toLowerCase();
-        const hasLezioni = row.dataset.hasLezioni === '1';
+        const materia = row.cells[2].textContent.toLowerCase();
+        const email = row.cells[3].textContent.toLowerCase();
         
         const matchQuery = nome.includes(query) || cognome.includes(query) || email.includes(query);
-        const matchLezioni = filtroLezioni === 'tutti' || 
-                            (filtroLezioni === 'con_lezioni' && hasLezioni) ||
-                            (filtroLezioni === 'senza_lezioni' && !hasLezioni);
+        const matchMateria = !filtroMateria || materia.includes(filtroMateria);
         
-        if (matchQuery && matchLezioni) {
+        if (matchQuery && matchMateria) {
             row.style.display = '';
             visibili++;
         } else {
@@ -399,7 +449,7 @@ function filtroTabella() {
 
 function resetFiltri() {
     document.getElementById('searchDocenti').value = '';
-    document.getElementById('filtroLezioni').value = 'tutti';
+    document.getElementById('filtroMateria').value = '';
     filtroTabella();
 }
 
@@ -412,6 +462,10 @@ function salvaDocente() {
     
     const formData = new FormData(form);
     const data = Object.fromEntries(formData);
+    
+    // Gestione materie multiple
+    const materieSelect = document.getElementById('materieSelect');
+    data.materie = Array.from(materieSelect.selectedOptions).map(opt => opt.value);
     
     fetch('<?= BASE_URL ?>/api_docenti.php', {
         method: 'POST',
@@ -441,8 +495,17 @@ function modificaDocente(id) {
                 document.getElementById('editCognome').value = d.cognome;
                 document.getElementById('editEmail').value = d.email || '';
                 document.getElementById('editTelefono').value = d.telefono || '';
-                document.getElementById('editIndirizzo').value = d.indirizzo || '';
                 document.getElementById('editNote').value = d.note || '';
+                
+                // Carica materie docente e selezionale
+                fetch(`<?= BASE_URL ?>/api_docenti.php?action=get_materie&id=${id}`)
+                    .then(r => r.json())
+                    .then(materieData => {
+                        const editSelect = document.getElementById('editMaterieSelect');
+                        Array.from(editSelect.options).forEach(option => {
+                            option.selected = materieData.data && materieData.data.includes(parseInt(option.value));
+                        });
+                    });
                 
                 const modal = new bootstrap.Modal(document.getElementById('editDocenteModal'));
                 modal.show();
@@ -462,6 +525,10 @@ function aggiornaDocente() {
     
     const formData = new FormData(form);
     const data = Object.fromEntries(formData);
+    
+    // Gestione materie multiple
+    const materieSelect = document.getElementById('editMaterieSelect');
+    data.materie = Array.from(materieSelect.selectedOptions).map(opt => opt.value);
     
     fetch('<?= BASE_URL ?>/api_docenti.php', {
         method: 'POST',
@@ -486,6 +553,130 @@ function confermaDisattivazione(id, nome) {
     
     const modal = new bootstrap.Modal(document.getElementById('confermaDisattivazioneModal'));
     modal.show();
+}
+
+function visualizzaDettagli(id) {
+    const modalBody = document.getElementById('viewDocenteBody');
+    const modalNome = document.getElementById('viewDocenteNome');
+    
+    modalBody.innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Caricamento...</span>
+            </div>
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('viewDocenteModal'));
+    modal.show();
+    
+    fetch(`<?= BASE_URL ?>/api_get_info_docente.php?docente_id=${id}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            
+            modalNome.textContent = data.docente.nome_completo;
+            
+            let html = `
+                <!-- Info Anagrafica -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="bi bi-person"></i> Dati Anagrafici</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6"><strong>Email:</strong> ${data.docente.email || '-'}</div>
+                            <div class="col-md-6"><strong>Telefono:</strong> ${data.docente.telefono || '-'}</div>
+                        </div>
+                        ${data.docente.note ? `<div class="row mt-2"><div class="col-12"><strong>Note:</strong> ${data.docente.note}</div></div>` : ''}
+                    </div>
+                </div>
+                
+                <!-- Materie Insegnate -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="bi bi-book"></i> Materie Insegnate</h6>
+                    </div>
+                    <div class="card-body">
+                        ${data.materie.length > 0 ? `
+                            <div class="d-flex flex-wrap gap-2">
+                                ${data.materie.map(m => `
+                                    <span class="badge bg-info text-dark">
+                                        <i class="bi bi-music-note"></i> ${m.nome}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        ` : '<p class="text-muted mb-0">Nessuna materia assegnata</p>'}
+                    </div>
+                </div>
+                
+                <!-- Statistiche -->
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <div class="card border-primary">
+                            <div class="card-header bg-primary bg-opacity-10">
+                                <h6 class="mb-0"><i class="bi bi-calendar-check"></i> Statistiche Lezioni</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span><strong>Totale Lezioni Settimanali:</strong></span>
+                                    <span class="badge bg-primary">${data.statistiche.lezioni.totale}</span>
+                                </div>
+                                ${Object.keys(data.statistiche.lezioni.per_giorno).length > 0 ? `
+                                    <div class="row g-2">
+                                        ${Object.entries(data.statistiche.lezioni.per_giorno).map(([giorno, num]) => `
+                                            <div class="col-6">
+                                                <div class="d-flex justify-content-between align-items-center border rounded p-2">
+                                                    <span>${giorno}:</span>
+                                                    <span class="badge bg-secondary">${num}</span>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Lezioni Programmate -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="bi bi-calendar-week"></i> Lezioni Programmate</h6>
+                    </div>
+                    <div class="card-body">
+                        ${data.lezioni.length > 0 ? `
+                            <div class="list-group list-group-flush">
+                                ${data.lezioni.map(l => `
+                                    <div class="list-group-item px-0">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">
+                                                <i class="bi bi-music-note"></i> ${l.materia || 'N/D'} - 
+                                                <span class="text-muted">${l.allievo}</span>
+                                            </h6>
+                                            <small class="text-capitalize">${l.giorno_settimana}</small>
+                                        </div>
+                                        <p class="mb-1">
+                                            <i class="bi bi-clock"></i> ${l.ora_inizio.substr(0,5)} - ${l.ora_fine.substr(0,5)}
+                                            ${l.aula ? `<br><i class="bi bi-door-open"></i> ${l.aula}` : ''}
+                                        </p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : '<p class="text-muted mb-0">Nessuna lezione programmata</p>'}
+                    </div>
+                </div>
+            `;
+            
+            modalBody.innerHTML = html;
+        })
+        .catch(error => {
+            modalBody.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle"></i> ${error.message}
+                </div>
+            `;
+        });
 }
 
 function disattivaDocente() {

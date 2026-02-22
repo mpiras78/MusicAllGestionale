@@ -66,6 +66,17 @@ if ($canCreate && isPost()) {
 
 // Prepara filtri per query
 $filters = [];
+
+// Filtro mese: se non specificato, usa il mese corrente come default
+if (!isset($_GET['mese']) && empty($_GET)) {
+    // Nessun parametro GET = primo caricamento -> usa mese corrente
+    $filters['mese'] = (int)date('n');
+} elseif (!empty($_GET['mese'])) {
+    // Mese specificato dall'utente
+    $filters['mese'] = (int)$_GET['mese'];
+}
+// Se mese = "" (Tutti), non aggiungiamo il filtro
+
 if ($isDocente) {
     $filters['docente_id'] = $docente_id;
 } else {
@@ -73,6 +84,7 @@ if ($isDocente) {
     if (!empty($_GET['allievo_id'])) $filters['allievo_id'] = $_GET['allievo_id'];
     if (!empty($_GET['search'])) $filters['search'] = $_GET['search'];
     if (!empty($_GET['causata_da'])) $filters['causata_da'] = $_GET['causata_da'];
+    if (!empty($_GET['stato_recupero'])) $filters['stato_recupero'] = $_GET['stato_recupero'];
 }
 
 // Ottieni dati tramite controllers

@@ -377,3 +377,40 @@ function isScuolaAperta($data) {
     
     return true;
 }
+
+/**
+ * Ottieni classe badge Bootstrap per tipo lezione
+ */
+function getTipoLezioneBadge($tipo) {
+    // Normalizza il tipo (lowercase e trim)
+    $tipo_lower = strtolower(trim($tipo));
+    
+    // Mapping tipo lezione -> colore Bootstrap
+    $badge_map = [
+        'individuale' => 'primary',
+        'gruppo' => 'success',
+        'collettiva' => 'info',
+        'duo' => 'warning',
+        'trio' => 'secondary',
+        'recupero' => 'danger',
+        'prova' => 'light',
+        'saggio' => 'dark',
+        'orchestra' => 'info',
+        'coro' => 'info'
+    ];
+    
+    // Cerca match esatto
+    if (isset($badge_map[$tipo_lower])) {
+        return $badge_map[$tipo_lower];
+    }
+    
+    // Cerca match parziale (contiene)
+    foreach ($badge_map as $key => $color) {
+        if (stripos($tipo_lower, $key) !== false) {
+            return $color;
+        }
+    }
+    
+    // Default: primary
+    return 'primary';
+}

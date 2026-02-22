@@ -73,7 +73,7 @@
                             <li><a class="dropdown-item <?= ($current_page ?? '') == 'allievi' ? 'active' : '' ?>" href="<?= BASE_URL ?>/gestione_allievi.php">
                                 <i class="bi bi-people"></i> Allievi
                             </a></li>
-                            <li><a class="dropdown-item" href="<?= BASE_URL ?>/docenti/index.php">
+                            <li><a class="dropdown-item <?= ($current_page ?? '') == 'docenti' ? 'active' : '' ?>" href="<?= BASE_URL ?>/gestione_docenti.php">
                                 <i class="bi bi-person-badge"></i> Docenti
                             </a></li>
                             <li><a class="dropdown-item" href="<?= BASE_URL ?>/lezioni/index.php">

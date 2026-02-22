@@ -109,6 +109,21 @@ try {
             ]);
             break;
             
+        case 'get_materie':
+            // GET materie docente
+            $id = $_GET['id'] ?? null;
+            if (!$id) {
+                throw new Exception('ID docente mancante');
+            }
+            
+            $materie_ids = $docentiCtrl->getMaterieIds($id);
+            
+            echo json_encode([
+                'success' => true,
+                'data' => $materie_ids
+            ]);
+            break;
+            
         default:
             throw new Exception('Azione non valida');
     }

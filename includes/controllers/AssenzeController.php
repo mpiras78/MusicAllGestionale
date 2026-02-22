@@ -119,9 +119,37 @@ class AssenzeController {
             $params[] = $filters['necessita_recupero'];
         }
         
+        // Filtro per mese
+        if (!empty($filters['mese'])) {
+            $mese = (int)$filters['mese'];
+            // Determina l'anno in base al mese (anno scolastico)
+            $anno_corrente = (int)date('Y');
+            $mese_corrente = (int)date('n');
+            
+            // Se il mese selezionato è settembre-dicembre e siamo in gennaio-luglio,
+            // il mese si riferisce all'anno precedente
+            if ($mese >= 9 && $mese_corrente < 9) {
+                $anno = $anno_corrente - 1;
+            }
+            // Se il mese selezionato è gennaio-luglio e siamo in settembre-dicembre,
+            // il mese si riferisce all'anno successivo
+            else if ($mese < 9 && $mese_corrente >= 9) {
+                $anno = $anno_corrente + 1;
+            }
+            // Altrimenti è l'anno corrente
+            else {
+                $anno = $anno_corrente;
+            }
+            
+            $where[] = "CAST(strftime('%m', a.data_assenza) AS INTEGER) = ? AND CAST(strftime('%Y', a.data_assenza) AS INTEGER) = ?";
+            $params[] = $mese;
+            $params[] = $anno;
+        }
+        
         $where_clause = !empty($where) ? "WHERE " . implode(" AND ", $where) : "";
         
-        return $this->db->query("
+        // Filtro stato recupero - uso subquery per evitare HAVING su query non-aggregate
+        $base_query = "
             SELECT a.*, 
                    a.data_assenza as data,
                    a.tipo as causata_da,
@@ -153,7 +181,29 @@ class AssenzeController {
             LEFT JOIN materie m ON l.materia_id = m.id
             $where_clause
             ORDER BY a.data_assenza DESC, a.created_at DESC
-        ", $params) ?: [];
+        ";
+        
+        // Se c'è filtro stato, wrappa in subquery
+        if (!empty($filters['stato_recupero'])) {
+            $condition = "";
+            switch ($filters['stato_recupero']) {
+                case 'programmato':
+                    $condition = "ha_recupero > 0";
+                    break;
+                case 'da_programmare':
+                    $condition = "da_recuperare = 1 AND ha_recupero = 0";
+                    break;
+                case 'non_necessario':
+                    $condition = "da_recuperare = 0";
+                    break;
+            }
+            
+            if ($condition) {
+                $base_query = "SELECT * FROM ($base_query) AS subq WHERE $condition";
+            }
+        }
+        
+        return $this->db->query($base_query, $params) ?: [];
     }
     
     /**

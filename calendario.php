@@ -521,12 +521,12 @@ include 'includes/header.php';
                                                     $tipo_css = 'recupero';
                                                 } elseif (strpos($tipo_lower, 'pren_sala') !== false) {
                                                     $tipo_css = 'prenotazione-allievi';
-                                                    $icona_prenotazione = 'bi-mortarboard';
+                                                    $icona_prenotazione = 'bi-person-workspace';
                                                     $classe_icona_pren = 'tipo-allievi';
                                                     $is_prenotazione = true;
                                                 } elseif (strpos($tipo_lower, 'pren_docente') !== false) {
                                                     $tipo_css = 'prenotazione-docente';
-                                                    $icona_prenotazione = 'bi-person-workspace';
+                                                    $icona_prenotazione = 'bi-mortarboard';
                                                     $classe_icona_pren = 'tipo-docente';
                                                     $is_prenotazione = true;
                                                 } elseif (strpos($tipo_lower, 'pren_esterno') !== false) {
@@ -902,8 +902,8 @@ include 'includes/header.php';
                         <label class="form-label fw-bold">Tipo Prenotazione *</label>
                         <select class="form-select" id="prenotTipo" name="tipo" required onchange="cambiaTipoPrenotazione()">
                             <option value="">Seleziona tipo...</option>
-                            <option value="PREN_SALA">🎓 Prenotazione Allievi (lezione)</option>
-                            <option value="PREN_DOCENTE">💼 Prenotazione Docente (personale)</option>
+                            <option value="PREN_SALA">🤖 Prenotazione Allievi (lezione)</option>
+                            <option value="PREN_DOCENTE">🎓 Prenotazione Docente (personale)</option>
                             <option value="PREN_ESTERNO">👤 Prenotazione Esterno</option>
                         </select>
                     </div>

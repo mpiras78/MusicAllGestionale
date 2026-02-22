@@ -12,13 +12,21 @@ class DocentiController {
     }
     
     /**
-     * Ottiene tutti i docenti attivi
+     * Ottiene tutti i docenti attivi con le loro materie
      */
     public function getDocenti($attivi_only = true, $limit = null, $offset = 0) {
-        $where = $attivi_only ? "WHERE attivo = 1" : "";
+        $where = $attivi_only ? "WHERE d.attivo = 1" : "";
         $limit_clause = $limit ? "LIMIT ? OFFSET ?" : "";
         
-        $sql = "SELECT * FROM docenti $where ORDER BY cognome, nome $limit_clause";
+        $sql = "SELECT 
+                    d.*,
+                    COALESCE(GROUP_CONCAT(m.nome, ', '), d.specializzazioni) as materie
+                FROM docenti d
+                LEFT JOIN docenti_materie dm ON d.id = dm.docente_id
+                LEFT JOIN materie m ON dm.materia_id = m.id AND m.attiva = 1
+                $where
+                GROUP BY d.id, d.cognome, d.nome, d.email, d.telefono, d.specializzazioni, d.note, d.user_id, d.attivo, d.created_at
+                ORDER BY d.cognome, d.nome $limit_clause";
         
         $params = [];
         if ($limit) {
@@ -82,17 +90,24 @@ class DocentiController {
     public function createDocente($data) {
         $sql = "INSERT INTO docenti (
             nome, cognome, email, telefono, 
-            indirizzo, note, attivo, created_at
+            specializzazioni, note, attivo, created_at
         ) VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'))";
         
-        return $this->db->insert($sql, [
+        $docente_id = $this->db->insert($sql, [
             $data['nome'],
             $data['cognome'],
             $data['email'] ?? null,
             $data['telefono'] ?? null,
-            $data['indirizzo'] ?? null,
+            $data['specializzazioni'] ?? null,
             $data['note'] ?? null
         ]);
+        
+        // Salva materie se presenti
+        if ($docente_id && !empty($data['materie'])) {
+            $this->salvaMaterie($docente_id, $data['materie']);
+        }
+        
+        return $docente_id;
     }
     
     /**
@@ -101,18 +116,25 @@ class DocentiController {
     public function updateDocente($id, $data) {
         $sql = "UPDATE docenti SET 
             nome = ?, cognome = ?, email = ?, 
-            telefono = ?, indirizzo = ?, note = ?
+            telefono = ?, specializzazioni = ?, note = ?
             WHERE id = ?";
         
-        return $this->db->execute($sql, [
+        $result = $this->db->execute($sql, [
             $data['nome'],
             $data['cognome'],
             $data['email'] ?? null,
             $data['telefono'] ?? null,
-            $data['indirizzo'] ?? null,
+            $data['specializzazioni'] ?? null,
             $data['note'] ?? null,
             $id
         ]);
+        
+        // Aggiorna materie se presenti
+        if (isset($data['materie'])) {
+            $this->salvaMaterie($id, $data['materie']);
+        }
+        
+        return $result;
     }
     
     /**
@@ -172,5 +194,34 @@ class DocentiController {
             'senza_lezioni' => $totale - $con_lezioni,
             'percentuale' => $totale > 0 ? round(($con_lezioni / $totale) * 100, 1) : 0
         ];
+    }
+    
+    /**
+     * Salva materie docente (sostituisce tutte le materie esistenti)
+     */
+    private function salvaMaterie($docente_id, $materie_ids) {
+        // Rimuovi tutte le materie esistenti
+        $this->db->execute("DELETE FROM docenti_materie WHERE docente_id = ?", [$docente_id]);
+        
+        // Inserisci nuove materie
+        if (!empty($materie_ids) && is_array($materie_ids)) {
+            foreach ($materie_ids as $materia_id) {
+                $this->db->execute(
+                    "INSERT INTO docenti_materie (docente_id, materia_id) VALUES (?, ?)",
+                    [$docente_id, $materia_id]
+                );
+            }
+        }
+    }
+    
+    /**
+     * Ottieni IDs materie di un docente
+     */
+    public function getMaterieIds($docente_id) {
+        $result = $this->db->query(
+            "SELECT materia_id FROM docenti_materie WHERE docente_id = ?",
+            [$docente_id]
+        );
+        return array_column($result, 'materia_id');
     }
 }
