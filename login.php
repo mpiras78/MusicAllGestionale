@@ -15,23 +15,41 @@ if (isset($_GET['timeout'])) {
 }
 
 if (isPost()) {
-    $username = post('username');
-    $password = post('password');
-    
-    if (empty($username) || empty($password)) {
-        $error = 'Inserisci username e password';
+    // Verifica CSRF token
+    if (!CSRFHelper::verifyToken(post('csrf_token', ''))) {
+        $error = 'Token di sicurezza non valido. Ricarica la pagina e riprova.';
     } else {
-        if ($auth->login($username, $password)) {
-            // Redirect in base al ruolo
-            $role = $_SESSION['user_role'];
-            
-            if ($role === 'admin') {
-                redirect(BASE_URL . '/index.php'); // Dashboard
-            } else {
-                redirect(BASE_URL . '/calendario.php'); // Calendario per docente/segreteria
-            }
+        $username = post('username');
+        $password = post('password');
+        
+        if (empty($username) || empty($password)) {
+            $error = 'Inserisci username e password';
         } else {
-            $error = 'Credenziali non valide';
+            // Rate limiting - max 5 tentativi in 15 minuti
+            $rateLimiter = new RateLimiter();
+            $identifier = $_SERVER['REMOTE_ADDR'];
+            
+            if (!$rateLimiter->check($identifier, 'login')) {
+                $remaining = $rateLimiter->getTimeRemaining($identifier, 'login');
+                $minutes = ceil($remaining / 60);
+                $error = "Troppi tentativi di login. Riprova tra {$minutes} minuti.";
+            } else {
+                // Registra tentativo
+                $rateLimiter->hit($identifier, 'login', ['username' => $username]);
+                
+                if ($auth->login($username, $password)) {
+                    // Redirect in base al ruolo
+                    $role = $_SESSION['role'] ?? 'segreteria';
+                    
+                    if ($role === 'admin') {
+                        redirect(BASE_URL . '/index.php'); // Dashboard
+                    } else {
+                        redirect(BASE_URL . '/calendario.php'); // Calendario per docente/segreteria
+                    }
+                } else {
+                    $error = 'Credenziali non valide';
+                }
+            }
         }
     }
 }
@@ -77,6 +95,7 @@ if (isPost()) {
                         <?php endif; ?>
                         
                         <form method="POST" action="">
+                            <?= CSRFHelper::field() ?>
                             <div class="mb-3">
                                 <label for="username" class="form-label">
                                     <i class="bi bi-person"></i> Username

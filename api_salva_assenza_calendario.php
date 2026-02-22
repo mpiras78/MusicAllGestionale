@@ -34,6 +34,15 @@ try {
         throw new Exception('Dati non validi');
     }
     
+    // Verifica CSRF token
+    if (!CSRFHelper::verifyToken($data['csrf_token'] ?? '')) {
+        throw new Exception('Token CSRF non valido');
+    }
+    
+    // Rate limiting
+    $rateLimiter = new RateLimiter();
+    $rateLimiter->enforce($_SERVER['REMOTE_ADDR'], 'api');
+    
     // Valida parametri richiesti
     $lezione_id = $data['lezione_id'] ?? null;
     $data_lezione = $data['data_lezione'] ?? null;

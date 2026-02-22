@@ -22,6 +22,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// Verifica CSRF
+if (!CSRFHelper::verifyToken($_POST['csrf_token'] ?? '')) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'Token CSRF non valido']);
+    exit;
+}
+
+// Rate limiting
+$rateLimiter = new RateLimiter();
+$rateLimiter->enforce($_SERVER['REMOTE_ADDR'], 'api');
+
 try {
     $db = Database::getInstance()->getConnection();
     
@@ -35,10 +46,16 @@ try {
     $titolo = $_POST['titolo'] ?? null;
     $note = $_POST['note'] ?? null;
     
-    // Validazione campi obbligatori
-    if (!$tipologia_id || !$aula_id || !$ora_inizio || !$data || !$giorno) {
-        throw new Exception('Campi obbligatori mancanti');
-    }
+    // Validazione input
+    $validator = new InputValidator();
+    $validator
+        ->integer($tipologia_id, 'tipologia_id', 1)
+        ->integer($aula_id, 'aula_id', 1)
+        ->time($ora_inizio, 'ora_inizio')
+        ->integer($durata, 'durata', 15, 240)
+        ->date($data, 'data')
+        ->inList($giorno, 'giorno', ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato'])
+        ->validate();
     
     // Calcola ora_fine in base alla durata
     $ora_fine = date('H:i:s', strtotime($ora_inizio) + ($durata * 60));
@@ -209,6 +226,13 @@ try {
         'evento_id' => $evento_id
     ]);
     
+} catch (ValidationException $e) {
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Errori di validazione',
+        'errors' => $e->getErrors()
+    ]);
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
