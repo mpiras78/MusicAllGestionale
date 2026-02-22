@@ -142,14 +142,14 @@ function calcolaRowspan($ora_inizio, $ora_fine) {
 // Mappa icone strumenti (Bootstrap Icons)
 function getIconaMateria($materia) {
     $materia_lower = strtolower($materia);
-    if (strpos($materia_lower, 'chitar') !== false) return 'bi-music-note-beamed';
-    if (strpos($materia_lower, 'piano') !== false) return 'bi-piano';
-    if (strpos($materia_lower, 'canto') !== false) return 'bi-mic';
-    if (strpos($materia_lower, 'batter') !== false) return 'bi-disc';
-    if (strpos($materia_lower, 'basso') !== false) return 'bi-soundwave';
-    if (strpos($materia_lower, 'violino') !== false) return 'bi-violin';
-    if (strpos($materia_lower, 'sax') !== false) return 'bi-trumpet';
-    return 'bi-music-note';
+    if (strpos($materia_lower, 'chitar') !== false) return '🎸';
+    if (strpos($materia_lower, 'piano') !== false) return '🎹';
+    if (strpos($materia_lower, 'canto') !== false) return '🎤';
+    if (strpos($materia_lower, 'batter') !== false) return '🥁';
+    if (strpos($materia_lower, 'basso') !== false) return '🎸';
+    if (strpos($materia_lower, 'violino') !== false) return '🎻';
+    if (strpos($materia_lower, 'sax') !== false) return '🎷';
+    return '🎵';
 }
 
 include 'includes/header.php';
@@ -481,7 +481,7 @@ include 'includes/header.php';
                                                     <?= date('H:i', strtotime($lezione_slot['ora_inizio'])) ?>-<?= date('H:i', strtotime($lezione_slot['ora_fine'])) ?>
                                                 </div>
                                                 <div class="lezione-header">
-                                                    <i class="bi <?= $icona ?> icona-strumento"></i>
+                                                    <span class="icona-strumento" style="font-size: 1.2rem;"><?= $icona ?></span>
                                                     <span class="lezione-allievo" 
                                                           style="cursor: pointer; text-decoration: underline;" 
                                                           data-allievo-id="<?= $lezione_slot['allievo_id'] ?>"
@@ -521,17 +521,17 @@ include 'includes/header.php';
                                                     $tipo_css = 'recupero';
                                                 } elseif (strpos($tipo_lower, 'pren_sala') !== false) {
                                                     $tipo_css = 'prenotazione-allievi';
-                                                    $icona_prenotazione = 'bi-person-workspace';
+                                                    $icona_prenotazione = '👥';
                                                     $classe_icona_pren = 'tipo-allievi';
                                                     $is_prenotazione = true;
                                                 } elseif (strpos($tipo_lower, 'pren_docente') !== false) {
                                                     $tipo_css = 'prenotazione-docente';
-                                                    $icona_prenotazione = 'bi-mortarboard';
+                                                    $icona_prenotazione = '👨🏫';
                                                     $classe_icona_pren = 'tipo-docente';
                                                     $is_prenotazione = true;
                                                 } elseif (strpos($tipo_lower, 'pren_esterno') !== false) {
                                                     $tipo_css = 'prenotazione-esterno';
-                                                    $icona_prenotazione = 'bi-person-x';
+                                                    $icona_prenotazione = '🚪';
                                                     $classe_icona_pren = 'tipo-esterno';
                                                     $is_prenotazione = true;
                                                 }
@@ -555,7 +555,7 @@ include 'includes/header.php';
                                                     <div class="lezione-header">
                                                         <span class="lezione-allievo">
                                                             <?php if ($icona_prenotazione): ?>
-                                                                <i class="<?= $icona_prenotazione ?> prenotazione-tipo-icon <?= $classe_icona_pren ?>"></i>
+                                                                <span class="prenotazione-tipo-icon <?= $classe_icona_pren ?>" style="font-size: 1.1rem;"><?= $icona_prenotazione ?></span>
                                                             <?php endif; ?>
                                                             PRENOTAZIONE
                                                         </span>
@@ -572,7 +572,7 @@ include 'includes/header.php';
                                                 <?php else: ?>
                                                     <!-- Layout standard per RECUPERI e altri eventi -->
                                                     <div class="lezione-header">
-                                                        <i class="bi <?= $icona ?> icona-strumento"></i>
+                                                        <span class="icona-strumento" style="font-size: 1.2rem;"><?= $icona ?></span>
                                                         <span class="lezione-allievo">
                                                             <?= e($evento_slot['allievo'] ?: ($evento_slot['docente'] ?: 'Evento')) ?>
                                                             <?php if (isset($evento_slot['confermato']) && $evento_slot['confermato'] == 0): ?>
@@ -636,17 +636,17 @@ include 'includes/header.php';
                                                     $tipo_css_evt = 'recupero';
                                                 } elseif (strpos($tipo_lower, 'pren_sala') !== false) {
                                                     $tipo_css_evt = 'prenotazione-allievi';
-                                                    $icona_prenotazione_evt = 'bi-mortarboard';
+                                                    $icona_prenotazione_evt = '👨🏫';
                                                     $classe_icona_pren_evt = 'tipo-allievi';
                                                     $is_prenotazione_evt = true;
                                                 } elseif (strpos($tipo_lower, 'pren_docente') !== false) {
                                                     $tipo_css_evt = 'prenotazione-docente';
-                                                    $icona_prenotazione_evt = 'bi-person-workspace';
+                                                    $icona_prenotazione_evt = '👥';
                                                     $classe_icona_pren_evt = 'tipo-docente';
                                                     $is_prenotazione_evt = true;
                                                 } elseif (strpos($tipo_lower, 'pren_esterno') !== false) {
                                                     $tipo_css_evt = 'prenotazione-esterno';
-                                                    $icona_prenotazione_evt = 'bi-person-x';
+                                                    $icona_prenotazione_evt = '🚪';
                                                     $classe_icona_pren_evt = 'tipo-esterno';
                                                     $is_prenotazione_evt = true;
                                                 }
@@ -677,7 +677,7 @@ include 'includes/header.php';
                                                     <div class="lezione-header">
                                                         <span class="lezione-allievo">
                                                             <?php if ($icona_prenotazione_evt): ?>
-                                                                <i class="<?= $icona_prenotazione_evt ?> prenotazione-tipo-icon <?= $classe_icona_pren_evt ?>"></i>
+                                                                <span class="prenotazione-tipo-icon <?= $classe_icona_pren_evt ?>" style="font-size: 1.1rem;"><?= $icona_prenotazione_evt ?></span>
                                                             <?php endif; ?>
                                                             PRENOTAZIONE
                                                         </span>
@@ -694,7 +694,7 @@ include 'includes/header.php';
                                                 <?php else: ?>
                                                     <!-- Layout standard per RECUPERI e altri eventi -->
                                                     <div class="lezione-header">
-                                                        <i class="bi <?= $icona_evt ?> icona-strumento"></i>
+                                                        <span class="icona-strumento" style="font-size: 1.2rem;"><?= $icona_evt ?></span>
                                                         <span class="lezione-allievo">
                                                             <?= e($evento_slot['allievo'] ?: ($evento_slot['docente'] ?: 'Evento')) ?>
                                                             <?php if (isset($evento_slot['confermato']) && $evento_slot['confermato'] == 0): ?>
