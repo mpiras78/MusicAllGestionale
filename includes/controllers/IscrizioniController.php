@@ -1,410 +1,240 @@
 <?php
-
-use MusicAll\Models\Iscrizione;
-use MusicAll\Models\Allievo;
-use MusicAll\Models\Materia;
-use MusicAll\Models\Docente;
-use MusicAll\Models\ConfigurazioneTariffe;
-
 /**
- * Controller per gestione iscrizioni
+ * Iscrizioni Controller
+ * Gestione iscrizioni allievi ai corsi
  */
-class IscrizioniController
-{
+
+class IscrizioniController {
     private $db;
-    private $userId;
-
-    public function __construct()
-    {
-        $this->db = Database::getInstance()->getConnection();
-        $this->userId = $_SESSION['user_id'] ?? null;
+    
+    public function __construct() {
+        $this->db = Database::getInstance();
     }
-
+    
     /**
-     * Lista iscrizioni con filtri
-     * 
-     * @param array $filters
-     * @return array
+     * Ottiene tutte le iscrizioni con filtri
      */
-    public function lista($filters = [])
-    {
-        try {
-            $query = Iscrizione::query()
-                ->with(['allievo', 'materia', 'docente']);
-
-            // Filtro anno accademico
-            if (!empty($filters['anno_accademico'])) {
-                $query->perAnno($filters['anno_accademico']);
-            }
-
-            // Filtro allievo
-            if (!empty($filters['allievo_id'])) {
-                $query->perAllievo($filters['allievo_id']);
-            }
-
-            // Filtro stato
-            if (!empty($filters['stato'])) {
-                if ($filters['stato'] === 'attiva') {
-                    $query->attive();
-                } else {
-                    $query->where('stato', $filters['stato']);
-                }
-            }
-
-            // Filtro materia
-            if (!empty($filters['materia_id'])) {
-                $query->where('materia_id', $filters['materia_id']);
-            }
-
-            // Filtro docente
-            if (!empty($filters['docente_id'])) {
-                $query->where('docente_id', $filters['docente_id']);
-            }
-
-            // Ordinamento
-            $query->orderBy('created_at', 'desc');
-
-            $iscrizioni = $query->get();
-
-            return [
-                'success' => true,
-                'iscrizioni' => $iscrizioni,
-                'count' => $iscrizioni->count()
-            ];
-
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'error' => $e->getMessage()
-            ];
+    public function getIscrizioni($anno_scolastico = null, $stato = null, $allievo_id = null) {
+        $conn = $this->db->getConnection();
+        
+        $sql = "SELECT i.*, 
+                CONCAT(a.cognome, ' ', a.nome) as allievo,
+                tc.nome as tipo_corso,
+                m.nome as materia,
+                CONCAT(d.cognome, ' ', d.nome) as docente,
+                0 as is_pacchetto,
+                0 as lezioni_utilizzate,
+                0 as lezioni_totali,
+                i.quota_iscrizione as importo_totale,
+                0 as importo_pagato
+                FROM iscrizioni i
+                LEFT JOIN allievi a ON i.allievo_id = a.id
+                LEFT JOIN tipi_corso_config tc ON i.tipo_corso_config_id = tc.id
+                LEFT JOIN materie m ON i.materia_id = m.id
+                LEFT JOIN docenti d ON i.docente_id = d.id
+                WHERE 1=1";
+        
+        $params = [];
+        
+        if ($anno_scolastico) {
+            $sql .= " AND i.anno_accademico = ?";
+            $params[] = $anno_scolastico;
         }
+        
+        if ($stato) {
+            $sql .= " AND i.stato = ?";
+            $params[] = $stato;
+        }
+        
+        if ($allievo_id) {
+            $sql .= " AND i.allievo_id = ?";
+            $params[] = $allievo_id;
+        }
+        
+        $sql .= " ORDER BY i.created_at DESC";
+        
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
+    
     /**
-     * Dettaglio iscrizione
-     * 
-     * @param int $id
-     * @return array
+     * Ottiene iscrizione per ID
      */
-    public function dettaglio($id)
-    {
-        try {
-            $iscrizione = Iscrizione::with(['allievo', 'materia', 'docente', 'pagamenti.tipoPagamento'])
-                ->find($id);
-
-            if (!$iscrizione) {
-                return [
-                    'success' => false,
-                    'error' => 'Iscrizione non trovata'
-                ];
-            }
-
-            return [
-                'success' => true,
-                'iscrizione' => $iscrizione
-            ];
-
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'error' => $e->getMessage()
-            ];
-        }
+    public function getIscrizioneById($id) {
+        $conn = $this->db->getConnection();
+        $stmt = $conn->prepare("SELECT * FROM iscrizioni WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
-
+    
+    /**
+     * Ottiene iscrizioni attive di un allievo
+     */
+    public function getIscrizioniAttiveAllievo($allievo_id) {
+        $conn = $this->db->getConnection();
+        $stmt = $conn->prepare("
+            SELECT i.*, tc.nome as tipo_corso, m.nome as materia
+            FROM iscrizioni i
+            LEFT JOIN tipi_corso_config tc ON i.tipo_corso_config_id = tc.id
+            LEFT JOIN materie m ON i.materia_id = m.id
+            WHERE i.allievo_id = ? AND i.stato = 'attiva'
+            ORDER BY i.data_inizio DESC
+        ");
+        $stmt->execute([$allievo_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
     /**
      * Crea nuova iscrizione
-     * 
-     * @param array $data
-     * @return array
      */
-    public function crea($data)
-    {
-        try {
-            // Validazione
-            $validation = $this->valida($data);
-            if (!$validation['valid']) {
-                return [
-                    'success' => false,
-                    'error' => $validation['errors']
-                ];
-            }
-
-            // Check se esiste già iscrizione per stesso allievo/materia/anno
-            $esistente = Iscrizione::perAllievo($data['allievo_id'])
-                ->perAnno($data['anno_accademico'])
-                ->where('materia_id', $data['materia_id'])
-                ->first();
-
-            if ($esistente) {
-                return [
-                    'success' => false,
-                    'error' => 'Esiste già una iscrizione per questo allievo e materia nell\'anno accademico selezionato'
-                ];
-            }
-
-            // Crea iscrizione
-            $iscrizione = Iscrizione::create([
-                'allievo_id' => $data['allievo_id'],
-                'anno_accademico' => $data['anno_accademico'],
-                'materia_id' => $data['materia_id'],
-                'docente_id' => $data['docente_id'],
-                'tipo_corso' => $data['tipo_corso'],
-                'data_iscrizione' => $data['data_iscrizione'] ?? date('Y-m-d'),
-                'data_inizio_corso' => $data['data_inizio_corso'],
-                'data_fine_corso' => $data['data_fine_corso'] ?? null,
-                'stato' => 'attiva',
-                'creato_da' => $this->userId
-            ]);
-
-            // Calcola importo per il frontend
-            $importo = $iscrizione->calcolaImportoIscrizione();
-
-            // Log attività
-            SecurityHelper::logActivity(
-                $this->userId,
-                'iscrizione_creata',
-                'iscrizione',
-                $iscrizione->id,
-                "Creata iscrizione per {$iscrizione->allievo_nome}"
-            );
-
-            return [
-                'success' => true,
-                'iscrizione' => $iscrizione,
-                'importo_calcolato' => $importo,
-                'message' => 'Iscrizione creata con successo'
-            ];
-
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'error' => $e->getMessage()
-            ];
-        }
+    public function creaIscrizione($data) {
+        $conn = $this->db->getConnection();
+        
+        $stmt = $conn->prepare("
+            INSERT INTO iscrizioni (
+                allievo_id, tipo_corso_config_id, materia_id, docente_id,
+                anno_accademico, data_inizio, data_fine,
+                stato, quota_iscrizione, sconto_fratelli, sconto_meta_anno, note
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        
+        $stmt->execute([
+            $data['allievo_id'],
+            $data['tipo_corso_config_id'],
+            $data['materia_id'],
+            $data['docente_id'],
+            $data['anno_scolastico'],
+            $data['data_inizio'],
+            $data['data_fine'] ?? null,
+            $data['stato'] ?? 'attiva',
+            $data['quota_iscrizione'] ?? 30,
+            $data['sconto_fratelli'] ?? 0,
+            $data['sconto_meta_anno'] ?? 0,
+            $data['note'] ?? null
+        ]);
+        
+        return $conn->lastInsertId();
     }
-
+    
     /**
      * Aggiorna iscrizione
-     * 
-     * @param int $id
-     * @param array $data
-     * @return array
      */
-    public function aggiorna($id, $data)
-    {
-        try {
-            $iscrizione = Iscrizione::find($id);
-
-            if (!$iscrizione) {
-                return [
-                    'success' => false,
-                    'error' => 'Iscrizione non trovata'
-                ];
-            }
-
-            // Aggiorna campi consentiti
-            if (isset($data['data_inizio_corso'])) {
-                $iscrizione->data_inizio_corso = $data['data_inizio_corso'];
-            }
-            if (isset($data['data_fine_corso'])) {
-                $iscrizione->data_fine_corso = $data['data_fine_corso'];
-            }
-            if (isset($data['stato'])) {
-                $iscrizione->stato = $data['stato'];
-            }
-            if (isset($data['tipo_corso'])) {
-                $iscrizione->tipo_corso = $data['tipo_corso'];
-            }
-
-            $iscrizione->save();
-
-            // Log attività
-            SecurityHelper::logActivity(
-                $this->userId,
-                'iscrizione_aggiornata',
-                'iscrizione',
-                $iscrizione->id,
-                "Aggiornata iscrizione per {$iscrizione->allievo_nome}"
-            );
-
-            return [
-                'success' => true,
-                'iscrizione' => $iscrizione,
-                'message' => 'Iscrizione aggiornata con successo'
-            ];
-
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'error' => $e->getMessage()
-            ];
-        }
+    public function aggiornaIscrizione($id, $data) {
+        $conn = $this->db->getConnection();
+        
+        $stmt = $conn->prepare("
+            UPDATE iscrizioni SET
+                tipo_corso_config_id = ?,
+                materia_id = ?,
+                docente_id = ?,
+                anno_accademico = ?,
+                data_inizio = ?,
+                data_fine = ?,
+                stato = ?,
+                quota_iscrizione = ?,
+                sconto_fratelli = ?,
+                note = ?
+            WHERE id = ?
+        ");
+        
+        return $stmt->execute([
+            $data['tipo_corso_config_id'],
+            $data['materia_id'],
+            $data['docente_id'],
+            $data['anno_scolastico'],
+            $data['data_inizio'],
+            $data['data_fine'] ?? null,
+            $data['stato'],
+            $data['quota_iscrizione'],
+            $data['sconto_fratelli'],
+            $data['note'] ?? null,
+            $id
+        ]);
     }
-
+    
     /**
-     * Sospendi iscrizione
-     * 
-     * @param int $id
-     * @return array
+     * Registra utilizzo lezione custom
      */
-    public function sospendi($id)
-    {
-        return $this->aggiorna($id, ['stato' => 'sospesa']);
+    public function registraUtilizzoLezioneCustom($iscrizione_id, $data) {
+        // Verifica che sia un corso custom
+        $iscrizione = $this->getIscrizioneById($iscrizione_id);
+        
+        if (!$iscrizione || !$iscrizione['is_pacchetto']) {
+            throw new Exception("Iscrizione non valida o non è un corso custom");
+        }
+        
+        if ($iscrizione['lezioni_utilizzate'] >= $iscrizione['lezioni_totali']) {
+            throw new Exception("Tutte le lezioni del pacchetto sono state utilizzate");
+        }
+        
+        // Registra utilizzo
+        $this->db->insert("
+            INSERT INTO utilizzo_lezioni_custom (
+                iscrizione_id, data_lezione, ora_inizio, ora_fine,
+                docente_id, aula_id, note
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        ", [
+            $iscrizione_id,
+            $data['data_lezione'],
+            $data['ora_inizio'],
+            $data['ora_fine'],
+            $data['docente_id'],
+            $data['aula_id'] ?? null,
+            $data['note'] ?? null
+        ]);
+        
+        // Incrementa contatore
+        $this->db->execute("
+            UPDATE iscrizioni 
+            SET lezioni_utilizzate = lezioni_utilizzate + 1,
+                updated_at = datetime('now')
+            WHERE id = ?
+        ", [$iscrizione_id]);
+        
+        return true;
     }
-
+    
     /**
-     * Riattiva iscrizione
-     * 
-     * @param int $id
-     * @return array
+     * Ottiene tipi corso disponibili
      */
-    public function riattiva($id)
-    {
-        return $this->aggiorna($id, ['stato' => 'attiva']);
+    public function getTipiCorso($attivi_only = true) {
+        $conn = $this->db->getConnection();
+        $where = $attivi_only ? "WHERE attivo = 1" : "";
+        $stmt = $conn->query("SELECT * FROM tipi_corso_config $where ORDER BY ordine_visualizzazione");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
+    
     /**
-     * Elimina iscrizione (soft)
-     * 
-     * @param int $id
-     * @return array
+     * Statistiche iscrizioni
      */
-    public function elimina($id)
-    {
-        try {
-            $iscrizione = Iscrizione::find($id);
-
-            if (!$iscrizione) {
-                return [
-                    'success' => false,
-                    'error' => 'Iscrizione non trovata'
-                ];
-            }
-
-            // Check se ha pagamenti
-            if ($iscrizione->pagamenti()->count() > 0) {
-                return [
-                    'success' => false,
-                    'error' => 'Impossibile eliminare: esistono pagamenti associati'
-                ];
-            }
-
-            $allievoNome = $iscrizione->allievo_nome;
-            $iscrizione->delete();
-
-            // Log attività
-            SecurityHelper::logActivity(
-                $this->userId,
-                'iscrizione_eliminata',
-                'iscrizione',
-                $id,
-                "Eliminata iscrizione per {$allievoNome}"
-            );
-
-            return [
-                'success' => true,
-                'message' => 'Iscrizione eliminata con successo'
-            ];
-
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'error' => $e->getMessage()
-            ];
+    public function getStatistiche($anno_scolastico = null) {
+        $conn = $this->db->getConnection();
+        
+        $sql = "SELECT stato, COUNT(*) as num_iscrizioni, 
+                SUM(quota_iscrizione) as importo_totale,
+                0 as importo_pagato
+                FROM iscrizioni";
+        
+        $params = [];
+        if ($anno_scolastico) {
+            $sql .= " WHERE anno_accademico = ?";
+            $params[] = $anno_scolastico;
         }
+        
+        $sql .= " GROUP BY stato";
+        
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
+    
     /**
-     * Calcola importo iscrizione
-     * 
-     * @param array $data
-     * @return array
+     * Conta iscrizioni attive
      */
-    public function calcolaImporto($data)
-    {
-        try {
-            $allievoId = $data['allievo_id'] ?? null;
-            $annoAccademico = $data['anno_accademico'] ?? null;
-            $tipoCorso = $data['tipo_corso'] ?? 'individuale';
-
-            if (!$allievoId || !$annoAccademico) {
-                return [
-                    'success' => false,
-                    'error' => 'Parametri mancanti'
-                ];
-            }
-
-            // Get configurazione tariffe
-            $config = ConfigurazioneTariffe::getPerAnno($annoAccademico);
-            
-            if (!$config) {
-                return [
-                    'success' => false,
-                    'error' => "Configurazione tariffe non trovata per {$annoAccademico}"
-                ];
-            }
-
-            // Check se allievo ha già pagato quota associativa
-            $hasQuota = \MusicAll\Models\Pagamento::where('allievo_id', $allievoId)
-                ->where('anno_accademico', $annoAccademico)
-                ->where(function($q) {
-                    $tipoQuotaId = \MusicAll\Models\TipoPagamento::getQuotaAssociativa()->id;
-                    $q->where('tipo_pagamento_id', $tipoQuotaId)
-                      ->orWhere('include_quota_associativa', 1);
-                })
-                ->where('stato', 'pagato')
-                ->exists();
-
-            $includeQuota = !$hasQuota;
-            $importo = $config->calcolaImporto($tipoCorso, $includeQuota);
-
-            return [
-                'success' => true,
-                'importo' => $importo,
-                'has_quota_associativa' => $hasQuota
-            ];
-
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'error' => $e->getMessage()
-            ];
-        }
-    }
-
-    /**
-     * Validazione dati iscrizione
-     * 
-     * @param array $data
-     * @return array
-     */
-    private function valida($data)
-    {
-        $errors = [];
-
-        if (empty($data['allievo_id'])) {
-            $errors[] = 'Allievo richiesto';
-        }
-        if (empty($data['anno_accademico'])) {
-            $errors[] = 'Anno accademico richiesto';
-        }
-        if (empty($data['materia_id'])) {
-            $errors[] = 'Materia richiesta';
-        }
-        if (empty($data['docente_id'])) {
-            $errors[] = 'Docente richiesto';
-        }
-        if (empty($data['tipo_corso'])) {
-            $errors[] = 'Tipo corso richiesto';
-        }
-        if (empty($data['data_inizio_corso'])) {
-            $errors[] = 'Data inizio corso richiesta';
-        }
-
-        return [
-            'valid' => empty($errors),
-            'errors' => implode(', ', $errors)
-        ];
+    public function countIscrizioniAttive() {
+        $conn = $this->db->getConnection();
+        $stmt = $conn->query("SELECT COUNT(*) FROM iscrizioni WHERE stato = 'attiva'");
+        return $stmt->fetchColumn();
     }
 }

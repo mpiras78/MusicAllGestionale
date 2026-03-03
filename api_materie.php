@@ -7,13 +7,13 @@ $auth->requireLogin();
 
 $action = $_GET['action'] ?? '';
 
-$controller = new AllieviController();
-
 try {
     switch ($action) {
         case 'list':
-            $allievi = $controller->getAllievi();
-            echo json_encode($allievi);
+            $db = Database::getInstance()->getConnection();
+            $stmt = $db->query("SELECT * FROM materie WHERE attiva = 1 ORDER BY nome");
+            $materie = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode(['success' => true, 'data' => $materie]);
             break;
             
         default:

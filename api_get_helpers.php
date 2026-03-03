@@ -1,108 +1,36 @@
 <?php
-/**
- * API Helpers - Singolo endpoint multiplo
- * GET: ?type=allievi|docenti|materie|aule
- */
-
 require_once 'includes/bootstrap.php';
 
-use MusicAll\Models\Allievo;
-use MusicAll\Models\Docente;
-use MusicAll\Models\Materia;
-use MusicAll\Models\Aula;
-
 header('Content-Type: application/json');
-
-// Autenticazione richiesta
-if (!isset($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'error' => 'Non autorizzato']);
-    exit;
-}
 
 $type = $_GET['type'] ?? '';
 
 try {
+    $db = Database::getInstance()->getConnection();
+    
     switch ($type) {
-        case 'allievi':
-            $data = Allievo::where('attivo', true)
-                ->orderBy('cognome')
-                ->orderBy('nome')
-                ->get()
-                ->map(function($a) {
-                    return [
-                        'id' => $a->id,
-                        'nome' => $a->nome,
-                        'cognome' => $a->cognome,
-                        'nome_completo' => $a->cognome . ' ' . $a->nome
-                    ];
-                });
-            break;
-            
-        case 'docenti':
-            $data = Docente::where('attivo', true)
-                ->orderBy('cognome')
-                ->orderBy('nome')
-                ->get()
-                ->map(function($d) {
-                    return [
-                        'id' => $d->id,
-                        'nome' => $d->nome,
-                        'cognome' => $d->cognome,
-                        'nome_completo' => $d->cognome . ' ' . $d->nome
-                    ];
-                });
-            break;
-            
-        case 'materie':
-            $data = Materia::where('attiva', true)
-                ->orderBy('nome')
-                ->get()
-                ->map(function($m) {
-                    return [
-                        'id' => $m->id,
-                        'nome' => $m->nome
-                    ];
-                });
-            break;
-            
-        case 'aule':
-            $data = Aula::where('attiva', true)
-                ->orderBy('nome')
-                ->get()
-                ->map(function($a) {
-                    return [
-                        'id' => $a->id,
-                        'nome' => $a->nome
-                    ];
-                });
-            break;
-            
         case 'allievi_con_lezioni':
-            // Usa AllieviController per ottenere allievi con statistiche lezioni
-            $allieviCtrl = new AllieviController();
-            $data = $allieviCtrl->getAllieviConLezioni();
-            break;
-
-        case 'docenti_con_lezioni':
-            // Usa DocentiController per ottenere docenti con statistiche lezioni
-            $docentiCtrl = new DocentiController();
-            $data = $docentiCtrl->getDocentiConLezioni();
+            $stmt = $db->query("
+                SELECT 
+                    a.id,
+                    COUNT(DISTINCT l.id) as num_lezioni,
+                    GROUP_CONCAT(DISTINCT m.nome) as materie,
+                    GROUP_CONCAT(DISTINCT l.giorno_settimana) as giorni
+                FROM allievi a
+                INNER JOIN lezioni l ON a.id = l.allievo_id AND l.attiva = 1 AND l.iscrizione_id IS NOT NULL
+                INNER JOIN iscrizioni i ON l.iscrizione_id = i.id AND i.stato = 'attiva'
+                LEFT JOIN materie m ON l.materia_id = m.id
+                WHERE a.attivo = 1
+                GROUP BY a.id
+            ");
+            
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode(['success' => true, 'data' => $result]);
             break;
             
         default:
-            throw new Exception('Tipo non valido');
+            echo json_encode(['success' => false, 'error' => 'Tipo non valido']);
     }
-    
-    echo json_encode([
-        'success' => true,
-        'data' => $data
-    ]);
-    
 } catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'error' => $e->getMessage()
-    ]);
+    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }

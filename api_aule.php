@@ -7,13 +7,13 @@ $auth->requireLogin();
 
 $action = $_GET['action'] ?? '';
 
-$controller = new AllieviController();
+$controller = new AuleController();
 
 try {
     switch ($action) {
         case 'list':
-            $allievi = $controller->getAllievi();
-            echo json_encode($allievi);
+            $aule = $controller->getAule();
+            echo json_encode(['success' => true, 'data' => $aule]);
             break;
             
         default:

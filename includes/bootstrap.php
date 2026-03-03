@@ -55,6 +55,10 @@ require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Auth.php';
 require_once __DIR__ . '/SecurityHelper.php';
 require_once __DIR__ . '/EmailHelper.php';
+require_once __DIR__ . '/CSRFHelper.php';
+require_once __DIR__ . '/RateLimiter.php';
+require_once __DIR__ . '/InputValidator.php';
+require_once __DIR__ . '/PagamentiHelper.php';
 
 // Funzioni helper
 require_once __DIR__ . '/helpers.php';
@@ -67,6 +71,8 @@ require_once __DIR__ . '/controllers/AssenzeController.php';
 require_once __DIR__ . '/controllers/AuleController.php';
 require_once __DIR__ . '/controllers/RecuperiController.php';
 require_once __DIR__ . '/controllers/EventiController.php';
+require_once __DIR__ . '/controllers/IscrizioniController.php';
+require_once __DIR__ . '/controllers/ConfigurazioneCorsiController.php';
 
 // Inizializza oggetti globali
 if (!ELOQUENT_ENABLED) {

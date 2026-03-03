@@ -21,7 +21,7 @@ if (!isset($stats)) {
                         <i class="bi bi-people"></i>
                     </div>
                 </div>
-                <a href="<?= BASE_URL ?>/allievi/index.php" class="btn btn-sm btn-outline-primary mt-2">
+                <a href="<?= BASE_URL ?>/gestione_allievi.php" class="btn btn-sm btn-outline-primary mt-2">
                     Visualizza <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
@@ -40,7 +40,7 @@ if (!isset($stats)) {
                         <i class="bi bi-person-badge"></i>
                     </div>
                 </div>
-                <a href="<?= BASE_URL ?>/docenti/index.php" class="btn btn-sm btn-outline-success mt-2">
+                <a href="<?= BASE_URL ?>/gestione_docenti.php" class="btn btn-sm btn-outline-success mt-2">
                     Visualizza <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
@@ -59,7 +59,7 @@ if (!isset($stats)) {
                         <i class="bi bi-book"></i>
                     </div>
                 </div>
-                <a href="<?= BASE_URL ?>/lezioni/index.php" class="btn btn-sm btn-outline-warning mt-2">
+                <a href="<?= BASE_URL ?>/calendario.php" class="btn btn-sm btn-outline-warning mt-2">
                     Visualizza <i class="bi bi-arrow-right"></i>
                 </a>
             </div>

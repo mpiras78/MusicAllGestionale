@@ -164,8 +164,8 @@ include 'includes/header.php';
             <p class="text-muted mb-0">Visualizzazione programmazione giornaliera</p>
         </div>
         <div class="col-auto">
-            <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#addLezioneModal">
-                <i class="bi bi-plus-circle"></i> Nuova Lezione
+            <button class="btn me-2" style="background-color: #9C27B0; color: white;" data-bs-toggle="modal" data-bs-target="#modalLezioneProva">
+                <i class="bi bi-star"></i> Nuova Lezione
             </button>
             <button class="btn btn-outline-primary btn-print">
                 <i class="bi bi-printer"></i> Stampa
@@ -521,17 +521,17 @@ include 'includes/header.php';
                                                     $tipo_css = 'recupero';
                                                 } elseif (strpos($tipo_lower, 'pren_sala') !== false) {
                                                     $tipo_css = 'prenotazione-allievi';
-                                                    $icona_prenotazione = '👥';
+                                                    $icona_prenotazione = '👨‍🎓';
                                                     $classe_icona_pren = 'tipo-allievi';
                                                     $is_prenotazione = true;
                                                 } elseif (strpos($tipo_lower, 'pren_docente') !== false) {
                                                     $tipo_css = 'prenotazione-docente';
-                                                    $icona_prenotazione = '👨🏫';
+                                                    $icona_prenotazione = '🎓';
                                                     $classe_icona_pren = 'tipo-docente';
                                                     $is_prenotazione = true;
                                                 } elseif (strpos($tipo_lower, 'pren_esterno') !== false) {
                                                     $tipo_css = 'prenotazione-esterno';
-                                                    $icona_prenotazione = '🚪';
+                                                    $icona_prenotazione = '👤';
                                                     $classe_icona_pren = 'tipo-esterno';
                                                     $is_prenotazione = true;
                                                 }
@@ -636,17 +636,17 @@ include 'includes/header.php';
                                                     $tipo_css_evt = 'recupero';
                                                 } elseif (strpos($tipo_lower, 'pren_sala') !== false) {
                                                     $tipo_css_evt = 'prenotazione-allievi';
-                                                    $icona_prenotazione_evt = '👨🏫';
+                                                    $icona_prenotazione_evt = '👨‍🎓';
                                                     $classe_icona_pren_evt = 'tipo-allievi';
                                                     $is_prenotazione_evt = true;
                                                 } elseif (strpos($tipo_lower, 'pren_docente') !== false) {
                                                     $tipo_css_evt = 'prenotazione-docente';
-                                                    $icona_prenotazione_evt = '👥';
+                                                    $icona_prenotazione_evt = '🎓';
                                                     $classe_icona_pren_evt = 'tipo-docente';
                                                     $is_prenotazione_evt = true;
                                                 } elseif (strpos($tipo_lower, 'pren_esterno') !== false) {
                                                     $tipo_css_evt = 'prenotazione-esterno';
-                                                    $icona_prenotazione_evt = '🚪';
+                                                    $icona_prenotazione_evt = '👤';
                                                     $classe_icona_pren_evt = 'tipo-esterno';
                                                     $is_prenotazione_evt = true;
                                                 }
@@ -902,7 +902,7 @@ include 'includes/header.php';
                         <label class="form-label fw-bold">Tipo Prenotazione *</label>
                         <select class="form-select" id="prenotTipo" name="tipo" required onchange="cambiaTipoPrenotazione()">
                             <option value="">Seleziona tipo...</option>
-                            <option value="PREN_SALA">🤖 Prenotazione Allievi (lezione)</option>
+                            <option value="PREN_SALA">👨‍🎓 Prenotazione Allievi (lezione)</option>
                             <option value="PREN_DOCENTE">🎓 Prenotazione Docente (personale)</option>
                             <option value="PREN_ESTERNO">👤 Prenotazione Esterno</option>
                         </select>
@@ -1897,5 +1897,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<?php include 'includes/modals/modal_lezione_prova.php'; ?>
 
 <?php include 'includes/footer.php'; ?>

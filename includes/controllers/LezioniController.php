@@ -37,6 +37,13 @@ class LezioniController {
     }
     
     /**
+     * Alias per getLezioni - per compatibilità
+     */
+    public function getAllLezioni($attive_only = true) {
+        return $this->getLezioni($attive_only);
+    }
+    
+    /**
      * Ottiene lezioni per un giorno specifico con info assenze
      * @param string $giorno Nome giorno (lunedi, martedi, etc)
      * @param bool $attive_only Se true, filtra solo lezioni attive

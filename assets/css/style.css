@@ -201,6 +201,15 @@ body {
     border-left: 3px solid #4caf50;
 }
 
+.lezione-slot.tipo-prova {
+    background-color: #f3e5f5;
+    border-left: 3px solid #9C27B0;
+}
+
+.lezione-slot.tipo-prova .lezione-allievo::before {
+    content: "⭐ ";
+}
+
 .lezione-slot.tipo-laboratorio {
     background-color: #f3e5f5;
     border-left: 3px solid #9c27b0;

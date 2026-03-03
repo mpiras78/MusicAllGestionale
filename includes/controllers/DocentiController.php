@@ -37,6 +37,13 @@ class DocentiController {
     }
     
     /**
+     * Alias per getDocenti - per compatibilità
+     */
+    public function getAllDocenti($attivi_only = true) {
+        return $this->getDocenti($attivi_only);
+    }
+    
+    /**
      * Ottiene un singolo docente per ID
      */
     public function getDocenteById($id) {

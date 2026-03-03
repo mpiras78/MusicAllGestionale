@@ -76,7 +76,7 @@
                             <li><a class="dropdown-item <?= ($current_page ?? '') == 'docenti' ? 'active' : '' ?>" href="<?= BASE_URL ?>/gestione_docenti.php">
                                 <i class="bi bi-person-badge"></i> Docenti
                             </a></li>
-                            <li><a class="dropdown-item" href="<?= BASE_URL ?>/lezioni/index.php">
+                            <li><a class="dropdown-item <?= ($current_page ?? '') == 'lezioni' ? 'active' : '' ?>" href="<?= BASE_URL ?>/gestione_lezioni.php">
                                 <i class="bi bi-book"></i> Lezioni
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
@@ -85,6 +85,13 @@
                             </a></li>
                             <li><a class="dropdown-item" href="<?= BASE_URL ?>/gestione_pagamenti.php">
                                 <i class="bi bi-cash-coin"></i> Pagamenti
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>/configurazione_corsi.php">
+                                <i class="bi bi-gear-fill"></i> Configurazione Corsi
+                            </a></li>
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>/configurazione_laboratori.php">
+                                <i class="bi bi-people-fill"></i> Configurazione Laboratori
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="<?= BASE_URL ?>/aule/index.php">
