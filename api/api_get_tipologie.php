@@ -4,7 +4,7 @@
  * Restituisce lista tipologie per select forms
  */
 
-require_once 'includes/bootstrap.php';
+require_once '../includes/bootstrap.php';
 
 header('Content-Type: application/json');
 

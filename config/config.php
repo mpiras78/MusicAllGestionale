@@ -19,9 +19,10 @@ define('DB_PATH', __DIR__ . '/../database/musicall.sqlite');
 
 // Configurazione Applicazione
 define('APP_NAME', 'MusicAll');
-define('APP_VERSION', '2.2.0');
+define('APP_VERSION', '2.2.1');
 define('BASE_URL', 'http://localhost:8000');
 define('BASE_PATH', dirname(__DIR__));
+define('LOG_PATH', BASE_PATH . '/logs');
 
 // Sicurezza
 define('SESSION_NAME', 'MUSICALL_SESSION');

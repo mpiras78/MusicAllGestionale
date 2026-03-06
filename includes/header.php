@@ -97,7 +97,7 @@
                             <li><a class="dropdown-item" href="<?= BASE_URL ?>/aule/index.php">
                                 <i class="bi bi-door-open"></i> Aule
                             </a></li>
-                            <li><a class="dropdown-item" href="<?= BASE_URL ?>/materie/index.php">
+                            <li><a class="dropdown-item" href="<?= BASE_URL ?>/gestione_materie.php">
                                 <i class="bi bi-journal-text"></i> Materie
                             </a></li>
                         </ul>

@@ -4,7 +4,7 @@
  * Gestisce creazione, lettura, aggiornamento e cancellazione docenti
  */
 
-require_once 'includes/bootstrap.php';
+require_once '../includes/bootstrap.php';
 
 // Richiede login
 $auth->requireLogin();

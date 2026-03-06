@@ -9,7 +9,7 @@ ob_start();
 error_reporting(0);
 ini_set('display_errors', 0);
 
-require_once 'includes/bootstrap.php';
+require_once '../includes/bootstrap.php';
 
 // Pulisci buffer e imposta header JSON PRIMA di tutto
 ob_end_clean();

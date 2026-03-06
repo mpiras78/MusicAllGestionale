@@ -1,5 +1,5 @@
 <?php
-require_once 'includes/bootstrap.php';
+require_once '../includes/bootstrap.php';
 
 header('Content-Type: application/json');
 
@@ -79,7 +79,6 @@ try {
                 INNER JOIN materie m ON l.materia_id = m.id
                 LEFT JOIN assenze ass ON ass.lezione_id = l.id 
                     AND ass.data_assenza = ?
-                    AND ass.attiva = 1
                 WHERE l.giorno_settimana = ?
                 AND l.aula_id = ?
                 AND l.attiva = 1

@@ -1,5 +1,5 @@
 <?php
-require_once 'includes/bootstrap.php';
+require_once '../includes/bootstrap.php';
 
 header('Content-Type: application/json');
 
@@ -9,6 +9,28 @@ try {
     $db = Database::getInstance()->getConnection();
     
     switch ($type) {
+        case 'allievi':
+            $stmt = $db->query("
+                SELECT id, cognome, nome
+                FROM allievi
+                WHERE attivo = 1
+                ORDER BY cognome, nome
+            ");
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode(['success' => true, 'data' => $result]);
+            break;
+            
+        case 'docenti':
+            $stmt = $db->query("
+                SELECT id, cognome, nome
+                FROM docenti
+                WHERE attivo = 1
+                ORDER BY cognome, nome
+            ");
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode(['success' => true, 'data' => $result]);
+            break;
+            
         case 'allievi_con_lezioni':
             $stmt = $db->query("
                 SELECT 

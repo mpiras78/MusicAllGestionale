@@ -11,7 +11,23 @@ $iscrizioniCtrl = new IscrizioniController();
 // Anno scolastico corrente
 $anno_corrente = date('Y') . '-' . (date('Y') + 1);
 
-$iscrizioni = $iscrizioniCtrl->getIscrizioni($anno_corrente);
+// Determina il mese e anno selezionati
+$mese_selezionato = $_GET['mese'] ?? date('Y-m');
+list($anno_selezionato, $mese_num) = explode('-', $mese_selezionato) + ['', ''];
+
+if (!$anno_selezionato || !$mese_num) {
+    $anno_selezionato = (int)date('Y');
+    $mese_num = (int)date('m');
+} else {
+    $anno_selezionato = (int)$anno_selezionato;
+    $mese_num = (int)$mese_num;
+}
+
+$mese_display = sprintf('%04d-%02d', $anno_selezionato, $mese_num);
+
+// Carica iscrizioni da database tramite controller
+$iscrizioni = $iscrizioniCtrl->getIscrizioniPerMese($anno_selezionato, $mese_num);
+
 $tipi_corso = $iscrizioniCtrl->getTipiCorso();
 $statistiche = $iscrizioniCtrl->getStatistiche($anno_corrente);
 
@@ -35,6 +51,55 @@ include 'includes/header.php';
             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addIscrizioneModal">
                 <i class="bi bi-plus-circle"></i> Nuova Iscrizione
             </button>
+        </div>
+    </div>
+
+    <!-- Filtro Mese -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <label class="form-label fw-bold mb-2">
+                        <i class="bi bi-calendar"></i> Filtra per Mese Anno Accademico
+                    </label>
+                    <div class="input-group mb-2">
+                        <select class="form-select" id="filtroMese" onchange="cambiaFiltroMese()">
+                            <?php
+                            // Calcola l'anno accademico corrente
+                            $mese_corrente = (int)date('m');
+                            $anno_corrente = (int)date('Y');
+                            
+                            // Anno accademico (inizia a Settembre)
+                            $anno_accademico_inizio = ($mese_corrente >= 9) ? $anno_corrente : $anno_corrente - 1;
+                            
+                            // Genera opzioni per i 12 mesi (Settembre - Luglio)
+                            $mesi_it = ['', 'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+                            
+                            for ($i = 0; $i < 12; $i++) {
+                                $mese_num = 9 + $i;
+                                $anno_opt = $anno_accademico_inizio;
+                                if ($mese_num > 12) {
+                                    $mese_num -= 12;
+                                    $anno_opt++;
+                                }
+                                
+                                $option_value = sprintf('%04d-%02d', $anno_opt, $mese_num);
+                                $selected = ($option_value === $mese_display) ? 'selected' : '';
+                                $label = $mesi_it[$mese_num] . ' ' . $anno_opt;
+                                
+                                echo "<option value=\"{$option_value}\" {$selected}>{$label}</option>";
+                            }
+                            ?>
+                        </select>
+                        <button class="btn btn-outline-secondary" type="button" onclick="resetFiltroMese()" title="Ripristina mese corrente">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
+                    <small class="text-muted d-block">
+                        <i class="bi bi-info-circle"></i> Anno accademico: Settembre - Luglio
+                    </small>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -148,10 +213,10 @@ include 'includes/header.php';
                                     <td class="text-end">€ <?= number_format($i['importo_totale'], 2) ?></td>
                                     <td class="text-end">€ <?= number_format($i['importo_pagato'], 2) ?></td>
                                     <td class="text-center">
-                                        <button class="btn btn-sm btn-primary" onclick="visualizzaIscrizione(<?= $i['id'] ?>)" title="Visualizza">
+                                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#dettaglioIscrizioneModal" onclick="caricaDettagliIscrizione(<?= $i['id'] ?>)" title="Visualizza">
                                             <i class="bi bi-eye"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-warning" onclick="modificaIscrizione(<?= $i['id'] ?>)" title="Modifica">
+                                        <button class="btn btn-sm btn-warning" onclick="apriModificaIscrizione(<?= $i['id'] ?>)" title="Modifica">
                                             <i class="bi bi-pencil"></i>
                                         </button>
                                     </td>
@@ -160,6 +225,91 @@ include 'includes/header.php';
                         <?php endif; ?>
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Dettaglio Iscrizione -->
+<div class="modal fade" id="dettaglioIscrizioneModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-info-circle"></i> Dettaglio Iscrizione
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted small mb-2">ALLIEVO</h6>
+                        <p class="mb-0 fw-bold" id="det_allievo">-</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted small mb-2">STATO</h6>
+                        <p class="mb-0" id="det_stato">-</p>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted small mb-2">TIPO CORSO</h6>
+                        <p class="mb-0" id="det_tipo_corso">-</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted small mb-2">MATERIA</h6>
+                        <p class="mb-0" id="det_materia">-</p>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted small mb-2">DOCENTE</h6>
+                        <p class="mb-0" id="det_docente">-</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted small mb-2">DATA INIZIO</h6>
+                        <p class="mb-0" id="det_data_inizio">-</p>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <h6 class="text-muted small mb-2">GIORNO</h6>
+                        <p class="mb-0" id="det_giorno">-</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted small mb-2">ORARIO</h6>
+                        <p class="mb-0" id="det_orario">-</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted small mb-2">AULA</h6>
+                        <p class="mb-0" id="det_aula">-</p>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted small mb-2">QUOTA ISCRIZIONE</h6>
+                        <p class="mb-0 fw-bold" id="det_quota">€ 0.00</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted small mb-2">SCONTO FRATELLI</h6>
+                        <p class="mb-0" id="det_sconto">€ 0.00</p>
+                    </div>
+                </div>
+
+                <div id="det_note_container" style="display:none;">
+                    <h6 class="text-muted small mb-2">NOTE</h6>
+                    <p class="mb-0" id="det_note">-</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                <button type="button" class="btn btn-warning" id="btnModificaDaDettaglio" onclick="apriModificaDaDettaglio()">
+                    <i class="bi bi-pencil"></i> Modifica Iscrizione
+                </button>
             </div>
         </div>
     </div>
@@ -353,6 +503,20 @@ include 'includes/header.php';
                             <label class="form-label">Note</label>
                             <textarea class="form-control" name="note" rows="2"></textarea>
                         </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Stato</label>
+                            <select class="form-select" name="stato">
+                                <option value="attiva">Attiva</option>
+                                <option value="sospesa">Sospesa</option>
+                                <option value="conclusa">Conclusa</option>
+                                <option value="annullata">Annullata</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3" style="display:none;">
+                            <input type="hidden" name="data_fine">
+                        </div>
                     </div>
                     
                     <!-- STEP 4: Errore Conflitto -->
@@ -443,7 +607,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         console.log('Caricamento docenti per materia:', materiaId);
         
-        fetch(`api_docenti_per_materia.php?materia_id=${materiaId}`)
+        fetch(`<?= BASE_URL ?>/api/api_docenti_per_materia.php?materia_id=${materiaId}`)
         .then(r => r.json())
         .then(data => {
             console.log('Risposta API docenti:', data);
@@ -562,7 +726,7 @@ function creaAllievo() {
         attivo: 1
     };
     
-    fetch('api_allievi_crud.php', {
+    fetch('<?= BASE_URL ?>/api/api_allievi_crud.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({action: 'create', data: data})
@@ -589,7 +753,7 @@ function checkConflicts() {
     
     if (!giorno || !oraInizio || !aulaId || !tipoCorsoId) return;
     
-    fetch(`api_check_conflicts.php?giorno=${giorno}&ora_inizio=${oraInizio}&aula_id=${aulaId}&tipo_corso_id=${tipoCorsoId}`)
+    fetch(`<?= BASE_URL ?>/api/api_check_conflicts.php?giorno=${giorno}&ora_inizio=${oraInizio}&aula_id=${aulaId}&tipo_corso_id=${tipoCorsoId}`)
     .then(r => r.json())
     .then(data => {
         const alert = document.getElementById('conflitti_alert');
@@ -624,18 +788,21 @@ function selectAula(aulaId) {
 }
 
 function caricaAllievi() {
-    fetch('api_allievi.php?action=list')
+    fetch('<?= BASE_URL ?>/api/api_get_helpers.php?type=allievi')
     .then(r => r.json())
     .then(data => {
         const select = document.getElementById('select_allievo');
-        data.forEach(a => {
-            select.innerHTML += `<option value="${a.id}">${a.cognome} ${a.nome}</option>`;
-        });
+        select.innerHTML = '<option value="">Seleziona allievo...</option>';
+        if (data.success && data.data) {
+            data.data.forEach(a => {
+                select.innerHTML += `<option value="${a.id}">${a.cognome} ${a.nome}</option>`;
+            });
+        }
     });
 }
 
 function caricaTipiCorso() {
-    fetch('api_configurazione_corsi.php?action=list&tipo=corso')
+    fetch('<?= BASE_URL ?>/api/api_configurazione_corsi.php?action=list&tipo=corso')
     .then(r => r.json())
     .then(data => {
         const select = document.getElementById('tipo_corso_id');
@@ -650,7 +817,7 @@ function caricaTipiCorso() {
 }
 
 function caricaMaterie() {
-    fetch('api_materie.php?action=list')
+    fetch('<?= BASE_URL ?>/api/api_materie.php?action=list')
     .then(r => r.json())
     .then(data => {
         const select = document.getElementById('materia_id');
@@ -663,7 +830,7 @@ function caricaMaterie() {
 }
 
 function caricaAule() {
-    fetch('api_aule.php?action=list')
+    fetch('<?= BASE_URL ?>/api/api_aule.php?action=list')
     .then(r => r.json())
     .then(data => {
         const select = document.getElementById('aula_id');
@@ -685,7 +852,7 @@ function salvaIscrizione() {
     const formData = new FormData(form);
     const id = document.getElementById('iscrizione_id').value;
     
-    fetch('api_iscrizioni.php', {
+    fetch('<?= BASE_URL ?>/api/api_iscrizioni.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
@@ -718,6 +885,11 @@ function salvaIscrizione() {
             `;
             currentStep = 5;
             showStep(5);
+            
+            // Ricarica la pagina dopo 3 secondi per mostrare la nuova iscrizione
+            setTimeout(() => {
+                location.reload();
+            }, 3000);
         } else if (data.conflict) {
             // Mostra step errore con conflitto
             const conf = data.conflict;
@@ -765,47 +937,149 @@ function nuovaIscrizione() {
     location.reload();
 }
 
-function modificaIscrizione(id) {
-    fetch(`api_iscrizioni.php?action=get&id=${id}`)
-    .then(r => r.json())
+function caricaDettagliIscrizione(id) {
+    fetch(`<?= BASE_URL ?>/api/api_iscrizioni.php?action=get&id=${id}`)
+    .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+    })
     .then(data => {
-        if (data.success && data.data) {
-            const i = data.data;
-            document.getElementById('iscrizione_id').value = i.id;
-            document.getElementById('allievo_id').value = i.allievo_id;
-            document.getElementById('tipo_corso_id').value = i.tipo_corso_config_id;
-            document.getElementById('materia_id').value = i.materia_id;
-            
-            // Carica docenti per materia poi seleziona
-            setTimeout(() => {
-                document.getElementById('materia_id').dispatchEvent(new Event('change'));
-                setTimeout(() => {
-                    document.getElementById('docente_id').value = i.docente_id;
-                }, 500);
-            }, 100);
-            
-            document.getElementById('giorno_settimana').value = i.giorno_settimana;
-            document.getElementById('ora_inizio').value = i.ora_inizio;
-            document.getElementById('aula_id').value = i.aula_id;
-            document.querySelector('[name="anno_scolastico"]').value = i.anno_scolastico;
-            document.querySelector('[name="data_inizio"]').value = i.data_inizio;
-            document.querySelector('[name="data_fine"]').value = i.data_fine || '';
-            document.querySelector('[name="quota_iscrizione"]').value = i.quota_iscrizione;
-            document.querySelector('[name="sconto_fratelli"]').value = i.sconto_fratelli;
-            document.querySelector('[name="stato"]').value = i.stato;
-            document.querySelector('[name="note"]').value = i.note || '';
-            
-            document.getElementById('modalTitle').textContent = 'Modifica Iscrizione';
-            new bootstrap.Modal(document.getElementById('addIscrizioneModal')).show();
+        console.log('Dettagli iscrizione ricevuti:', data);
+        
+        if (!data.success) {
+            throw new Error(data.message || 'Errore nel caricamento');
         }
+        
+        if (!data.data) {
+            throw new Error('Dati non disponibili');
+        }
+        
+        const i = data.data;
+        window.currentIscrizioneId = i.id;
+        
+        // Popola i dettagli
+        document.getElementById('det_allievo').textContent = i.allievo || '-';
+        
+        // Stato con badge
+        const statoBadgeClass = {
+            'attiva': 'bg-success',
+            'sospesa': 'bg-warning',
+            'conclusa': 'bg-secondary',
+            'annullata': 'bg-danger'
+        }[i.stato] || 'bg-secondary';
+        document.getElementById('det_stato').innerHTML = 
+            `<span class="badge ${statoBadgeClass}">${i.stato ? i.stato.charAt(0).toUpperCase() + i.stato.slice(1) : '-'}</span>`;
+        
+        document.getElementById('det_tipo_corso').textContent = i.tipo_corso || '-';
+        document.getElementById('det_materia').textContent = i.materia || '-';
+        document.getElementById('det_docente').textContent = i.docente || '-';
+        
+        // Data inizio
+        if (i.data_inizio) {
+            const date = new Date(i.data_inizio);
+            document.getElementById('det_data_inizio').textContent = 
+                date.toLocaleDateString('it-IT', {year: 'numeric', month: 'long', day: 'numeric'});
+        } else {
+            document.getElementById('det_data_inizio').textContent = '-';
+        }
+        
+        // Giorno settimana
+        const giorni = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+        document.getElementById('det_giorno').textContent = giorni[parseInt(i.giorno_settimana)] || '-';
+        
+        // Orario
+        document.getElementById('det_orario').textContent = i.ora_inizio ? i.ora_inizio.substring(0, 5) : '-';
+        
+        // Aula
+        document.getElementById('det_aula').textContent = i.aula || '-';
+        
+        // Quote
+        document.getElementById('det_quota').textContent = '€ ' + (parseFloat(i.quota_iscrizione) || 0).toFixed(2);
+        document.getElementById('det_sconto').textContent = '€ ' + (parseFloat(i.sconto_fratelli) || 0).toFixed(2);
+        
+        // Note
+        if (i.note) {
+            document.getElementById('det_note').textContent = i.note;
+            document.getElementById('det_note_container').style.display = 'block';
+        } else {
+            document.getElementById('det_note_container').style.display = 'none';
+        }
+        
+        // Salva l'ID per la modifica
+        document.getElementById('btnModificaDaDettaglio').onclick = () => apriModificaDaDettaglio(i.id);
+    })
+    .catch(err => {
+        console.error('Errore caricamento dettagli:', err);
+        mostraToast('Errore', err.message || 'Errore nel caricamento dei dettagli', 'danger');
     });
 }
-function visualizzaIscrizione(id) {
-    mostraToast('Info', 'Funzionalità in sviluppo', 'info');
+
+function apriModificaIscrizione(id) {
+    console.log('Aprendo modifica iscrizione ID:', id);
+    fetch(`<?= BASE_URL ?>/api/api_iscrizioni.php?action=get&id=${id}`)
+    .then(r => {
+        console.log('Risposta ricevuta, status:', r.status);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+    })
+    .then(data => {
+        console.log('Dati ricevuti:', data);
+        
+        if (!data.success) {
+            throw new Error(data.message || 'Errore nel caricamento');
+        }
+        
+        if (!data.data) {
+            throw new Error('Dati non disponibili');
+        }
+        
+        const i = data.data;
+        console.log('Iscrizione caricata:', i);
+        
+        document.getElementById('iscrizione_id').value = i.id;
+        document.getElementById('allievo_id').value = i.allievo_id;
+        document.getElementById('tipo_corso_id').value = i.tipo_corso_config_id;
+        document.getElementById('materia_id').value = i.materia_id;
+        
+        // Carica docenti per materia poi seleziona
+        setTimeout(() => {
+            document.getElementById('materia_id').dispatchEvent(new Event('change'));
+            setTimeout(() => {
+                document.getElementById('docente_id').value = i.docente_id;
+            }, 500);
+        }, 100);
+        
+        document.getElementById('giorno_settimana').value = i.giorno_settimana;
+        document.getElementById('ora_inizio').value = i.ora_inizio;
+        document.getElementById('aula_id').value = i.aula_id;
+        document.querySelector('[name="anno_scolastico"]').value = i.anno_scolastico;
+        document.querySelector('[name="data_inizio"]').value = i.data_inizio;
+        document.querySelector('[name="data_fine"]').value = i.data_fine || '';
+        document.querySelector('[name="quota_iscrizione"]').value = i.quota_iscrizione;
+        document.querySelector('[name="sconto_fratelli"]').value = i.sconto_fratelli;
+        document.querySelector('[name="stato"]').value = i.stato;
+        document.querySelector('[name="note"]').value = i.note || '';
+        
+        document.getElementById('modalTitle').textContent = 'Modifica Iscrizione';
+        currentStep = 1;
+        showStep(1);
+        new bootstrap.Modal(document.getElementById('addIscrizioneModal')).show();
+    })
+    .catch(err => {
+        console.error('Errore fetch:', err);
+        mostraToast('Errore', err.message || 'Errore nel caricamento iscrizione', 'danger');
+    });
 }
 
-function modificaIscrizione(id) {
-    mostraToast('Info', 'Funzionalità in sviluppo', 'info');
+function apriModificaDaDettaglio(id) {
+    // Chiudi modal dettaglio
+    const modal = bootstrap.Modal.getInstance(document.getElementById('dettaglioIscrizioneModal'));
+    if (modal) modal.hide();
+    
+    // Apri modifica
+    setTimeout(() => {
+        apriModificaIscrizione(id);
+    }, 300);
 }
 
 function mostraToast(titolo, messaggio, tipo = 'info') {
@@ -851,6 +1125,17 @@ function mostraToast(titolo, messaggio, tipo = 'info') {
     toast.show();
     
     toastElement.addEventListener('hidden.bs.toast', () => toastElement.remove());
+}
+
+function cambiaFiltroMese() {
+    const mese = document.getElementById('filtroMese').value;
+    if (mese) {
+        window.location.href = '<?= BASE_URL ?>/gestione_iscrizioni.php?mese=' + mese;
+    }
+}
+
+function resetFiltroMese() {
+    window.location.href = '<?= BASE_URL ?>/gestione_iscrizioni.php';
 }
 </script>
 

@@ -693,7 +693,7 @@ function disattivaDocente() {
             mostraToast('Successo', 'Docente disattivato correttamente', 'success');
             setTimeout(() => location.reload(), 1500);
         } else {
-            throw new Error(result.error || 'Errore durante la disattivazione');
+            throw new Error(result.error || result.message);
         }
     })
     .catch(error => mostraToast('Errore', error.message, 'danger'));

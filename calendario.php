@@ -1128,7 +1128,7 @@ function caricaOpzioniPrenotazione() {
     selectSocioEsterno.innerHTML = '<option value="">Caricamento...</option>';
     
     // Carica allievi
-    fetch('<?= BASE_URL ?>/api_get_helpers.php?type=allievi')
+    fetch('<?= BASE_URL ?>/api/api_get_helpers.php?type=allievi')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -1147,7 +1147,7 @@ function caricaOpzioniPrenotazione() {
         });
     
     // Carica docenti
-    fetch('<?= BASE_URL ?>/api_get_helpers.php?type=docenti')
+    fetch('<?= BASE_URL ?>/api/api_get_helpers.php?type=docenti')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -1166,7 +1166,7 @@ function caricaOpzioniPrenotazione() {
         });
     
     // Carica soci esterni
-    fetch('<?= BASE_URL ?>/api_get_soci_esterni.php')
+    fetch('<?= BASE_URL ?>/api/api_get_soci_esterni.php')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -1312,7 +1312,7 @@ function salvaPrenotazione() {
     }
     
     // Invia richiesta
-    fetch('<?= BASE_URL ?>/api_salva_prenotazione.php', {
+    fetch('<?= BASE_URL ?>/api/api_salva_prenotazione.php', {
         method: 'POST',
         body: formDataToSend
     })
@@ -1342,7 +1342,7 @@ function salvaPrenotazione() {
 
 function mostraInfoEvento(eventoId) {
     // Apri modal con info evento/prenotazione
-    fetch(`<?= BASE_URL ?>/api_eventi.php?id=${eventoId}`)
+    fetch(`<?= BASE_URL ?>/api/api_eventi.php?id=${eventoId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success && data.data) {
@@ -1414,6 +1414,9 @@ function mostraInfoEvento(eventoId) {
                 }
                 html += `
                     <div class="d-grid gap-2">
+                        <button class="btn btn-primary" onclick="apriModalModificaEvento(${eventoId})">
+                            <i class="bi bi-pencil"></i> Modifica Orario/Sala
+                        </button>
                         <button class="btn btn-danger" onclick="annullaEvento(${eventoId})">
                             <i class="bi bi-trash"></i> ${testoPulsante}
                         </button>
@@ -1447,6 +1450,76 @@ function annullaEvento(eventoId) {
     modalConferma.show();
 }
 
+function apriModalModificaEvento(eventoId) {
+    // Carica dati evento
+    fetch(`<?= BASE_URL ?>/api/api_eventi.php?id=${eventoId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.data) {
+                const evt = data.data;
+                
+                // Popola form modifica
+                document.getElementById('modEvento_id').value = eventoId;
+                document.getElementById('modEvento_oraInizio').value = evt.ora_inizio;
+                document.getElementById('modEvento_oraFine').value = evt.ora_fine;
+                document.getElementById('modEvento_aulaId').value = evt.aula_id;
+                
+                // Apri modal
+                const modal = new bootstrap.Modal(document.getElementById('modificaEventoModal'));
+                modal.show();
+            } else {
+                throw new Error(data.error || 'Evento non trovato');
+            }
+        })
+        .catch(error => {
+            mostraToast('Errore', 'Impossibile caricare i dettagli: ' + error.message, 'danger');
+        });
+}
+
+function salvaModificaEvento() {
+    const eventoId = document.getElementById('modEvento_id').value;
+    const oraInizio = document.getElementById('modEvento_oraInizio').value;
+    const oraFine = document.getElementById('modEvento_oraFine').value;
+    const aulaId = document.getElementById('modEvento_aulaId').value;
+    
+    if (!oraInizio || !oraFine || !aulaId) {
+        mostraToast('Errore', 'Compila tutti i campi', 'danger');
+        return;
+    }
+    
+    const btnSalva = event.target;
+    btnSalva.disabled = true;
+    btnSalva.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Salvataggio...';
+    
+    const formData = new FormData();
+    formData.append('evento_id', eventoId);
+    formData.append('ora_inizio', oraInizio);
+    formData.append('ora_fine', oraFine);
+    formData.append('aula_id', aulaId);
+    
+    fetch('<?= BASE_URL ?>/api/api_modifica_evento.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modificaEventoModal'));
+            if (modal) modal.hide();
+            
+            mostraToast('Successo', 'Prenotazione modificata', 'success');
+            setTimeout(() => location.reload(), 800);
+        } else {
+            throw new Error(result.error || 'Errore durante il salvataggio');
+        }
+    })
+    .catch(error => {
+        mostraToast('Errore', error.message, 'danger');
+        btnSalva.disabled = false;
+        btnSalva.innerHTML = '<i class="bi bi-check-circle"></i> Salva Modifiche';
+    });
+}
+
 // Gestisci click su pulsante conferma annullamento
 document.addEventListener('DOMContentLoaded', function() {
     const btnConferma = document.getElementById('btnConfermaAnnullamento');
@@ -1460,7 +1533,7 @@ document.addEventListener('DOMContentLoaded', function() {
             btnConferma.disabled = true;
             btnConferma.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Annullamento...';
             
-            fetch(`<?= BASE_URL ?>/api_annulla_prenotazione.php`, {
+            fetch(`<?= BASE_URL ?>/api/api_annulla_prenotazione.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1531,7 +1604,7 @@ function caricaInfoAllievo(allieviId, lezioneId = null, nomeAllievo = '', materi
     `;
     
     // Fetch dati
-    fetch(`<?= BASE_URL ?>/api_get_info_allievo.php?allievo_id=${allieviId}`)
+    fetch(`<?= BASE_URL ?>/api/api_get_info_allievo.php?allievo_id=${allieviId}`)
         .then(response => response.json())
         .then(data => {
             if (data.error) {
@@ -1762,7 +1835,7 @@ function confermaAssenza() {
     btnConferma.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Salvataggio...';
     
     // Invia richiesta
-    fetch('<?= BASE_URL ?>/api_salva_assenza_calendario.php', {
+    fetch('<?= BASE_URL ?>/api/api_salva_assenza_calendario.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -1899,5 +1972,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <?php include 'includes/modals/modal_lezione_prova.php'; ?>
+<?php include 'includes/modals/modal_modifica_evento.php'; ?>
 
 <?php include 'includes/footer.php'; ?>

@@ -202,8 +202,8 @@ body {
 }
 
 .lezione-slot.tipo-prova {
-    background-color: #f3e5f5;
-    border-left: 3px solid #9C27B0;
+    background-color: #ffe0b2;
+    border-left: 3px solid #ff9800;
 }
 
 .lezione-slot.tipo-prova .lezione-allievo::before {

@@ -8,7 +8,7 @@ ob_start();
 error_reporting(0);
 ini_set('display_errors', 0);
 
-require_once 'includes/bootstrap.php';
+require_once '../includes/bootstrap.php';
 
 ob_end_clean();
 header('Content-Type: application/json; charset=utf-8');

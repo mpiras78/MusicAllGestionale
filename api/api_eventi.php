@@ -10,7 +10,7 @@
  * - DELETE ?action=delete&id=X
  */
 
-require_once 'includes/bootstrap.php';
+require_once '../includes/bootstrap.php';
 
 use MusicAll\Models\EventoCalendario;
 use MusicAll\Models\TipologiaEvento;

@@ -5,6 +5,7 @@
 
 // State globale
 let currentEventData = null;
+let currentDettaglioPrenotazione = null;
 let tipologieEventi = [];
 let allieviList = [];
 let docentiList = [];
@@ -12,8 +13,113 @@ let materieList = [];
 let auleList = [];
 
 /**
- * Carica dati iniziali per i form
+ * Apri modal dettaglio prenotazione
  */
+async function apriModalDettaglioPrenotazione(eventoId) {
+    try {
+        console.log('Apertura modal dettaglio per evento:', eventoId);
+        
+        // Mostra modal subito
+        const modalElement = document.getElementById('modalDettaglioPrenotazione');
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+        
+        // Mostra loading nel body
+        const dettaglioTipologia = document.getElementById('dettaglioTipologia');
+        if (dettaglioTipologia) {
+            dettaglioTipologia.innerHTML = '<small class="text-muted"><i class="bi bi-hourglass-split"></i> Caricamento...</small>';
+        }
+        
+        // Carica dettagli evento
+        const response = await fetch(`api_eventi.php?action=get&id=${eventoId}`);
+        const data = await response.json();
+        
+        console.log('Risposta API:', data);
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Errore caricamento prenotazione');
+        }
+        
+        const eventoData = data.data;
+        
+        currentDettaglioPrenotazione = {
+            id: eventoId,
+            ...eventoData
+        };
+        
+        // Popola i campi di dettaglio
+        document.getElementById('dettaglioTipologia').textContent = eventoData.tipologia_nome || '-';
+        document.getElementById('dettaglioData').textContent = formatDataItaliana(eventoData.data_evento || eventoData.giorno_settimana || '-');
+        document.getElementById('dettaglioOrario').textContent = `${(eventoData.ora_inizio || '-').substring(0, 5)} - ${(eventoData.ora_fine || '-').substring(0, 5)}`;
+        document.getElementById('dettaglioSala').textContent = eventoData.aula_nome || '-';
+        document.getElementById('dettaglioDocente').textContent = eventoData.docente_nome || '-';
+        document.getElementById('dettaglioMateria').textContent = eventoData.materia_nome || '-';
+        document.getElementById('dettaglioAllievo').textContent = eventoData.partecipante_nome || '-';
+        document.getElementById('dettaglioTitolo').textContent = eventoData.titolo || '-';
+        document.getElementById('dettaglioDescrizione').textContent = eventoData.descrizione || '-';
+        document.getElementById('dettaglioNote').textContent = eventoData.note || '-';
+        
+        // Popola stato
+        const statoBadge = document.getElementById('dettaglioStatoBadge');
+        const stato = eventoData.confermato ? 'Confermato' : 'Non Confermato';
+        const classeStato = eventoData.confermato ? 'bg-success' : 'bg-warning';
+        statoBadge.textContent = stato;
+        statoBadge.className = `badge ${classeStato}`;
+        
+    } catch (error) {
+        console.error('Errore:', error);
+        document.getElementById('dettaglioTipologia').textContent = 'Errore nel caricamento';
+    }
+}
+
+/**
+ * Modifica prenotazione attuale (apre modal modifica)
+ */
+function modificaPrenotazioneAttuale() {
+    if (currentDettaglioPrenotazione) {
+        // Chiudi modal dettaglio
+        const dettaglioModal = bootstrap.Modal.getInstance(document.getElementById('modalDettaglioPrenotazione'));
+        if (dettaglioModal) {
+            dettaglioModal.hide();
+        }
+        
+        // Apri modal modifica
+        apriModalModificaEvento(currentDettaglioPrenotazione.id);
+    }
+}
+
+/**
+ * Formatta data in italiano
+ */
+function formatDataItaliana(data) {
+    if (!data) return '-';
+    
+    // Se è un giorno della settimana
+    if (['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato', 'domenica'].includes(data.toLowerCase())) {
+        const giorni = {
+            'lunedi': 'Lunedì',
+            'martedi': 'Martedì',
+            'mercoledi': 'Mercoledì',
+            'giovedi': 'Giovedì',
+            'venerdi': 'Venerdì',
+            'sabato': 'Sabato',
+            'domenica': 'Domenica'
+        };
+        return giorni[data.toLowerCase()] || data;
+    }
+    
+    // Se è una data yyyy-mm-dd
+    if (data.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const date = new Date(data + 'T00:00:00');
+        const giorni = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+        const mesi = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 
+                      'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+        return `${giorni[date.getDay()]} ${date.getDate()} ${mesi[date.getMonth()]} ${date.getFullYear()}`;
+    }
+    
+    return data;
+}
+
 async function loadFormData() {
     try {
         // Carica tipologie eventi

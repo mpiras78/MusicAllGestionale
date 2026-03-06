@@ -7,7 +7,7 @@
  * l'annullamento di una prenotazione semplicemente la disattiva.
  */
 
-require_once 'includes/bootstrap.php';
+require_once '../includes/bootstrap.php';
 
 header('Content-Type: application/json');
 

@@ -359,8 +359,9 @@ include 'includes/header.php';
                                         ?>
                                             <div class="lezione-slot<?= $classe_annullata ?>" 
                                                  data-evento-id="<?= $evento_slot['id'] ?>"
-                                                 style="background-color: <?= $evento_slot['colore_bg'] ?>; border-left: 3px solid <?= $evento_slot['colore_border'] ?>; position: relative;"
-                                                 title="<?= e($evento_slot['partecipante_nome'] ?? 'N/D') ?> - <?= e($evento_slot['tipologia_nome']) ?>">
+                                                 onclick="apriModalDettaglioPrenotazione(<?= $evento_slot['id'] ?>); event.stopPropagation();"
+                                                 style="background-color: <?= $evento_slot['colore_bg'] ?>; border-left: 3px solid <?= $evento_slot['colore_border'] ?>; position: relative; cursor: pointer;"
+                                                 title="<?= e($evento_slot['partecipante_nome'] ?? 'N/D') ?> - <?= e($evento_slot['tipologia_nome']) ?> (click per dettagli)">
                                                 
                                                 <!-- Pulsante Modifica -->
                                                 <button class="btn btn-sm btn-light position-absolute top-0 end-0 m-1" 
@@ -425,6 +426,112 @@ include 'includes/header.php';
         </div>
     </div>
 
+</div>
+
+<!-- Modal Dettaglio Prenotazione -->
+<div class="modal fade" id="modalDettaglioPrenotazione" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-info-circle"></i> Dettaglio Prenotazione
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Tipologia</label>
+                            <p id="dettaglioTipologia" class="text-muted">-</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Stato</label>
+                            <p id="dettaglioStato">
+                                <span id="dettaglioStatoBadge" class="badge bg-secondary">-</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Data</label>
+                            <p id="dettaglioData" class="text-muted">-</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Orario</label>
+                            <p id="dettaglioOrario" class="text-muted">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold"><i class="bi bi-door-open"></i> Sala</label>
+                            <p id="dettaglioSala" class="text-muted">-</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold"><i class="bi bi-person-fill"></i> Docente</label>
+                            <p id="dettaglioDocente" class="text-muted">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold"><i class="bi bi-music-note-beamed"></i> Materia</label>
+                            <p id="dettaglioMateria" class="text-muted">-</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold"><i class="bi bi-person"></i> Allievo</label>
+                            <p id="dettaglioAllievo" class="text-muted">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Titolo</label>
+                        <p id="dettaglioTitolo" class="text-muted">-</p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Descrizione</label>
+                        <p id="dettaglioDescrizione" class="text-muted">-</p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Note</label>
+                        <p id="dettaglioNote" class="text-muted">-</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Chiudi
+                </button>
+                <button type="button" class="btn btn-primary" id="btnModificaPrenotazione" onclick="modificaPrenotazioneAttuale(); event.stopPropagation();">
+                    <i class="bi bi-pencil-fill"></i> Modifica Orario/Sala
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Modal Crea/Modifica Evento -->

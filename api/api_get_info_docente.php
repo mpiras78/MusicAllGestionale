@@ -4,7 +4,7 @@
  * Restituisce dati anagrafici, lezioni, materie del docente
  */
 
-require_once 'includes/bootstrap.php';
+require_once '../includes/bootstrap.php';
 
 header('Content-Type: application/json');
 

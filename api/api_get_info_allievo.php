@@ -5,7 +5,7 @@
  */
 
 header('Content-Type: application/json');
-require_once 'includes/bootstrap.php';
+require_once '../includes/bootstrap.php';
 
 // Verifica autenticazione
 if (!$auth->isLoggedIn()) {

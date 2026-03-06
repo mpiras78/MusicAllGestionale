@@ -300,7 +300,7 @@ Vedi `includes/helpers.php`:
 ## 🎯 Prossimi Step
 
 ### TODO
-- [ ] Implementare CRUD completo allievi
+- [X] Implementare CRUD completo allievi
 - [ ] Calendario interattivo
 - [ ] Sistema notifiche
 - [ ] API REST endpoints

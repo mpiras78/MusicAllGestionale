@@ -1,5 +1,5 @@
 <?php
-require_once 'includes/bootstrap.php';
+require_once '../includes/bootstrap.php';
 
 header('Content-Type: application/json');
 
@@ -17,16 +17,41 @@ try {
     switch ($action) {
         case 'get':
             $id = $_GET['id'] ?? 0;
-            $iscrizione = $controller->getIscrizioneById($id);
+            $db = Database::getInstance()->getConnection();
+            
+            // Recupera iscrizione con info allievo, materia, docente, tipo corso
+            $stmt = $db->prepare("
+                SELECT i.*,
+                    CONCAT(a.cognome, ' ', a.nome) as allievo,
+                    m.nome as materia,
+                    CONCAT(d.cognome, ' ', d.nome) as docente,
+                    tcc.nome as tipo_corso
+                FROM iscrizioni i
+                LEFT JOIN allievi a ON i.allievo_id = a.id
+                LEFT JOIN materie m ON i.materia_id = m.id
+                LEFT JOIN docenti d ON i.docente_id = d.id
+                LEFT JOIN tipi_corso_config tcc ON i.tipo_corso_config_id = tcc.id
+                WHERE i.id = ?
+            ");
+            $stmt->execute([$id]);
+            $iscrizione = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$iscrizione) {
+                echo json_encode(['success' => false, 'message' => 'Iscrizione non trovata']);
+                break;
+            }
             
             if ($iscrizione) {
-                // Recupera anche info slot settimanale
-                $db = Database::getInstance()->getConnection();
-                $stmt = $db->prepare("SELECT giorno_settimana, ora_inizio, aula_id 
-                                      FROM lezioni WHERE iscrizione_id = ? LIMIT 1");
+                // Recupera slot settimanale e aula
+                $stmt = $db->prepare("
+                    SELECT l.giorno_settimana, l.ora_inizio, l.aula_id, au.nome as aula
+                    FROM lezioni l
+                    LEFT JOIN aule au ON l.aula_id = au.id
+                    WHERE l.iscrizione_id = ?
+                    LIMIT 1
+                ");
                 $stmt->execute([$id]);
                 $slot = $stmt->fetch(PDO::FETCH_ASSOC);
-                
                 if ($slot) {
                     $iscrizione = array_merge($iscrizione, $slot);
                 }

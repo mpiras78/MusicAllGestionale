@@ -66,6 +66,13 @@ include 'includes/header.php';
     <!-- Statistiche -->
     <?php require 'includes/views/dashboard/statistics.php'; ?>
 
+    <!-- Azioni Rapide (full width) -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <?php require 'includes/views/dashboard/quick_actions.php'; ?>
+        </div>
+    </div>
+
     <!-- Cards -->
     <div class="row g-3">
         <!-- Prossime Lezioni Oggi -->
@@ -76,9 +83,6 @@ include 'includes/header.php';
 
         <!-- Ultimi Allievi Aggiunti -->
         <?php require 'includes/views/dashboard/last_added_students.php'; ?>
-
-        <!-- Quick Actions -->
-        <?php require 'includes/views/dashboard/quick_actions.php'; ?>
     </div>
 </div>
 

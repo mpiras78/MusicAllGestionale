@@ -370,7 +370,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function caricaLezioniAllievi() {
-    fetch('<?= BASE_URL ?>/api_get_helpers.php?type=allievi_con_lezioni')
+    fetch('<?= BASE_URL ?>/api/api_get_helpers.php?type=allievi_con_lezioni')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -459,7 +459,7 @@ function salvaAllievo() {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData);
     
-    fetch('<?= BASE_URL ?>/api_allievi.php', {
+    fetch('<?= BASE_URL ?>/api/api_allievi.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({action: 'create', ...data})
@@ -477,7 +477,7 @@ function salvaAllievo() {
 }
 
 function modificaAllievo(id) {
-    fetch(`<?= BASE_URL ?>/api_allievi.php?action=get&id=${id}`)
+    fetch(`<?= BASE_URL ?>/api/api_allievi.php?action=get&id=${id}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -510,7 +510,7 @@ function aggiornaAllievo() {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData);
     
-    fetch('<?= BASE_URL ?>/api_allievi.php', {
+    fetch('<?= BASE_URL ?>/api/api_allievi.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({action: 'update', ...data})
@@ -542,7 +542,7 @@ function visualizzaAllievo(id) {
     const modal = new bootstrap.Modal(document.getElementById('viewAllieveModal'));
     modal.show();
     
-    fetch(`<?= BASE_URL ?>/api_get_info_allievo.php?allievo_id=${id}`)
+    fetch(`<?= BASE_URL ?>/api/api_get_info_allievo.php?allievo_id=${id}`)
         .then(response => response.json())
         .then(data => {
             if (data.error) throw new Error(data.error);
@@ -657,7 +657,7 @@ function confermaDisattivazione(id, nome) {
 function disattivaAllievo() {
     const id = document.getElementById('idAllievoDaDisattivare').value;
     
-    fetch('<?= BASE_URL ?>/api_allievi.php', {
+    fetch('<?= BASE_URL ?>/api/api_allievi.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({action: 'delete', id: id})
@@ -668,7 +668,7 @@ function disattivaAllievo() {
             mostraToast('Successo', 'Allievo disattivato correttamente', 'success');
             setTimeout(() => location.reload(), 1500);
         } else {
-            throw new Error(result.error || 'Errore durante la disattivazione');
+            throw new Error(result.message || 'Errore durante la disattivazione');
         }
     })
     .catch(error => mostraToast('Errore', error.message, 'danger'));

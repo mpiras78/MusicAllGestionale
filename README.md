@@ -1,14 +1,18 @@
 # MusicAll - Sistema di Gestione Scuola di Musica
 
-Sistema completo per la gestione di scuole di musica con calendario settimanale, gestione allievi, docenti, lezioni e assenze.
+**Versione:** 2.2.1 (6 Marzo 2026)
+
+Sistema completo per la gestione di scuole di musica con calendario settimanale, gestione allievi, docenti, lezioni, assenze e iscrizioni accademiche.
 
 ## 🎵 Caratteristiche Principali
 
 - **Calendario Settimanale Visuale**: Interfaccia simile a un foglio Excel con visualizzazione per aule e orari
-- **Gestione Completa**: Allievi, Docenti, Lezioni, Aule, Materie
+- **Gestione Iscrizioni**: Filtro per mese accademico (Settembre-Luglio) con gestione automatica delle date
+- **Gestione Completa**: Allievi, Docenti, Lezioni, Aule, Materie, Iscrizioni
 - **Sistema Assenze/Recuperi**: Tracciamento assenze e programmazione recuperi
 - **Report e Statistiche**: Dashboard con statistiche in tempo reale
 - **Autenticazione Sicura**: Sistema di login con ruoli utente
+- **Sistema Logging**: Log dettagliati per debugging e auditing
 - **Responsive Design**: Interfaccia Bootstrap 5 ottimizzata per tutti i dispositivi
 
 ## 📋 Requisiti di Sistema
@@ -48,6 +52,7 @@ composer install
 ```bash
 # Clona o scarica il progetto nella directory del web server
 cd /var/www/html  # Linux/Mac
+```
 # oppure
 cd C:\xampp\htdocs  # Windows con XAMPP
 

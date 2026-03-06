@@ -8,7 +8,7 @@ ini_set('error_log', __DIR__ . '/error_api_assenza.log');
 // Cattura qualsiasi output indesiderato
 ob_start();
 
-require_once 'includes/bootstrap.php';
+require_once '../includes/bootstrap.php';
 
 // Richiede login
 $auth->requireLogin();

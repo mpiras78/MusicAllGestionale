@@ -91,6 +91,17 @@ class IscrizioniController {
     public function creaIscrizione($data) {
         $conn = $this->db->getConnection();
         
+        // Valida data_inizio
+        if (empty($data['data_inizio'])) {
+            $data['data_inizio'] = date('Y-m-d');
+        }
+        
+        // Se data_fine non è fornita, usa il 31 luglio dello stesso anno
+        if (empty($data['data_fine'])) {
+            $anno = date('Y', strtotime($data['data_inizio']));
+            $data['data_fine'] = "{$anno}-07-31";
+        }
+        
         $stmt = $conn->prepare("
             INSERT INTO iscrizioni (
                 allievo_id, tipo_corso_config_id, materia_id, docente_id,
@@ -106,7 +117,7 @@ class IscrizioniController {
             $data['docente_id'],
             $data['anno_scolastico'],
             $data['data_inizio'],
-            $data['data_fine'] ?? null,
+            $data['data_fine'],
             $data['stato'] ?? 'attiva',
             $data['quota_iscrizione'] ?? 30,
             $data['sconto_fratelli'] ?? 0,
@@ -236,5 +247,74 @@ class IscrizioniController {
         $conn = $this->db->getConnection();
         $stmt = $conn->query("SELECT COUNT(*) FROM iscrizioni WHERE stato = 'attiva'");
         return $stmt->fetchColumn();
+    }
+    
+    /**
+     * Ottiene iscrizioni filtrate per mese
+     * Mostra le iscrizioni che sono attive nel mese selezionato:
+     * - data_inizio <= ultimo giorno del mese
+     * - data_fine >= primo giorno del mese
+     * - stato = 'attiva'
+     */
+    public function getIscrizioniPerMese($anno_selezionato, $mese_num) {
+        $conn = $this->db->getConnection();
+        
+        // Primo e ultimo giorno del mese
+        $primo_giorno_mese = sprintf('%04d-%02d-01', $anno_selezionato, $mese_num);
+        $ultimo_giorno_mese = date('Y-m-t', strtotime($primo_giorno_mese));
+        
+        // SQLite usa strftime per i confronti di data
+        $sql = "
+            SELECT 
+                i.id,
+                CONCAT(a.cognome, ' ', a.nome) as allievo,
+                tcc.nome as tipo_corso,
+                m.nome as materia,
+                CONCAT(d.cognome, ' ', d.nome) as docente,
+                i.data_inizio,
+                i.data_fine,
+                i.stato,
+                i.quota_iscrizione as importo_totale,
+                0 as importo_pagato,
+                0 as is_pacchetto,
+                0 as lezioni_utilizzate,
+                0 as lezioni_totali
+            FROM iscrizioni i
+            INNER JOIN allievi a ON i.allievo_id = a.id
+            LEFT JOIN tipi_corso_config tcc ON i.tipo_corso_config_id = tcc.id
+            LEFT JOIN materie m ON i.materia_id = m.id
+            LEFT JOIN docenti d ON i.docente_id = d.id
+            WHERE i.stato = 'attiva'
+            AND i.data_inizio <= ?
+            AND i.data_fine >= ?
+            ORDER BY a.cognome, a.nome ASC
+        ";
+        
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            $ultimo_giorno_mese,  // data_inizio <= ultimo giorno del mese
+            $primo_giorno_mese    // data_fine >= primo giorno del mese
+        ]);
+        
+        $iscrizioni = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Log della query
+        $this->logQuery($sql, [$ultimo_giorno_mese, $primo_giorno_mese], $anno_selezionato, $mese_num, count($iscrizioni));
+        
+        return $iscrizioni;
+    }
+    
+    /**
+     * Log della query eseguita
+     */
+    private function logQuery($sql, $params, $anno, $mese, $risultati) {
+        $log_file = LOG_PATH . '/query_iscrizioni.log';
+        $timestamp = date('Y-m-d H:i:s');
+        $mese_formattato = sprintf('%02d', $mese);
+        $log_message = "[{$timestamp}] Mese: {$anno}-{$mese_formattato} | Params: " . json_encode($params) . " | Risultati: {$risultati}\n";
+        $log_message .= "SQL: {$sql}\n";
+        $log_message .= str_repeat('-', 80) . "\n";
+        
+        @file_put_contents($log_file, $log_message, FILE_APPEND);
     }
 }
