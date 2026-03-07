@@ -1834,6 +1834,13 @@ function confermaAssenza() {
     btnConferma.disabled = true;
     btnConferma.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Salvataggio...';
     
+    // Ottieni token CSRF dalla meta tag o dal DOM
+    let csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if (!csrfToken) {
+        // Fallback: cerca nel primo form hidden field
+        csrfToken = document.querySelector('input[name="csrf_token"]')?.value;
+    }
+    
     // Invia richiesta
     fetch('<?= BASE_URL ?>/api/api_salva_assenza_calendario.php', {
         method: 'POST',
@@ -1841,6 +1848,7 @@ function confermaAssenza() {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+            csrf_token: csrfToken,
             lezione_id: currentLezioneData.lezione_id,
             data_lezione: currentLezioneData.data,
             causale: causale,

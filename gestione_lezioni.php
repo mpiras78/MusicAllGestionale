@@ -492,12 +492,15 @@ function salvaLezione() {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData);
     
-    fetch('<?= BASE_URL ?>/api_lezioni_prova.php', {
+    fetch('<?= BASE_URL ?>/api/api_lezioni_prova.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({action: 'create', data: data})
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+    })
     .then(result => {
         if (result.success) {
             mostraToast('Successo', 'Lezione di prova creata correttamente', 'success');
@@ -510,8 +513,11 @@ function salvaLezione() {
 }
 
 function modificaLezione(id) {
-    fetch(`<?= BASE_URL ?>/api_lezioni.php?action=get&id=${id}`)
-        .then(response => response.json())
+    fetch(`<?= BASE_URL ?>/api/api_lezioni.php?action=get&id=${id}`)
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 const l = data.data;
@@ -544,12 +550,15 @@ function aggiornaLezione() {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData);
     
-    fetch('<?= BASE_URL ?>/api_lezioni.php', {
+    fetch('<?= BASE_URL ?>/api/api_lezioni.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({action: 'update', ...data})
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+    })
     .then(result => {
         if (result.success) {
             mostraToast('Successo', 'Lezione aggiornata correttamente', 'success');
@@ -572,12 +581,15 @@ function confermaEliminazione(id, allievo) {
 function eliminaLezione() {
     const id = document.getElementById('idLezioneDaEliminare').value;
     
-    fetch('<?= BASE_URL ?>/api_lezioni.php', {
+    fetch('<?= BASE_URL ?>/api/api_lezioni.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({action: 'delete', id: id})
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+    })
     .then(result => {
         if (result.success) {
             mostraToast('Successo', 'Lezione eliminata correttamente', 'success');

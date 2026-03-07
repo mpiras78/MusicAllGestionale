@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e($page_title ?? 'MusicAll') ?> - <?= APP_NAME ?></title>
     
+    <!-- CSRF Token per API -->
+    <meta name="csrf-token" content="<?= CSRFHelper::generateToken() ?>">
+    
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     

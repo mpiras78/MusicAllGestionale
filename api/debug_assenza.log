@@ -1,0 +1,6 @@
+2026-03-07 19:35:05 - Richiesta ricevuta
+EXCEPTION: Token CSRF non valido
+#0 {main}
+2026-03-07 19:45:39 - Richiesta ricevuta
+EXCEPTION: Token CSRF non valido
+#0 {main}

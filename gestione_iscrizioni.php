@@ -1037,7 +1037,7 @@ function apriModificaIscrizione(id) {
         console.log('Iscrizione caricata:', i);
         
         document.getElementById('iscrizione_id').value = i.id;
-        document.getElementById('allievo_id').value = i.allievo_id;
+        document.getElementById('selected_allievo_id').value = i.allievo_id;
         document.getElementById('tipo_corso_id').value = i.tipo_corso_config_id;
         document.getElementById('materia_id').value = i.materia_id;
         
