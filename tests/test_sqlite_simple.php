@@ -45,7 +45,8 @@ try {
     // Crea tabelle
     echo "Creazione tabelle...\n";
     
-    Capsule::schema()->create('allievi', function ($table) {
+    // Usare la tabella `soci` (model Allievo punta a 'soci')
+    Capsule::schema()->create('soci', function ($table) {
         $table->id();
         $table->string('cognome');
         $table->string('nome');
@@ -81,7 +82,7 @@ try {
     echo "✅ Tabelle create\n\n";
     
     // Test CRUD
-    echo "Test 1: Creazione Allievi\n";
+    echo "Test 1: Creazione Soci (ex Allievi)\n";
     echo "-------------------------\n";
     
     Allievo::create([
@@ -99,14 +100,14 @@ try {
         'attivo' => true
     ]);
     
-    echo "✅ Creati " . Allievo::count() . " allievi\n\n";
+    echo "✅ Creati " . Allievo::count() . " soci\n\n";
     
     echo "Test 2: Query con Scopes\n";
     echo "------------------------\n";
     
-    $allieviAttivi = Allievo::attivi()->get();
-    foreach ($allieviAttivi as $allievo) {
-        echo "- {$allievo->nome_completo} ({$allievo->email})\n";
+    $sociAttivi = Allievo::attivi()->get();
+    foreach ($sociAttivi as $socio) {
+        echo "- {$socio->nome_completo} ({$socio->email})\n";
     }
     echo "\n";
     
@@ -134,7 +135,7 @@ try {
     echo "========================================\n";
     echo "STATISTICHE FINALI\n";
     echo "========================================\n";
-    echo "Allievi: " . Allievo::count() . "\n";
+    echo "Soci: " . Allievo::count() . "\n";
     echo "Docenti: " . Docente::count() . "\n";
     echo "Aule: " . Aula::count() . "\n\n";
     

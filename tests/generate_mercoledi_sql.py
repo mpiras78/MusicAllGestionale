@@ -3,7 +3,7 @@ import sys
 import os
 
 # Percorso del file Excel
-excel_file = os.path.join(os.path.dirname(__file__), '..', 'template', 'Orario Allievi MusicAll.xlsx')
+excel_file = os.path.join(os.path.dirname(__file__), '..', 'template', 'Orario Soci MusicAll.xlsx')
 
 # Mapping aule per MERCOLEDI (stesso del MARTEDI)
 aule_map = {
@@ -95,7 +95,7 @@ try:
                         sql = f"""INSERT INTO lezioni (giorno_settimana, ora_inizio, ora_fine, id_aula, id_allievo, id_docente, id_materia)
 SELECT 'MERCOLEDÌ', '{ora_inizio}', '{ora_fine}',
        (SELECT id FROM aule WHERE UPPER(nome) LIKE '%{aula_nome}%' LIMIT 1),
-       (SELECT id FROM allievi WHERE UPPER(cognome) LIKE '%{allievo}%' LIMIT 1),
+       (SELECT s.id FROM soci s JOIN persone p ON s.persona_id = p.id WHERE UPPER(p.cognome) LIKE '%{allievo}%' LIMIT 1),
        (SELECT id FROM docenti WHERE UPPER(cognome) LIKE '%{docente}%' LIMIT 1),
        (SELECT id FROM materie WHERE UPPER(nome) LIKE '%{materia.split()[0]}%' LIMIT 1);"""
                         

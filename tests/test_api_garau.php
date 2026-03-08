@@ -8,10 +8,14 @@ require_once __DIR__ . '/../includes/bootstrap.php';
 $db = Database::getInstance();
 
 // Trova Garau
-$garau = $db->queryOne("SELECT id, cognome, nome FROM allievi WHERE cognome LIKE '%Garau%'");
+// Cerca Garau nella tabella `soci` (la tabella `soci` è collegata a `persone` tramite persona_id)
+$garau = $db->queryOne("SELECT s.id as id, p.cognome as cognome, p.nome as nome
+    FROM soci s
+    JOIN persone p ON s.persona_id = p.id
+    WHERE p.cognome LIKE '%Garau%'");
 
 echo "=== TEST API LEZIONI GARAU ===\n\n";
-echo "Allievo: {$garau['cognome']} {$garau['nome']} (ID: {$garau['id']})\n\n";
+echo "Socio: " . ($garau ? ($garau['cognome'] . ' ' . $garau['nome'] . ' (ID: ' . $garau['id'] . ')') : 'NON TROVATO') . "\n\n";
 
 // Simula query API (stessa query di api_get_lezioni_allievo.php)
 $lezioni = $db->query("
@@ -25,6 +29,7 @@ $lezioni = $db->query("
     FROM lezioni l
     JOIN materie m ON l.materia_id = m.id
     JOIN docenti d ON l.docente_id = d.id
+    -- la tabella `lezioni` nel DB attuale usa ancora la colonna `allievo_id`
     WHERE l.allievo_id = ?
     ORDER BY 
         CASE l.giorno_settimana
@@ -55,6 +60,7 @@ if (empty($lezioni)) {
         FROM lezioni l
         JOIN materie m ON l.materia_id = m.id
         JOIN docenti d ON l.docente_id = d.id
+        -- la tabella `lezioni` nel DB attuale usa ancora la colonna `allievo_id`
         WHERE l.allievo_id = ?
     ", [$garau['id']]);
     

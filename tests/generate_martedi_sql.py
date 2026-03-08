@@ -3,7 +3,7 @@ import sys
 import os
 
 # Percorso del file Excel
-excel_file = os.path.join(os.path.dirname(__file__), '..', 'template', 'Orario Allievi MusicAll.xlsx')
+excel_file = os.path.join(os.path.dirname(__file__), '..', 'template', 'Orario Soci MusicAll.xlsx')
 
 # Mapping aule
 aule_map = {
@@ -140,11 +140,11 @@ try:
             ora_fine = '0' + ora_fine
             
         sql = f"""INSERT INTO lezioni (giorno_settimana, ora_inizio, ora_fine, id_aula, id_allievo, id_docente, id_materia)
-SELECT 'MARTEDÌ', '{ora_inizio}', '{ora_fine}',
-       (SELECT id FROM aule WHERE UPPER(nome) LIKE '%{lez['aula']}%' LIMIT 1),
-       (SELECT id FROM allievi WHERE UPPER(cognome) LIKE '%{lez['allievo']}%' LIMIT 1),
-       (SELECT id FROM docenti WHERE UPPER(cognome) LIKE '%{lez['docente']}%' LIMIT 1),
-       (SELECT id FROM materie WHERE UPPER(nome) LIKE '%{lez['materia'].split()[0]}%' LIMIT 1);"""
+    SELECT 'MARTEDÌ', '{ora_inizio}', '{ora_fine}',
+           (SELECT id FROM aule WHERE UPPER(nome) LIKE '%{lez['aula']}%' LIMIT 1),
+           (SELECT s.id FROM soci s JOIN persone p ON s.persona_id = p.id WHERE UPPER(p.cognome) LIKE '%{lez['allievo']}%' LIMIT 1),
+           (SELECT id FROM docenti WHERE UPPER(cognome) LIKE '%{lez['docente']}%' LIMIT 1),
+           (SELECT id FROM materie WHERE UPPER(nome) LIKE '%{lez['materia'].split()[0]}%' LIMIT 1);"""
         
         sql_statements.append(sql)
     

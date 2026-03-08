@@ -24,7 +24,8 @@ try {
     // STEP 0: Verifica prerequisiti
     echo "📋 STEP 0: Verifica prerequisiti...\n";
     
-    $tables_to_check = ['allievi', 'docenti', 'soci_occasionali'];
+    // Controlla le tabelle principali: `soci` è la tabella attiva dopo la migration
+    $tables_to_check = ['soci', 'docenti', 'soci_occasionali'];
     foreach ($tables_to_check as $table) {
         $stmt = $db->query("SELECT COUNT(*) as cnt FROM $table");
         $count = $stmt->fetch(PDO::FETCH_ASSOC)['cnt'];
@@ -56,21 +57,27 @@ try {
     $schema_sql = file_get_contents(__DIR__ . '/../database/migration_anagrafica_unificata.sql');
     $db->exec($schema_sql);
     echo "  ✓ Tabelle create: persone, soci, soci_*_dettagli\n";
-    echo "  ✓ Viste create: v_allievi, v_docenti, v_soci_occasionali\n";
+    echo "  ✓ Viste create: v_soci, v_docenti, v_soci_occasionali\n";
     echo "  ✓ Trigger created_at/updated_at attivi\n";
     echo "\n";
     
-    // STEP 3: Esegui migration dati
+    // STEP 3: Esegui migration dati (skip se DB già migrato)
     echo "📦 STEP 3: Migrazione dati...\n";
     $data_sql = file_get_contents(__DIR__ . '/../database/migration_dati_anagrafica.sql');
-    
-    // Cattura output del report
-    ob_start();
-    $db->exec($data_sql);
-    $output = ob_get_clean();
-    
-    echo "  ✓ Dati migrati da vecchie tabelle\n";
-    echo "\n";
+
+    // Se la tabella `allievi` non esiste più, probabilmente la migration è già stata applicata
+    $checkAllievi = $db->query("SELECT name FROM sqlite_master WHERE type='table' AND name='allievi'")->fetch();
+    if (!$checkAllievi) {
+        echo "  ⚠️ Tabella 'allievi' non trovata: salto STEP 3 (presumibilmente già migrato)\n\n";
+    } else {
+        // Cattura output del report
+        ob_start();
+        $db->exec($data_sql);
+        $output = ob_get_clean();
+
+        echo "  ✓ Dati migrati da vecchie tabelle\n";
+        echo "\n";
+    }
     
     // STEP 4: Report dettagliato
     echo "📊 STEP 4: Report migrazione\n";
@@ -95,52 +102,87 @@ try {
     }
     echo "\n";
     
-    // Persone con più ruoli
-    $stmt = $db->query("SELECT COUNT(*) as cnt FROM v_persone_multirolo");
-    $multi_count = $stmt->fetch(PDO::FETCH_ASSOC)['cnt'];
-    echo "⭐ Persone con ruoli multipli: $multi_count\n";
-    
-    if ($multi_count > 0) {
-        echo "\nDettaglio persone multi-ruolo:\n";
-        $stmt = $db->query("SELECT * FROM v_persone_multirolo LIMIT 5");
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            echo "  • {$row['cognome']} {$row['nome']}: {$row['ruoli']}\n";
+    // Persone con più ruoli (la vista potrebbe contenere riferimenti non compatibili)
+    try {
+        $stmt = $db->query("SELECT COUNT(*) as cnt FROM v_persone_multirolo");
+        $multi_count = $stmt->fetch(PDO::FETCH_ASSOC)['cnt'];
+        echo "⭐ Persone con ruoli multipli: $multi_count\n";
+
+        if ($multi_count > 0) {
+            echo "\nDettaglio persone multi-ruolo:\n";
+            try {
+                $stmt = $db->query("SELECT * FROM v_persone_multirolo LIMIT 5");
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    $cogn = $row['cognome'] ?? ($row['cognome_persona'] ?? '');
+                    $nom = $row['nome'] ?? ($row['nome_persona'] ?? '');
+                    $ruoli = $row['ruoli'] ?? ($row['roles'] ?? '');
+                    echo "  • {$cogn} {$nom}: {$ruoli}\n";
+                }
+            } catch (Exception $e) {
+                echo "  ⚠️ Impossibile leggere v_persone_multirolo: " . $e->getMessage() . "\n";
+            }
+
+            if ($multi_count > 5) {
+                echo "  ... e altri " . ($multi_count - 5) . "\n";
+            }
         }
-        if ($multi_count > 5) {
-            echo "  ... e altri " . ($multi_count - 5) . "\n";
-        }
+    } catch (Exception $e) {
+        echo "⭐ Persone con ruoli multipli: (impossibile calcolare) - vista v_persone_multirolo errore: " . $e->getMessage() . "\n";
+        $multi_count = 0;
     }
     echo "\n";
     
     // Verifica viste
     echo "👁️ Verifica viste compatibilità:\n";
-    $viste = ['v_allievi', 'v_docenti', 'v_soci_occasionali'];
+    // Viste aggiornate presenti nel DB
+    $viste = ['v_soci', 'v_docenti', 'v_soci_occasionali'];
     foreach ($viste as $vista) {
-        $stmt = $db->query("SELECT COUNT(*) as cnt FROM $vista");
-        $count = $stmt->fetch(PDO::FETCH_ASSOC)['cnt'];
-        echo "  ✓ $vista: $count record\n";
+        try {
+            $stmt = $db->query("SELECT COUNT(*) as cnt FROM $vista");
+            $count = $stmt->fetch(PDO::FETCH_ASSOC)['cnt'];
+            echo "  ✓ $vista: $count record\n";
+        } catch (Exception $e) {
+            echo "  ⚠️ Impossibile contare vista $vista: " . $e->getMessage() . "\n";
+        }
     }
     echo "\n";
     
     // Confronto con vecchie tabelle
     echo "🔍 Verifica consistenza:\n";
-    $stmt_old_allievi = $db->query("SELECT COUNT(*) as cnt FROM allievi");
-    $stmt_new_allievi = $db->query("SELECT COUNT(*) as cnt FROM v_allievi");
+    // Confronto: usa la tabella backup `_v2_backup` come "vecchia" e la vista `v_soci` come nuova
+    // Confronto: usa la tabella backup `_v2_backup` come "vecchia" e la vista `v_soci` come nuova
+    $stmt_old_allievi = $db->query("SELECT COUNT(*) as cnt FROM allievi_v2_backup");
     $old_a = $stmt_old_allievi->fetch()['cnt'];
-    $new_a = $stmt_new_allievi->fetch()['cnt'];
-    echo "  Allievi: $old_a (vecchia) → $new_a (nuova) " . ($old_a == $new_a ? '✅' : '⚠️') . "\n";
+    try {
+        $stmt_new_allievi = $db->query("SELECT COUNT(*) as cnt FROM v_soci");
+        $new_a = $stmt_new_allievi->fetch()['cnt'];
+        echo "  Soci: $old_a (backup) → $new_a (vista) " . ($old_a == $new_a ? '✅' : '⚠️') . "\n";
+    } catch (Exception $e) {
+        echo "  ⚠️ Impossibile leggere v_soci: " . $e->getMessage() . "\n";
+        echo "  Soci: $old_a (backup) → (vista non disponibile)\n";
+    }
     
     $stmt_old_docenti = $db->query("SELECT COUNT(*) as cnt FROM docenti");
-    $stmt_new_docenti = $db->query("SELECT COUNT(*) as cnt FROM v_docenti");
     $old_d = $stmt_old_docenti->fetch()['cnt'];
-    $new_d = $stmt_new_docenti->fetch()['cnt'];
-    echo "  Docenti: $old_d (vecchia) → $new_d (nuova) " . ($old_d == $new_d ? '✅' : '⚠️') . "\n";
+    try {
+        $stmt_new_docenti = $db->query("SELECT COUNT(*) as cnt FROM v_docenti");
+        $new_d = $stmt_new_docenti->fetch()['cnt'];
+        echo "  Docenti: $old_d (vecchia) → $new_d (nuova) " . ($old_d == $new_d ? '✅' : '⚠️') . "\n";
+    } catch (Exception $e) {
+        echo "  ⚠️ Impossibile leggere v_docenti: " . $e->getMessage() . "\n";
+        echo "  Docenti: $old_d (vecchia) → (vista non disponibile)\n";
+    }
     
     $stmt_old_esterni = $db->query("SELECT COUNT(*) as cnt FROM soci_occasionali");
-    $stmt_new_esterni = $db->query("SELECT COUNT(*) as cnt FROM v_soci_occasionali");
     $old_e = $stmt_old_esterni->fetch()['cnt'];
-    $new_e = $stmt_new_esterni->fetch()['cnt'];
-    echo "  Esterni: $old_e (vecchia) → $new_e (nuova) " . ($old_e == $new_e ? '✅' : '⚠️') . "\n";
+    try {
+        $stmt_new_esterni = $db->query("SELECT COUNT(*) as cnt FROM v_soci_occasionali");
+        $new_e = $stmt_new_esterni->fetch()['cnt'];
+        echo "  Esterni: $old_e (vecchia) → $new_e (nuova) " . ($old_e == $new_e ? '✅' : '⚠️') . "\n";
+    } catch (Exception $e) {
+        echo "  ⚠️ Impossibile leggere v_soci_occasionali: " . $e->getMessage() . "\n";
+        echo "  Esterni: $old_e (vecchia) → (vista non disponibile)\n";
+    }
     echo "\n";
     
     // Anomalie

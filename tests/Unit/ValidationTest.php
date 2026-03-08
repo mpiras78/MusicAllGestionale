@@ -3,7 +3,7 @@
  * Test Validazione Dati
  * 
  * Test per validazione input e business rules:
- * - Validazione form allievi
+ * - Validazione form soci
  * - Validazione lezioni
  * - Regole business
  */
@@ -15,11 +15,11 @@ use PHPUnit\Framework\TestCase;
 class ValidationTest extends TestCase
 {
     /**
-     * Test: Validazione dati allievo completi
+     * Test: Validazione dati socio completi
      */
     public function testValidazioneDatiAllievoCompleti()
     {
-        $validaAllievo = function($dati) {
+        $validaSocio = function($dati) {
             $errori = [];
             
             if (empty($dati['nome'])) $errori[] = 'Nome obbligatorio';
@@ -37,15 +37,15 @@ class ValidationTest extends TestCase
             'email' => 'mario@example.com'
         ];
         
-        $this->assertTrue($validaAllievo($datiValidi));
+        $this->assertTrue($validaSocio($datiValidi));
     }
     
     /**
-     * Test: Validazione dati allievo incompleti
+     * Test: Validazione dati socio incompleti
      */
     public function testValidazioneDatiAllievoIncompleti()
     {
-        $validaAllievo = function($dati) {
+        $validaSocio = function($dati) {
             $errori = [];
             
             if (empty($dati['nome'])) $errori[] = 'Nome obbligatorio';
@@ -55,7 +55,7 @@ class ValidationTest extends TestCase
         };
         
         $datiInvalidi = ['nome' => 'Mario'];
-        $risultato = $validaAllievo($datiInvalidi);
+        $risultato = $validaSocio($datiInvalidi);
         
         $this->assertIsArray($risultato);
         $this->assertContains('Cognome obbligatorio', $risultato);

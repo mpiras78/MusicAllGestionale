@@ -19,6 +19,21 @@ use MusicAll\Models\Aula;
 use MusicAll\Models\Materia;
 use Illuminate\Database\Capsule\Manager as DB;
 
+// Se la connessione Eloquent non è stata configurata dal bootstrap,
+// inizializziamo Capsule per i test in-memory (sqlite :memory:).
+try {
+    DB::connection();
+} catch (\Exception $e) {
+    $capsule = new \Illuminate\Database\Capsule\Manager();
+    $capsule->addConnection([
+        'driver' => 'sqlite',
+        'database' => ':memory:',
+        'prefix' => '',
+    ]);
+    $capsule->setAsGlobal();
+    $capsule->bootEloquent();
+}
+
 echo "========================================\n";
 echo "Test SQLite In-Memory con Eloquent ORM\n";
 echo "========================================\n\n";
@@ -36,7 +51,8 @@ try {
     // Crea tabelle (schema semplificato per test)
     echo "Creazione tabelle...\n";
     
-    DB::schema()->create('allievi', function ($table) {
+    // La tabella "allievi" è stata rinominata in "soci" nella migration
+    DB::schema()->create('soci', function ($table) {
         $table->id();
         $table->string('cognome');
         $table->string('nome');
@@ -71,8 +87,8 @@ try {
     
     echo "✅ Tabelle create\n\n";
     
-    // Test 1: Crea Allievi
-    echo "Test 1: Creazione Allievi\n";
+    // Test 1: Crea Soci (ex Allievi)
+    echo "Test 1: Creazione Soci\n";
     echo "-------------------------\n";
     
     $allievo1 = Allievo::create([
@@ -96,15 +112,15 @@ try {
         'attivo' => false
     ]);
     
-    echo "✅ Creati " . Allievo::count() . " allievi\n\n";
+    echo "✅ Creati " . Allievo::count() . " soci\n\n";
     
     // Test 2: Query con Eloquent
-    echo "Test 2: Query Allievi Attivi\n";
-    echo "-----------------------------\n";
-    
-    $allieviAttivi = Allievo::attivi()->get();
-    foreach ($allieviAttivi as $allievo) {
-        echo "- {$allievo->nome_completo} ({$allievo->email})\n";
+    echo "Test 2: Query Soci Attivi\n";
+    echo "-------------------------\n";
+
+    $sociAttivi = Allievo::attivi()->get();
+    foreach ($sociAttivi as $socio) {
+        echo "- {$socio->nome_completo} ({$socio->email})\n";
     }
     echo "\n";
     
@@ -157,7 +173,7 @@ try {
     $allievo->telefono = '333-9999999';
     $allievo->save();
     
-    echo "✅ Aggiornato allievo: {$allievo->nome_completo}\n";
+    echo "✅ Aggiornato socio: {$allievo->nome_completo}\n";
     echo "   Nuovo telefono: {$allievo->telefono}\n\n";
     
     // Test 7: Eliminazione
@@ -168,27 +184,27 @@ try {
     Allievo::find(3)->delete();
     $newCount = Allievo::count();
     
-    echo "✅ Eliminato 1 allievo\n";
+    echo "✅ Eliminato 1 socio\n";
     echo "   Prima: {$count} - Dopo: {$newCount}\n\n";
     
     // Test 8: Query Builder
     echo "Test 8: Query Builder Raw\n";
     echo "-------------------------\n";
     
-    $results = DB::table('allievi')
+    $results = DB::table('soci')
         ->where('attivo', true)
         ->orderBy('cognome')
         ->get();
     
-    echo "Query: SELECT * FROM allievi WHERE attivo = 1 ORDER BY cognome\n";
+    echo "Query: SELECT * FROM soci WHERE attivo = 1 ORDER BY cognome\n";
     echo "Risultati: {$results->count()}\n\n";
     
     // Statistiche finali
     echo "========================================\n";
     echo "STATISTICHE FINALI\n";
     echo "========================================\n";
-    echo "Allievi totali: " . Allievo::count() . "\n";
-    echo "Allievi attivi: " . Allievo::attivi()->count() . "\n";
+    echo "Soci totali: " . Allievo::count() . "\n";
+    echo "Soci attivi: " . Allievo::attivi()->count() . "\n";
     echo "Docenti: " . Docente::count() . "\n";
     echo "Aule: " . Aula::count() . "\n";
     echo "\n";

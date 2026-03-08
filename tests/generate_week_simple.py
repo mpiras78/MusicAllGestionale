@@ -9,7 +9,7 @@ import openpyxl
 import os
 import re
 
-excel_file = os.path.join(os.path.dirname(__file__), '..', 'template', 'Orario Allievi MusicAll.xlsx')
+excel_file = os.path.join(os.path.dirname(__file__), '..', 'template', 'Orario Soci MusicAll.xlsx')
 
 # Mapping colonne aule
 AULE = {
@@ -141,7 +141,7 @@ def process_giorno(sheet_name, giorno_it):
                 sql = f"""INSERT INTO lezioni (giorno_settimana, ora_inizio, ora_fine, id_aula, id_allievo, id_docente, id_materia)
 SELECT '{giorno_it.upper()}', '{start}', '{end}',
        (SELECT id FROM aule WHERE UPPER(nome) LIKE '%{aula_nome.split()[1]}%' LIMIT 1),
-       (SELECT id FROM allievi WHERE UPPER(cognome) LIKE '%{cognome}%' LIMIT 1),
+       (SELECT s.id FROM soci s JOIN persone p ON s.persona_id = p.id WHERE UPPER(p.cognome) LIKE '%{cognome}%' LIMIT 1),
        (SELECT id FROM docenti WHERE UPPER(cognome) LIKE '%{docente_default}%' LIMIT 1),
        (SELECT id FROM materie WHERE UPPER(nome) LIKE '%{mat}%' LIMIT 1);"""
                 

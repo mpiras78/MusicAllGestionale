@@ -2,10 +2,10 @@
 /**
  * Componente: Modal Crea Assenza
  * Da includere in gestione_assenze.php
- * Richiede: $allievi (array)
+ * Richiede: $soci (array)
  */
-if (!isset($allievi)) {
-    die('Errore: variabile $allievi non definita');
+if (!isset($soci)) {
+    die('Errore: variabile $soci non definita');
 }
 ?>
 
@@ -34,7 +34,7 @@ if (!isset($allievi)) {
                             <label class="form-label">Allievo *</label>
                             <select name="allievo_id_helper" id="allievoSelectHelper" class="form-select" required>
                                 <option value="">Seleziona allievo...</option>
-                                <?php foreach ($allievi as $all): ?>
+                                <?php foreach ($soci as $all): ?>
                                     <option value="<?= $all['id'] ?>"><?= e($all['nome_completo']) ?></option>
                                 <?php endforeach; ?>
                             </select>

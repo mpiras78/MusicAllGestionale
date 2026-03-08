@@ -97,16 +97,17 @@ class DatabaseTest extends TestCase
     {
         $pdo = new \PDO('sqlite::memory:');
         
-        $pdo->exec('CREATE TABLE allievi (id INTEGER PRIMARY KEY, nome TEXT)');
-        $pdo->exec('CREATE TABLE lezioni (id INTEGER PRIMARY KEY, allievo_id INTEGER, materia TEXT)');
-        
-        $pdo->exec("INSERT INTO allievi (id, nome) VALUES (1, 'Mario')");
-        $pdo->exec("INSERT INTO lezioni (allievo_id, materia) VALUES (1, 'Piano')");
-        
+        // Updated to use `soci` and `socio_id` (migration allievi -> soci)
+        $pdo->exec('CREATE TABLE soci (id INTEGER PRIMARY KEY, nome TEXT)');
+        $pdo->exec('CREATE TABLE lezioni (id INTEGER PRIMARY KEY, socio_id INTEGER, materia TEXT)');
+
+        $pdo->exec("INSERT INTO soci (id, nome) VALUES (1, 'Mario')");
+        $pdo->exec("INSERT INTO lezioni (socio_id, materia) VALUES (1, 'Piano')");
+
         $result = $pdo->query('
             SELECT a.nome, l.materia 
-            FROM allievi a 
-            JOIN lezioni l ON a.id = l.allievo_id
+            FROM soci a 
+            JOIN lezioni l ON a.id = l.socio_id
         ')->fetch();
         
         $this->assertEquals('Mario', $result['nome']);
@@ -120,13 +121,14 @@ class DatabaseTest extends TestCase
     {
         $pdo = new \PDO('sqlite::memory:');
         
-        $pdo->exec('CREATE TABLE assenze (id INTEGER PRIMARY KEY, allievo_id INTEGER)');
-        $pdo->exec("INSERT INTO assenze (allievo_id) VALUES (1), (1), (2)");
-        
+        // Use socio_id for consistency with migrated schema
+        $pdo->exec('CREATE TABLE assenze (id INTEGER PRIMARY KEY, socio_id INTEGER)');
+        $pdo->exec("INSERT INTO assenze (socio_id) VALUES (1), (1), (2)");
+
         $result = $pdo->query('
-            SELECT allievo_id, COUNT(*) as totale 
+            SELECT socio_id, COUNT(*) as totale 
             FROM assenze 
-            GROUP BY allievo_id
+            GROUP BY socio_id
         ')->fetchAll();
         
         $this->assertCount(2, $result);

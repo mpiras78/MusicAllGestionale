@@ -13,11 +13,11 @@ $_SESSION['username'] = 'admin';
 // Ottieni istanza database
 $db = Database::getInstance();
 
-// Test con allievo ID = 1
-$allievo_id = 1;
+// Test con socio ID = 1 (ex allievo)
+$socio_id = 1;
 
-echo "=== TEST API LEZIONI ALLIEVO ===\n\n";
-echo "Allievo ID: $allievo_id\n\n";
+echo "=== TEST API LEZIONI SOCIO ===\n\n";
+echo "Socio ID: $socio_id\n\n";
 
 try {
     // Query diretta
@@ -32,7 +32,8 @@ try {
         FROM lezioni l
         JOIN materie m ON l.materia_id = m.id
         JOIN docenti d ON l.docente_id = d.id
-        WHERE l.allievo_id = ?
+            -- la tabella `lezioni` nel DB attuale usa ancora la colonna `allievo_id`
+            WHERE l.allievo_id = ?
         ORDER BY 
             CASE l.giorno_settimana
                 WHEN 'lunedi' THEN 1
@@ -51,7 +52,7 @@ try {
                 WHEN 'Domenica' THEN 7
             END,
             l.ora_inizio
-    ", [$allievo_id]);
+    ", [$socio_id]);
     
     echo "Lezioni trovate: " . count($lezioni) . "\n\n";
     
@@ -59,12 +60,15 @@ try {
         echo "NESSUNA LEZIONE TROVATA!\n";
         echo "Verifica che esistano lezioni per questo allievo.\n\n";
         
-        // Check se l'allievo esiste
-        $allievo = $db->queryOne("SELECT * FROM allievi WHERE id = ?", [$allievo_id]);
-        if ($allievo) {
-            echo "✅ Allievo esiste: {$allievo['cognome']} {$allievo['nome']}\n";
+        // Check se il socio esiste (recupera anche dati anagrafici da `persone`)
+        $socio = $db->queryOne("SELECT s.*, p.cognome as cognome, p.nome as nome
+            FROM soci s
+            LEFT JOIN persone p ON s.persona_id = p.id
+            WHERE s.id = ?", [$socio_id]);
+        if ($socio) {
+            echo "✅ Socio esiste: " . ($socio['cognome'] ?? '') . " " . ($socio['nome'] ?? '') . "\n";
         } else {
-            echo "❌ Allievo NON esiste!\n";
+            echo "❌ Socio NON esiste!\n";
         }
         
         // Conta totale lezioni

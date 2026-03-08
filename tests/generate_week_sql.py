@@ -12,7 +12,7 @@ import os
 import re
 
 # Percorso del file Excel
-excel_file = os.path.join(os.path.dirname(__file__), '..', 'template', 'Orario Allievi MusicAll.xlsx')
+excel_file = os.path.join(os.path.dirname(__file__), '..', 'template', 'Orario Soci MusicAll.xlsx')
 
 # Mapping aule (colonne Excel)
 AULE_MAP = {
@@ -35,7 +35,7 @@ DOCENTI_DEFAULT = {
 }
 
 def extract_time_and_name(cell_value):
-    """Estrae orario e nome allievo da una cella"""
+    """Estrae orario e cognome del socio da una cella"""
     if not cell_value:
         return None, None
     
@@ -220,7 +220,7 @@ def process_day(giorno, giorno_it):
             sql = f"""INSERT INTO lezioni (giorno_settimana, ora_inizio, ora_fine, id_aula, id_allievo, id_docente, id_materia)
 SELECT '{giorno_it.upper()}', '{lez['ora_inizio']}', '{lez['ora_fine']}',
        (SELECT id FROM aule WHERE UPPER(nome) LIKE '%{lez['aula']}%' LIMIT 1),
-       (SELECT id FROM allievi WHERE UPPER(cognome) LIKE '%{lez['cognome']}%' LIMIT 1),
+       (SELECT s.id FROM soci s JOIN persone p ON s.persona_id = p.id WHERE UPPER(p.cognome) LIKE '%{lez['cognome']}%' LIMIT 1),
        (SELECT id FROM docenti WHERE UPPER(cognome) LIKE '%{lez['docente']}%' LIMIT 1),
        (SELECT id FROM materie WHERE UPPER(nome) LIKE '%{lez['materia'].split()[0]}%' LIMIT 1);"""
             

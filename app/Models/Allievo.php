@@ -19,9 +19,9 @@ namespace MusicAll\Models;
 class Allievo extends Model
 {
     /**
-     * Nome della tabella
+     * Nome della tabella (ora `soci`, mantiene il model `Allievo` per retrocompatibilità)
      */
-    protected $table = 'allievi';
+    protected $table = 'soci';
     
     /**
      * Cast degli attributi
@@ -36,7 +36,7 @@ class Allievo extends Model
      */
     public function lezioni()
     {
-        return $this->hasMany(Lezione::class, 'allievo_id');
+        return $this->hasMany(Lezione::class, 'socio_id');
     }
     
     /**
@@ -44,7 +44,7 @@ class Allievo extends Model
      */
     public function assenze()
     {
-        return $this->hasMany(Assenza::class, 'allievo_id');
+        return $this->hasMany(Assenza::class, 'socio_id');
     }
     
     /**
@@ -52,7 +52,7 @@ class Allievo extends Model
      */
     public function lezioniCustom()
     {
-        return $this->hasMany(LezioneCustom::class, 'allievo_id');
+        return $this->hasMany(LezioneCustom::class, 'socio_id');
     }
     
     /**

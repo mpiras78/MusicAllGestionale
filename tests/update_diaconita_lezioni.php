@@ -13,15 +13,18 @@ echo "🔄 AGGIORNAMENTO LEZIONI DIACONITA\n";
 echo str_repeat("=", 50) . "\n\n";
 
 try {
-    // 1. Trova allievo Diaconita
-    $allievo = $db->queryOne("SELECT * FROM allievi WHERE cognome LIKE '%Diaconita%' OR nome LIKE '%Diaconita%'");
+    // 1. Trova socio (ex allievo) Diaconita tramite anagrafica persone
+    $allievo = $db->queryOne("SELECT s.id as id, p.cognome as cognome, p.nome as nome
+        FROM soci s
+        JOIN persone p ON s.persona_id = p.id
+        WHERE p.cognome LIKE '%Diaconita%' OR p.nome LIKE '%Diaconita%'");
     
     if (!$allievo) {
-        echo "❌ Allievo Diaconita non trovato!\n";
+        echo "❌ Socio Diaconita non trovato!\n";
         exit(1);
     }
     
-    echo "📋 Allievo trovato:\n";
+    echo "📋 Socio trovato:\n";
     echo "   ID: {$allievo['id']}\n";
     echo "   Nome: {$allievo['cognome']} {$allievo['nome']}\n\n";
     
@@ -56,7 +59,7 @@ try {
     echo "   Nome: {$magna['nome']}\n\n";
     
     // 6. Trova lezioni da aggiornare
-    $whereConditions = ["allievo_id = ?"];
+    $whereConditions = ["allievo_id = ?"]; // la colonna nelle lezioni resta `allievo_id`
     $params = [$allievo['id']];
     
     if ($tessitore) {

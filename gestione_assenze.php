@@ -116,7 +116,7 @@ require_once 'includes/header.php';
                 <i class="bi bi-calendar-x"></i> Gestione Assenze
             </h1>
             <p class="text-muted mb-0">
-                <?= $isDocente ? 'Visualizza le assenze dei tuoi allievi' : 'Registra e gestisci le assenze' ?>
+                <?= $isDocente ? 'Visualizza le assenze dei tuoi soci' : 'Registra e gestisci le assenze' ?>
             </p>
         </div>
         <?php if ($canCreate): ?>

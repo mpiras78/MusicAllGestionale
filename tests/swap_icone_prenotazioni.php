@@ -1,6 +1,6 @@
 <?php
 /**
- * Script: Inverti icone prenotazioni allievo/docente
+ * Script: Inverti icone prenotazioni soci/docente
  */
 
 require_once __DIR__ . '/../includes/bootstrap.php';
@@ -25,7 +25,7 @@ foreach ($prenotazioni as $p) {
 // 2. Inverti le icone
 echo "\n2. Inversione icone...\n";
 
-// Icona attuale prenotazione allievi
+// Icona attuale prenotazione soci
 $icona_allievi = $db->queryOne("
     SELECT icona FROM tipologie_evento WHERE codice = 'PREN_SALA_ALLIEVI'
 ")['icona'];
@@ -35,7 +35,7 @@ $icona_docente = $db->queryOne("
     SELECT icona FROM tipologie_evento WHERE codice = 'PREN_DOCENTE'
 ")['icona'];
 
-echo "   Prenotazione Allievi aveva: $icona_allievi\n";
+echo "   Prenotazione Soci aveva: $icona_allievi\n";
 echo "   Prenotazione Docente aveva: $icona_docente\n\n";
 
 // Swap

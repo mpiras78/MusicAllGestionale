@@ -53,7 +53,7 @@ try {
             -- Foreign Keys
             FOREIGN KEY (assenza_id) REFERENCES assenze(id) ON DELETE CASCADE,
             FOREIGN KEY (lezione_originale_id) REFERENCES lezioni(id),
-            FOREIGN KEY (allievo_id) REFERENCES allievi(id),
+            FOREIGN KEY (allievo_id) REFERENCES soci(id),
             FOREIGN KEY (docente_id) REFERENCES docenti(id),
             FOREIGN KEY (materia_id) REFERENCES materie(id),
             FOREIGN KEY (aula_id) REFERENCES aule(id),
@@ -107,7 +107,8 @@ try {
             lo.ora_fine as ora_originale_fine
             
         FROM recuperi r
-        LEFT JOIN allievi al ON r.allievo_id = al.id
+        LEFT JOIN soci s ON r.allievo_id = s.id
+        LEFT JOIN persone al ON s.persona_id = al.id
         LEFT JOIN docenti d ON r.docente_id = d.id
         LEFT JOIN materie m ON r.materia_id = m.id
         LEFT JOIN aule a ON r.aula_id = a.id
@@ -132,7 +133,8 @@ try {
             
         FROM assenze ass
         JOIN lezioni l ON ass.lezione_id = l.id
-        JOIN allievi al ON l.allievo_id = al.id
+        JOIN soci s ON l.allievo_id = s.id
+        JOIN persone al ON s.persona_id = al.id
         JOIN docenti d ON l.docente_id = d.id
         JOIN materie m ON l.materia_id = m.id
         WHERE ass.necessita_recupero = 1

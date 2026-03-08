@@ -3,7 +3,7 @@ import sys
 import os
 
 # Percorso del file Excel
-excel_file = os.path.join(os.path.dirname(__file__), '..', 'template', 'Orario Allievi MusicAll.xlsx')
+excel_file = os.path.join(os.path.dirname(__file__), '..', 'template', 'Orario Soci MusicAll.xlsx')
 
 giorni = ['MERCOLEDI', 'GIOVEDI', 'VENERDI', 'SABATO']
 

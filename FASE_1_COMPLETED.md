@@ -38,7 +38,8 @@ Migrazione completa del database e codebase: **allievi → soci**
   - 10 metodi pubblici implementati
   
 - **Aggiornato**: `includes/controllers/AssenzeController.php`
-  - Nuovo metodo: `getSoci()` + retrocompat `getAllievi()`
+  - Rinomina  metodo: `getAllievi()` con `getSoci()` 
+  - Modifica tutte le classi che chiamano il vecchio metodo 
   - Query da `allievi` → `soci`
 
 - **Aggiornato**: `includes/bootstrap.php`
@@ -82,11 +83,11 @@ Migrazione completa del database e codebase: **allievi → soci**
   - Assenze, recuperi, corsi frequentati, iscrizioni
 
 - **Nuovo**: `api/api_get_soci_helpers.php`
-  - Helper per `soci_con_lezioni`
-  - Retrocompat: case `allievi_con_lezioni` reindirizza a soci
+  - Rinomina allievi_con_lezioni in `soci_con_lezioni`
+  - Modifica le classi che chiamavano `allievi_con_lezioni` con nuovo metodo
 
 - **Aggiornato**: `api/api_allievi.php`
-  - Retrocompatibilità: usa `SociController`
+  - Retrocompatibilità: usa `SociController`: no, usa refactor
   - Query da `allievi` → `soci`
 
 - **Aggiornato**: `api/api_allievi_crud.php`
@@ -94,13 +95,14 @@ Migrazione completa del database e codebase: **allievi → soci**
 
 - **Aggiornato**: `api/api_get_helpers.php`
   - Nuovo case: `soci_con_lezioni`
-  - Retrocompat: case `allievi` reindirizza a soci
+  - crea soci al posto di  `allievi`
   - Query da `allievi` → `soci`
+  - Modifica che classi che chiamavano vecchio metodo
 
 - **Aggiornato**: `api/api_get_info_allievo.php`
-  - Retrocompatibilità: accetta `socio_id` e `allievo_id`
+  - Retrocompatibilità: no, sostituisci con `socio_id` le ricorrenze di `allievo_id`
   - Query da `allievi_id` → `socio_id`
-  - Variabili: `$allievo` → `$socio` (ma mantiene `$allievo` per retrocompat)
+  - Variabili: `$allievo` → `$socio`
 
 - **Aggiornato**: `api/api_salva_prenotazione.php`
   - Query da `allievi` → `soci`
@@ -145,7 +147,7 @@ Migrazione completa del database e codebase: **allievi → soci**
 | **Endpoint API** | 8 (6 nuovi/aggiornati) |
 
 ### Retrocompatibilità ✅
-Mantenuta full backward compatibility:
+Non mantenere retrocompatibilità, adatta le ricorrenze nei seguenti file e modifica i chiamanti
 - `AllieviController` contiene alias `getAllievi()` → `getSocio()`
 - `api_allievi.php` reindirizza a `SociController`
 - `api_get_helpers.php` supporta sia `allievi` che `soci_con_lezioni`

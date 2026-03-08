@@ -2,10 +2,10 @@
 /**
  * Componente: Filtri Assenze
  * Da includere in gestione_assenze.php
- * Richiede: $docenti, $allievi (arrays)
+ * Richiede: $docenti, $soci (arrays)
  */
-if (!isset($docenti) || !isset($allievi)) {
-    die('Errore: variabili $docenti e $allievi non definite');
+if (!isset($docenti) || !isset($soci)) {
+    die('Errore: variabili $docenti e $soci non definite');
 }
 ?>
 
@@ -67,7 +67,7 @@ if (!isset($docenti) || !isset($allievi)) {
                 <label class="form-label">Allievo</label>
                 <select name="allievo_id" class="form-select">
                     <option value="">Tutti</option>
-                    <?php foreach ($allievi as $all): ?>
+                    <?php foreach ($soci as $all): ?>
                         <option value="<?= $all['id'] ?>" <?= ($_GET['allievo_id'] ?? '') == $all['id'] ? 'selected' : '' ?>>
                             <?= e($all['nome_completo']) ?>
                         </option>

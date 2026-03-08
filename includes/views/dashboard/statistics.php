@@ -14,8 +14,8 @@ if (!isset($stats)) {
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <p class="stat-label mb-1">Allievi Attivi</p>
-                        <h3 class="stat-value text-primary"><?= $stats['allievi'] ?></h3>
+                        <p class="stat-label mb-1">Soci Attivi</p>
+                        <h3 class="stat-value text-primary"><?= $stats['soci'] ?></h3>
                     </div>
                     <div class="stat-icon text-primary">
                         <i class="bi bi-people"></i>

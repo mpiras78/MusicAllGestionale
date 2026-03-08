@@ -11,14 +11,15 @@ $aula_piano_id = 2; // AULA PIANO
 // 1. Cerca lezione alle 18:15
 echo "1. LEZIONE RICORRENTE (18:15)\n";
 $stmt = $db->prepare("
-    SELECT l.*, 
-           al.cognome || ' ' || al.nome as allievo,
-           d.cognome || ' ' || d.nome as docente,
-           au.nome as aula
-    FROM lezioni l
-    LEFT JOIN allievi al ON l.allievo_id = al.id
-    LEFT JOIN docenti d ON l.docente_id = d.id
-    LEFT JOIN aule au ON l.aula_id = au.id
+        SELECT l.*, 
+            al.cognome || ' ' || al.nome as allievo,
+            d.cognome || ' ' || d.nome as docente,
+            au.nome as aula
+        FROM lezioni l
+        LEFT JOIN soci s ON l.allievo_id = s.id
+        LEFT JOIN persone al ON s.persona_id = al.id
+        LEFT JOIN docenti d ON l.docente_id = d.id
+        LEFT JOIN aule au ON l.aula_id = au.id
     WHERE l.giorno_settimana = 'martedi'
     AND l.aula_id = ?
     AND l.ora_inizio = '18:15:00'
@@ -29,7 +30,7 @@ $lezione = $stmt->fetch(PDO::FETCH_ASSOC);
 if ($lezione) {
     echo "✅ Lezione trovata:\n";
     echo "   ID: {$lezione['id']}\n";
-    echo "   Allievo: {$lezione['allievo']}\n";
+    echo "   Socio: {$lezione['allievo']}\n";
     echo "   Docente: {$lezione['docente']}\n";
     echo "   Orario: {$lezione['ora_inizio']} - {$lezione['ora_fine']}\n";
     echo "   Aula: {$lezione['aula']}\n\n";
@@ -62,15 +63,16 @@ if ($lezione) {
 // 3. Cerca eventi per quel giorno e aula
 echo "3. EVENTI AULA PIANO - 10 FEBBRAIO\n";
 $stmt = $db->prepare("
-    SELECT e.*, 
-           t.codice as tipologia,
-           t.nome as tipologia_nome,
-           COALESCE(al.cognome || ' ' || al.nome, d.cognome || ' ' || d.nome, se.cognome || ' ' || se.nome, 'N/D') as partecipante
-    FROM eventi_calendario e
-    INNER JOIN tipologie_evento t ON e.tipologia_id = t.id
-    LEFT JOIN allievi al ON e.allievo_id = al.id
-    LEFT JOIN docenti d ON e.docente_id = d.id
-    LEFT JOIN soci_esterni se ON e.socio_occasionale_id = se.id
+        SELECT e.*, 
+            t.codice as tipologia,
+            t.nome as tipologia_nome,
+            COALESCE(al.cognome || ' ' || al.nome, d.cognome || ' ' || d.nome, se.cognome || ' ' || se.nome, 'N/D') as partecipante
+        FROM eventi_calendario e
+        INNER JOIN tipologie_evento t ON e.tipologia_id = t.id
+        LEFT JOIN soci s3 ON e.allievo_id = s3.id
+        LEFT JOIN persone al ON s3.persona_id = al.id
+        LEFT JOIN docenti d ON e.docente_id = d.id
+        LEFT JOIN soci_esterni se ON e.socio_occasionale_id = se.id
     WHERE e.data_evento = ?
     AND e.aula_id = ?
     ORDER BY e.ora_inizio

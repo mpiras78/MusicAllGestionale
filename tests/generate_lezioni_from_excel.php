@@ -1,7 +1,7 @@
 <?php
 /**
  * Script per generare insert_lezioni.sql dal file Excel
- * Associa automaticamente allievi a docenti/materie basandosi su:
+ * Associa automaticamente soci (ex-allievi) a docenti/materie basandosi su:
  * - Giorno della settimana
  * - Orario
  * - Sala
@@ -186,7 +186,7 @@ echo "===========================================\n";
 echo "  Generazione insert_lezioni.sql\n";
 echo "===========================================\n\n";
 
-$file = __DIR__ . '/../template/Orario Allievi MusicAll.xlsx';
+$file = __DIR__ . '/../template/Orario Soci MusicAll.xlsx';
 
 if (!file_exists($file)) {
     die("ERRORE: File Excel non trovato: $file\n");
@@ -285,7 +285,7 @@ $sql .= "-- INSERT LEZIONI - MusicAll\n";
 $sql .= "-- Generato automaticamente da Excel\n";
 $sql .= "-- Data: " . date('Y-m-d H:i:s') . "\n";
 $sql .= "-- ============================================\n\n";
-$sql .= "-- NOTA: Eseguire DOPO aver importato allievi e docenti\n\n";
+$sql .= "-- NOTA: Eseguire DOPO aver importato soci e docenti\n\n";
 
 foreach ($lezioni as $lez) {
     $tipo = $lez['is_lab'] ? 'laboratorio' : 'regolare';
@@ -293,7 +293,7 @@ foreach ($lezioni as $lez) {
     
     $sql .= "INSERT INTO lezioni (allievo_id, docente_id, materia_id, aula_id, giorno_settimana, ora_inizio, ora_fine, tipo, note, attiva)\n";
     $sql .= "SELECT \n";
-    $sql .= "    (SELECT id FROM allievi WHERE cognome='{$lez['allievo_cognome']}' AND nome='{$lez['allievo_nome']}' LIMIT 1),\n";
+    $sql .= "    (SELECT s.id FROM soci s JOIN persone p ON s.persona_id = p.id WHERE p.cognome='{$lez['allievo_cognome']}' AND p.nome='{$lez['allievo_nome']}' LIMIT 1),\n";
     $sql .= "    (SELECT id FROM docenti WHERE cognome='{$lez['docente']}' LIMIT 1),\n";
     $sql .= "    (SELECT id FROM materie WHERE nome='{$lez['materia']}' LIMIT 1),\n";
     $sql .= "    (SELECT id FROM aule WHERE nome='{$lez['sala']}' LIMIT 1),\n";
