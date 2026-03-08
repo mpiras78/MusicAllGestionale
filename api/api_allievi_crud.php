@@ -10,7 +10,7 @@ $data = json_decode($input, true);
 
 $action = $data['action'] ?? '';
 
-$controller = new AllieviController();
+$controller = new SociController();
 
 try {
     switch ($action) {

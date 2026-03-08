@@ -7,7 +7,7 @@ $page_title = 'Gestione Lezioni';
 $current_page = 'lezioni';
 
 $lezioniCtrl = new LezioniController();
-$allieviCtrl = new AllieviController();
+$sociCtrl = new SociController();
 $docentiCtrl = new DocentiController();
 
 $stats = [

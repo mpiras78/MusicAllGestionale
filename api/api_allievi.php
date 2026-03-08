@@ -19,120 +19,71 @@ if (!$action && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode($input, true) ?? [];
 }
 
-$controller = new AllieviController();
+// Reindirizzare a SociController ma mantenere compatibility aliases
+$controller = new SociController();
 $db = Database::getInstance();
 
 try {
     switch ($action) {
         case 'list':
-            $allievi = $controller->getAllievi();
-            echo json_encode($allievi);
+            $soci = $controller->getSoci();
+            echo json_encode($soci);
             break;
         
         case 'get':
-            // Ottieni i dati di un singolo allievo
+            // Ottieni i dati di un singolo socio
             $id = $_GET['id'] ?? null;
             if (!$id) {
-                throw new Exception('ID allievo mancante');
+                throw new Exception('ID socio mancante');
             }
             
-            $allievo = $controller->getAllievoById($id);
-            if (!$allievo) {
-                throw new Exception('Allievo non trovato');
+            $socio = $controller->getSocioById($id);
+            if (!$socio) {
+                throw new Exception('Socio non trovato');
             }
             
-            echo json_encode(['success' => true, 'data' => $allievo]);
+            echo json_encode(['success' => true, 'data' => $socio]);
             break;
         
         case 'create':
-            // Crea un nuovo allievo
+            // Crea un nuovo socio
             if (!isset($data['nome']) || !isset($data['cognome'])) {
                 throw new Exception('Nome e cognome sono obbligatori');
             }
             
-            $sql = "INSERT INTO allievi (nome, cognome, email, telefono, data_nascita, indirizzo, note, attivo) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $id = $controller->createSocio($data);
             
-            $result = $db->execute($sql, [
-                $data['nome'],
-                $data['cognome'],
-                $data['email'] ?? null,
-                $data['telefono'] ?? null,
-                $data['data_nascita'] ?? null,
-                $data['indirizzo'] ?? null,
-                $data['note'] ?? null,
-                1
-            ]);
-            
-            if (!$result) {
-                throw new Exception('Errore durante l\'inserimento dell\'allievo');
+            if (!$id) {
+                throw new Exception('Errore durante l\'inserimento del socio');
             }
             
-            echo json_encode(['success' => true, 'message' => 'Allievo creato correttamente']);
+            echo json_encode(['success' => true, 'message' => 'Socio creato correttamente']);
             break;
         
         case 'update':
-            // Aggiorna un allievo esistente
+            // Aggiorna un socio esistente
             if (!isset($data['id'])) {
-                throw new Exception('ID allievo mancante');
+                throw new Exception('ID socio mancante');
             }
             
             if (!isset($data['nome']) || !isset($data['cognome'])) {
                 throw new Exception('Nome e cognome sono obbligatori');
             }
             
-            $sql = "UPDATE allievi SET nome = ?, cognome = ?, email = ?, telefono = ?, 
-                    data_nascita = ?, indirizzo = ?, note = ? WHERE id = ?";
+            $controller->updateSocio($data['id'], $data);
             
-            $result = $db->execute($sql, [
-                $data['nome'],
-                $data['cognome'],
-                $data['email'] ?? null,
-                $data['telefono'] ?? null,
-                $data['data_nascita'] ?? null,
-                $data['indirizzo'] ?? null,
-                $data['note'] ?? null,
-                $data['id']
-            ]);
-            
-            if (!$result) {
-                throw new Exception('Errore durante l\'aggiornamento dell\'allievo');
-            }
-            
-            echo json_encode(['success' => true, 'message' => 'Allievo aggiornato correttamente']);
+            echo json_encode(['success' => true, 'message' => 'Socio aggiornato correttamente']);
             break;
         
         case 'delete':
-            // Disattiva un allievo
+            // Disattiva un socio
             if (!isset($data['id'])) {
-                throw new Exception('ID allievo mancante');
+                throw new Exception('ID socio mancante');
             }
             
-            // Controlla se ha iscrizioni attive nel mese corrente
-            $mese_corrente = date('Y-m');
-            $sql_check = "SELECT COUNT(*) as count FROM iscrizioni 
-                         WHERE allievo_id = ? 
-                         AND stato = 'attiva'
-                         AND date(data_inizio) <= date('now')
-                         AND (data_fine IS NULL OR date(data_fine) >= date('now'))";
+            $controller->disattivaSocio($data['id']);
             
-            $stmt = $db->prepare($sql_check);
-            $stmt->execute([$data['id']]);
-            $result = $stmt->fetch();
-            
-            if ($result && $result['count'] > 0) {
-                throw new Exception('L\'utente ha una iscrizione attiva in questo mese');
-            }
-            
-            // Soft delete - imposta attivo a 0 invece di eliminare
-            $sql = "UPDATE allievi SET attivo = 0 WHERE id = ?";
-            $result = $db->execute($sql, [$data['id']]);
-            
-            if (!$result) {
-                throw new Exception('Errore durante la disattivazione dell\'allievo');
-            }
-            
-            echo json_encode(['success' => true, 'message' => 'Allievo disattivato correttamente']);
+            echo json_encode(['success' => true, 'message' => 'Socio disattivato correttamente']);
             break;
             
         default:

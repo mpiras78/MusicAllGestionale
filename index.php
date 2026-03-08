@@ -13,14 +13,14 @@ $page_title = 'Dashboard';
 $current_page = 'dashboard';
 
 // Inizializza Controllers
-$allieviCtrl = new AllieviController();
+$sociCtrl = new SociController();
 $docentiCtrl = new DocentiController();
 $lezioniCtrl = new LezioniController();
 $assenzeCtrl = new AssenzeController();
 
 // Statistiche usando i controller
 $stats = [
-    'allievi' => $allieviCtrl->countAllievi(),
+    'soci' => $sociCtrl->countSoci(),
     'docenti' => $docentiCtrl->countDocenti(),
     'lezioni_settimana' => $lezioniCtrl->countLezioniSettimana(),
     'assenze_mese' => $assenzeCtrl->countAssenzeMeseCorrente()
@@ -42,7 +42,7 @@ $giorno_corrente = $giorni_mapping[$oggi_giorno] ?? 'lunedi';
 // Dati per la dashboard usando i controller
 $prossime_lezioni = $lezioniCtrl->getProssimeLezioniOggi($giorno_corrente, 5);
 $assenze_da_recuperare = $assenzeCtrl->getAssenzeDaRecuperare(10);
-$ultimi_allievi = $allieviCtrl->getUltimiAllievi(5);
+$ultimi_soci = $sociCtrl->getUltimiSoci(5);
 
 include 'includes/header.php';
 ?>

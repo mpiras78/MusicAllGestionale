@@ -64,7 +64,7 @@ require_once __DIR__ . '/PagamentiHelper.php';
 require_once __DIR__ . '/helpers.php';
 
 // Carica Controllers
-require_once __DIR__ . '/controllers/AllieviController.php';
+require_once __DIR__ . '/controllers/SociController.php';
 require_once __DIR__ . '/controllers/DocentiController.php';
 require_once __DIR__ . '/controllers/LezioniController.php';
 require_once __DIR__ . '/controllers/AssenzeController.php';

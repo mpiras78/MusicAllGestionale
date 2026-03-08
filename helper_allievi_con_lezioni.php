@@ -1,19 +1,19 @@
 <?php
 /**
- * Helper: Mostra allievi con lezioni per facilitare test assenze
- * Pattern MVC - usa AllieviController
+ * Helper: Mostra soci con lezioni per facilitare test assenze
+ * Pattern MVC - usa SociController
  */
 
 require_once 'includes/bootstrap.php';
 
 // Usa controller (MVC)
-$allieviCtrl = new AllieviController();
+$sociCtrl = new SociController();
 
 // Ottieni dati tramite controller
-$allievi_con_lezioni = $allieviCtrl->getAllieviConLezioni();
-$stats = $allieviCtrl->getStatisticheLezioni();
+$soci_con_lezioni = $sociCtrl->getSociConLezioni();
+$stats = $sociCtrl->getStatisticheLezioni();
 
-$page_title = 'Helper - Allievi con Lezioni';
+$page_title = 'Helper - Soci con Lezioni';
 require_once 'includes/header.php';
 ?>
 

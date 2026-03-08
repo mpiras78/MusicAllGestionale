@@ -4,17 +4,17 @@ require_once 'includes/bootstrap.php';
 // Richiede login
 $auth->requireLogin();
 
-$page_title = 'Gestione Allievi';
-$current_page = 'allievi';
+$page_title = 'Gestione Soci';
+$current_page = 'soci';
 
 // Inizializza Controller
-$allieviCtrl = new AllieviController();
+$sociCtrl = new SociController();
 
 // Ottieni statistiche
-$stats = $allieviCtrl->getStatisticheLezioni();
+$stats = $sociCtrl->getStatisticheLezioni();
 
-// Ottieni tutti gli allievi
-$allievi = $allieviCtrl->getAllievi(true);
+// Ottieni tutti i soci
+$soci = $sociCtrl->getSoci(true);
 
 include 'includes/header.php';
 ?>
@@ -23,9 +23,9 @@ include 'includes/header.php';
     <div class="row mb-4">
         <div class="col">
             <h1 class="h3 mb-0">
-                <i class="bi bi-people"></i> Gestione Allievi
+                <i class="bi bi-people"></i> Gestione Soci
             </h1>
-            <p class="text-muted mb-0">Visualizza e gestisci gli allievi della scuola</p>
+            <p class="text-muted mb-0">Visualizza e gestisci i soci della scuola</p>
         </div>
         <div class="col-auto">
             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addAllieveModal">
@@ -41,7 +41,7 @@ include 'includes/header.php';
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <p class="stat-label mb-1">Totale Allievi</p>
+                            <p class="stat-label mb-1">Totale Soci</p>
                             <h3 class="stat-value mb-0"><?= $stats['totale'] ?></h3>
                         </div>
                         <div class="stat-icon">
@@ -105,12 +105,12 @@ include 'includes/header.php';
                 <div class="col-md-6">
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <input type="text" id="searchAllievi" class="form-control" placeholder="Cerca per nome, cognome, email...">
+                        <input type="text" id="searchSoci" class="form-control" placeholder="Cerca per nome, cognome, email...">
                     </div>
                 </div>
                 <div class="col-md-3">
                     <select class="form-select" id="filtroLezioni">
-                        <option value="tutti">Tutti gli allievi</option>
+                        <option value="tutti">Tutti i soci</option>
                         <option value="con_lezioni">Solo con lezioni</option>
                         <option value="senza_lezioni">Solo senza lezioni</option>
                     </select>
@@ -124,17 +124,17 @@ include 'includes/header.php';
         </div>
     </div>
 
-    <!-- Tabella Allievi -->
+    <!-- Tabella Soci -->
     <div class="card">
         <div class="card-header">
             <h5 class="mb-0">
-                <i class="bi bi-list-ul"></i> Elenco Allievi
-                <span class="badge bg-primary ms-2" id="countAllievi"><?= count($allievi) ?></span>
+                <i class="bi bi-list-ul"></i> Elenco Soci
+                <span class="badge bg-primary ms-2" id="countSoci"><?= count($soci) ?></span>
             </h5>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0" id="tabellaAllievi">
+                <table class="table table-hover mb-0" id="tavollaSoci">
                     <thead>
                         <tr>
                             <th>Nome</th>
@@ -147,32 +147,32 @@ include 'includes/header.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (empty($allievi)): ?>
+                        <?php if (empty($soci)): ?>
                             <tr>
                                 <td colspan="7" class="text-center text-muted py-4">
                                     <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-                                    <p class="mb-0 mt-2">Nessun allievo trovato</p>
+                                    <p class="mb-0 mt-2">Nessun socio trovato</p>
                                 </td>
                             </tr>
                         <?php else: ?>
-                            <?php foreach ($allievi as $allievo): ?>
-                                <tr data-allievo-id="<?= $allievo['id'] ?>" data-has-lezioni="0">
-                                    <td><?= e($allievo['nome']) ?></td>
-                                    <td><?= e($allievo['cognome']) ?></td>
-                                    <td><?= e($allievo['email'] ?: '-') ?></td>
-                                    <td><?= e($allievo['telefono'] ?: '-') ?></td>
-                                    <td><?= $allievo['data_nascita'] ? date('d/m/Y', strtotime($allievo['data_nascita'])) : '-' ?></td>
+                            <?php foreach ($soci as $socio): ?>
+                                <tr data-socio-id="<?= $socio['id'] ?>" data-has-lezioni="0">
+                                    <td><?= e($socio['nome']) ?></td>
+                                    <td><?= e($socio['cognome']) ?></td>
+                                    <td><?= e($socio['email'] ?: '-') ?></td>
+                                    <td><?= e($socio['telefono'] ?: '-') ?></td>
+                                    <td><?= $socio['data_nascita'] ? date('d/m/Y', strtotime($socio['data_nascita'])) : '-' ?></td>
                                     <td class="text-center">
                                         <span class="badge bg-secondary lezioni-badge">-</span>
                                     </td>
                                     <td class="text-center">
-                                        <button class="btn btn-sm btn-primary" onclick="visualizzaAllievo(<?= $allievo['id'] ?>)" title="Visualizza">
+                                        <button class="btn btn-sm btn-primary" onclick="visualizzaSocio(<?= $socio['id'] ?>)" title="Visualizza">
                                             <i class="bi bi-eye"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-warning" onclick="modificaAllievo(<?= $allievo['id'] ?>)" title="Modifica">
+                                        <button class="btn btn-sm btn-warning" onclick="modificaSocio(<?= $socio['id'] ?>)" title="Modifica">
                                             <i class="bi bi-pencil"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-danger" onclick="confermaDisattivazione(<?= $allievo['id'] ?>, '<?= addslashes($allievo['cognome'] . ' ' . $allievo['nome']) ?>')" title="Disattiva">
+                                        <button class="btn btn-sm btn-danger" onclick="confermaDisattivazione(<?= $socio['id'] ?>, '<?= addslashes($socio['cognome'] . ' ' . $socio['nome']) ?>')" title="Disattiva">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </td>
@@ -366,18 +366,18 @@ include 'includes/header.php';
 <script>
 // Carica info lezioni per ogni allievo all'avvio
 document.addEventListener('DOMContentLoaded', function() {
-    caricaLezioniAllievi();
+    caricaLezioniSoci();
 });
 
-function caricaLezioniAllievi() {
-    fetch('<?= BASE_URL ?>/api/api_get_helpers.php?type=allievi_con_lezioni')
+function caricaLezioniSoci() {
+    fetch('<?= BASE_URL ?>/api/api_get_helpers.php?type=soci_con_lezioni')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Mappa allievi con lezioni
-                const allieviConLezioni = new Map();
+                // Mappa soci con lezioni
+                const sociConLezioni = new Map();
                 data.data.forEach(a => {
-                    allieviConLezioni.set(a.id, {
+                    sociConLezioni.set(a.id, {
                         num_lezioni: a.num_lezioni,
                         materie: a.materie,
                         giorni: a.giorni
@@ -385,12 +385,12 @@ function caricaLezioniAllievi() {
                 });
                 
                 // Aggiorna tabella
-                document.querySelectorAll('#tabellaAllievi tbody tr[data-allievo-id]').forEach(row => {
-                    const allieveId = parseInt(row.dataset.allieveId);
+                document.querySelectorAll('#tavollaSoci tbody tr[data-socio-id]').forEach(row => {
+                    const socioId = parseInt(row.dataset.socioId);
                     const badge = row.querySelector('.lezioni-badge');
                     
-                    if (allieviConLezioni.has(allieveId)) {
-                        const info = allieviConLezioni.get(allieveId);
+                    if (sociConLezioni.has(socioId)) {
+                        const info = sociConLezioni.get(socioId);
                         badge.className = 'badge bg-success lezioni-badge';
                         badge.textContent = info.num_lezioni + ' lezioni';
                         badge.title = `Materie: ${info.materie}\nGiorni: ${info.giorni}`;
@@ -407,7 +407,7 @@ function caricaLezioniAllievi() {
 }
 
 // Filtro ricerca
-document.getElementById('searchAllievi').addEventListener('input', function(e) {
+document.getElementById('searchSoci').addEventListener('input', function(e) {
     const query = e.target.value.toLowerCase();
     filtroTabella();
 });
@@ -417,11 +417,11 @@ document.getElementById('filtroLezioni').addEventListener('change', function() {
 });
 
 function filtroTabella() {
-    const query = document.getElementById('searchAllievi').value.toLowerCase();
+    const query = document.getElementById('searchSoci').value.toLowerCase();
     const filtroLezioni = document.getElementById('filtroLezioni').value;
     
     let visibili = 0;
-    document.querySelectorAll('#tabellaAllievi tbody tr[data-allievo-id]').forEach(row => {
+    document.querySelectorAll('#tavollaSoci tbody tr[data-socio-id]').forEach(row => {
         const nome = row.cells[0].textContent.toLowerCase();
         const cognome = row.cells[1].textContent.toLowerCase();
         const email = row.cells[2].textContent.toLowerCase();
@@ -476,22 +476,22 @@ function salvaAllievo() {
     .catch(error => mostraToast('Errore', error.message, 'danger'));
 }
 
-function modificaAllievo(id) {
-    fetch(`<?= BASE_URL ?>/api/api_allievi.php?action=get&id=${id}`)
+function modificaSocio(id) {
+    fetch(`<?= BASE_URL ?>/api/api_soci.php?action=get&id=${id}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                const a = data.data;
-                document.getElementById('editAllieveId').value = a.id;
-                document.getElementById('editNome').value = a.nome;
-                document.getElementById('editCognome').value = a.cognome;
-                document.getElementById('editEmail').value = a.email || '';
-                document.getElementById('editTelefono').value = a.telefono || '';
-                document.getElementById('editDataNascita').value = a.data_nascita || '';
-                document.getElementById('editIndirizzo').value = a.indirizzo || '';
-                document.getElementById('editNote').value = a.note || '';
+                const s = data.data;
+                document.getElementById('editSocioId').value = s.id;
+                document.getElementById('editNome').value = s.nome;
+                document.getElementById('editCognome').value = s.cognome;
+                document.getElementById('editEmail').value = s.email || '';
+                document.getElementById('editTelefono').value = s.telefono || '';
+                document.getElementById('editDataNascita').value = s.data_nascita || '';
+                document.getElementById('editIndirizzo').value = s.indirizzo || '';
+                document.getElementById('editNote').value = s.note || '';
                 
-                const modal = new bootstrap.Modal(document.getElementById('editAllieveModal'));
+                const modal = new bootstrap.Modal(document.getElementById('editSocioModal'));
                 modal.show();
             } else {
                 throw new Error(data.error);
@@ -500,8 +500,8 @@ function modificaAllievo(id) {
         .catch(error => mostraToast('Errore', error.message, 'danger'));
 }
 
-function aggiornaAllievo() {
-    const form = document.getElementById('formModificaAllievo');
+function aggiornaSocio() {
+    const form = document.getElementById('formModificaSocio');
     if (!form.checkValidity()) {
         form.reportValidity();
         return;
@@ -510,7 +510,7 @@ function aggiornaAllievo() {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData);
     
-    fetch('<?= BASE_URL ?>/api/api_allievi.php', {
+    fetch('<?= BASE_URL ?>/api/api_soci.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({action: 'update', ...data})
@@ -518,7 +518,7 @@ function aggiornaAllievo() {
     .then(response => response.json())
     .then(result => {
         if (result.success) {
-            mostraToast('Successo', 'Allievo aggiornato correttamente', 'success');
+            mostraToast('Successo', 'Socio aggiornato correttamente', 'success');
             setTimeout(() => location.reload(), 1500);
         } else {
             throw new Error(result.error || 'Errore durante l\'aggiornamento');
@@ -527,9 +527,9 @@ function aggiornaAllievo() {
     .catch(error => mostraToast('Errore', error.message, 'danger'));
 }
 
-function visualizzaAllievo(id) {
-    const modalBody = document.getElementById('viewAllieveBody');
-    const modalNome = document.getElementById('viewAllieveNome');
+function visualizzaSocio(id) {
+    const modalBody = document.getElementById('viewSocioBody');
+    const modalNome = document.getElementById('viewSocioNome');
     
     modalBody.innerHTML = `
         <div class="text-center py-5">
@@ -539,15 +539,15 @@ function visualizzaAllievo(id) {
         </div>
     `;
     
-    const modal = new bootstrap.Modal(document.getElementById('viewAllieveModal'));
+    const modal = new bootstrap.Modal(document.getElementById('viewSocioModal'));
     modal.show();
     
-    fetch(`<?= BASE_URL ?>/api/api_get_info_allievo.php?allievo_id=${id}`)
+    fetch(`<?= BASE_URL ?>/api/api_get_info_socio.php?socio_id=${id}`)
         .then(response => response.json())
         .then(data => {
             if (data.error) throw new Error(data.error);
             
-            modalNome.textContent = data.allievo.nome_completo;
+            modalNome.textContent = data.socio.nome_completo;
             
             let html = `
                 <!-- Info Anagrafica -->
@@ -557,16 +557,16 @@ function visualizzaAllievo(id) {
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-6"><strong>Email:</strong> ${data.allievo.email || '-'}</div>
-                            <div class="col-md-6"><strong>Telefono:</strong> ${data.allievo.telefono || '-'}</div>
+                            <div class="col-md-6"><strong>Email:</strong> ${data.socio.email || '-'}</div>
+                            <div class="col-md-6"><strong>Telefono:</strong> ${data.socio.telefono || '-'}</div>
                         </div>
-                        ${data.allievo.data_nascita || data.allievo.indirizzo ? `
+                        ${data.socio.data_nascita || data.socio.indirizzo ? `
                         <div class="row mt-2">
-                            ${data.allievo.data_nascita ? `<div class="col-md-6"><strong>Data Nascita:</strong> ${new Date(data.allievo.data_nascita).toLocaleDateString('it-IT')}</div>` : ''}
-                            ${data.allievo.indirizzo ? `<div class="col-md-6"><strong>Indirizzo:</strong> ${data.allievo.indirizzo}</div>` : ''}
+                            ${data.socio.data_nascita ? `<div class="col-md-6"><strong>Data Nascita:</strong> ${new Date(data.socio.data_nascita).toLocaleDateString('it-IT')}</div>` : ''}
+                            ${data.socio.indirizzo ? `<div class="col-md-6"><strong>Indirizzo:</strong> ${data.socio.indirizzo}</div>` : ''}
                         </div>
                         ` : ''}
-                        ${data.allievo.note ? `<div class="row mt-2"><div class="col-12"><strong>Note:</strong> ${data.allievo.note}</div></div>` : ''}
+                        ${data.socio.note ? `<div class="row mt-2"><div class="col-12"><strong>Note:</strong> ${data.socio.note}</div></div>` : ''}
                     </div>
                 </div>
                 
@@ -647,17 +647,17 @@ function visualizzaAllievo(id) {
 }
 
 function confermaDisattivazione(id, nome) {
-    document.getElementById('nomeAllievoDaDisattivare').textContent = nome;
-    document.getElementById('idAllievoDaDisattivare').value = id;
+    document.getElementById('nomeSocioDaDisattivare').textContent = nome;
+    document.getElementById('idSocioDaDisattivare').value = id;
     
     const modal = new bootstrap.Modal(document.getElementById('confermaDisattivazioneModal'));
     modal.show();
 }
 
-function disattivaAllievo() {
-    const id = document.getElementById('idAllievoDaDisattivare').value;
+function disattivaSocio() {
+    const id = document.getElementById('idSocioDaDisattivare').value;
     
-    fetch('<?= BASE_URL ?>/api/api_allievi.php', {
+    fetch('<?= BASE_URL ?>/api/api_soci.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({action: 'delete', id: id})
@@ -665,7 +665,7 @@ function disattivaAllievo() {
     .then(response => response.json())
     .then(result => {
         if (result.success) {
-            mostraToast('Successo', 'Allievo disattivato correttamente', 'success');
+            mostraToast('Successo', 'Socio disattivato correttamente', 'success');
             setTimeout(() => location.reload(), 1500);
         } else {
             throw new Error(result.message || 'Errore durante la disattivazione');
