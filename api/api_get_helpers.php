@@ -9,10 +9,22 @@ try {
     $db = Database::getInstance()->getConnection();
     
     switch ($type) {
-        case 'allievi':
+        case 'soci':
             $stmt = $db->query("
                 SELECT id, cognome, nome
-                FROM allievi
+                FROM soci
+                WHERE attivo = 1
+                ORDER BY cognome, nome
+            ");
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode(['success' => true, 'data' => $result]);
+            break;
+            
+        case 'allievi':
+            // Retrocompatibilità - reindirizza a soci
+            $stmt = $db->query("
+                SELECT id, cognome, nome
+                FROM soci
                 WHERE attivo = 1
                 ORDER BY cognome, nome
             ");
@@ -31,19 +43,39 @@ try {
             echo json_encode(['success' => true, 'data' => $result]);
             break;
             
-        case 'allievi_con_lezioni':
+        case 'soci_con_lezioni':
             $stmt = $db->query("
                 SELECT 
-                    a.id,
+                    s.id,
                     COUNT(DISTINCT l.id) as num_lezioni,
                     GROUP_CONCAT(DISTINCT m.nome) as materie,
                     GROUP_CONCAT(DISTINCT l.giorno_settimana) as giorni
-                FROM allievi a
-                INNER JOIN lezioni l ON a.id = l.allievo_id AND l.attiva = 1 AND l.iscrizione_id IS NOT NULL
-                INNER JOIN iscrizioni i ON l.iscrizione_id = i.id AND i.stato = 'attiva'
+                FROM soci s
+                INNER JOIN lezioni l ON s.id = l.socio_id AND l.attiva = 1 AND l.iscrizione_id IS NOT NULL
+                INNER JOIN iscrizioni_annuali i ON l.iscrizione_id = i.id AND i.stato = 'attiva'
                 LEFT JOIN materie m ON l.materia_id = m.id
-                WHERE a.attivo = 1
-                GROUP BY a.id
+                WHERE s.attivo = 1
+                GROUP BY s.id
+            ");
+            
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode(['success' => true, 'data' => $result]);
+            break;
+            
+        case 'allievi_con_lezioni':
+            // Retrocompatibilità - reindirizza a soci_con_lezioni
+            $stmt = $db->query("
+                SELECT 
+                    s.id,
+                    COUNT(DISTINCT l.id) as num_lezioni,
+                    GROUP_CONCAT(DISTINCT m.nome) as materie,
+                    GROUP_CONCAT(DISTINCT l.giorno_settimana) as giorni
+                FROM soci s
+                INNER JOIN lezioni l ON s.id = l.socio_id AND l.attiva = 1 AND l.iscrizione_id IS NOT NULL
+                INNER JOIN iscrizioni_annuali i ON l.iscrizione_id = i.id AND i.stato = 'attiva'
+                LEFT JOIN materie m ON l.materia_id = m.id
+                WHERE s.attivo = 1
+                GROUP BY s.id
             ");
             
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);

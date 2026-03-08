@@ -28,15 +28,15 @@ try {
     $allievo_id = null;
     $docente_id = null;
     
-    if ($tipologia_id == 6) { // PREN_SALA_ALLIEVI
-        $allievo_id = $_POST['allievo_id_pren'] ?? null;
-        if (!$allievo_id) throw new Exception('Allievo richiesto per prenotazione sala');
+    if ($tipologia_id == 6) { // PREN_SALA_SOCI
+        $socio_id = $_POST['socio_id_pren'] ?? $_POST['allievo_id_pren'] ?? null;
+        if (!$socio_id) throw new Exception('Socio richiesto per prenotazione sala');
         
-        $stmt = $db->prepare("SELECT cognome, nome FROM allievi WHERE id = ?");
-        $stmt->execute([$allievo_id]);
-        $allievo = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt = $db->prepare("SELECT cognome, nome FROM soci WHERE id = ?");
+        $stmt->execute([$socio_id]);
+        $socio = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        $titolo = 'Prenotazione Sala - ' . $allievo['cognome'] . ' ' . $allievo['nome'];
+        $titolo = 'Prenotazione Sala - ' . $socio['cognome'] . ' ' . $socio['nome'];
         
     } elseif ($tipologia_id == 7) { // PREN_DOCENTE
         $docente_id = $_POST['docente_id_pren'] ?? null;
