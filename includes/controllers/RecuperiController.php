@@ -185,7 +185,7 @@ class RecuperiController {
         }
         
         // Inserisci recupero - GIÀ CONFERMATO (flusso semplificato)
-        $result = $this->db->execute("
+        $recupero_id = $this->db->insert("
             INSERT INTO recuperi (
                 assenza_id, lezione_originale_id, allievo_id, docente_id, materia_id,
                 data_recupero, ora_inizio, ora_fine, aula_id,
@@ -211,8 +211,7 @@ class RecuperiController {
         // Trova ID tipologia recupero
         $tipologia_recupero = $this->db->queryOne("SELECT id FROM tipologie_evento WHERE codice = 'LEZ_RECUPERO' LIMIT 1");
         
-        if ($tipologia_recupero) {
-            $recupero_id = $this->db->lastInsertId();
+        if ($tipologia_recupero && $recupero_id) {
             
             // Ottieni data assenza per le note
             $data_assenza_formattata = date('d/m/Y', strtotime($assenza['data_assenza']));
@@ -240,7 +239,7 @@ class RecuperiController {
             ]);
         }
         
-        return $result;
+        return $recupero_id;
     }
     
     /**
