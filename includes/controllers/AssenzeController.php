@@ -328,14 +328,21 @@ class AssenzeController {
     }
     
     /**
-     * Ottieni lista allievi (per filtro)
+     * Ottieni lista soci (per filtro)
      */
-    public function getAllievi() {
+    public function getSoci() {
         return $this->db->query("
             SELECT id, cognome || ' ' || nome as nome_completo 
-            FROM allievi 
+            FROM soci 
             ORDER BY cognome, nome
         ") ?: [];
+    }
+    
+    /**
+     * Alias di compatibilità (retrocompatibilità)
+     */
+    public function getAllievi() {
+        return $this->getSoci();
     }
     
     /**

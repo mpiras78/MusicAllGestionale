@@ -93,7 +93,7 @@ $conta = $assenzeCtrl->contaAssenze();
 
 // Dati per form/filtri (solo se necessario)
 $docenti = $canCreate || !$isDocente ? $assenzeCtrl->getDocenti() : [];
-$allievi = $canCreate || !$isDocente ? $assenzeCtrl->getAllievi() : [];
+$soci = $canCreate || !$isDocente ? $assenzeCtrl->getSoci() : [];
 
 // Aule per modal recupero
 if ($canCreate) {

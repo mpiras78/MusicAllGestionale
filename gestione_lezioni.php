@@ -23,7 +23,7 @@ foreach ($giorni as $giorno) {
 }
 
 $lezioni = $lezioniCtrl->getAllLezioni();
-$allievi = $allieviCtrl->getAllievi(true);
+$soci = $sociCtrl->getSoci(true);
 $docenti = $docentiCtrl->getAllDocenti(true);
 
 $db = Database::getInstance();
@@ -292,11 +292,11 @@ include 'includes/header.php';
                     <input type="hidden" name="id" id="editLezioneId">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Allievo *</label>
-                            <select class="form-select" name="allievo_id" id="editAllieveId" required>
-                                <option value="">Seleziona allievo</option>
-                                <?php foreach ($allievi as $a): ?>
-                                    <option value="<?= $a['id'] ?>"><?= e($a['cognome'] . ' ' . $a['nome']) ?></option>
+                            <label class="form-label fw-bold">Socio *</label>
+                            <select class="form-select" name="socio_id" id="editSocioId" required>
+                                <option value="">Seleziona socio</option>
+                                <?php foreach ($soci as $s): ?>
+                                    <option value="<?= $s['id'] ?>"><?= e($s['cognome'] . ' ' . $s['nome']) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
