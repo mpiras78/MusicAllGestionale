@@ -11,7 +11,7 @@ Script bash per gestione database SQLite del progetto MusicAll.
 ## 🚀 Quick Start
 
 ```bash
-# Import completo database (schema + docenti + allievi)
+# Import completo database (schema + docenti + soci)
 bash config/utils/db-import-all.sh
 
 # Avvia server PHP
@@ -90,7 +90,7 @@ bash config/utils/user-reset-password.sh mario.rossi
 - ✅ Reset e ricreazione database
 - ✅ Import schema (13 tabelle)
 - ✅ Import 25 docenti + 30+ relazioni materie
-- ✅ Import 230+ allievi
+- ✅ Import 230+ soci
 - ✅ Statistiche finali
 
 **Uso:**
@@ -107,13 +107,13 @@ bash config/utils/db-import-all.sh
 [STEP 1/4] Backup database esistente
 [STEP 2/4] Reset database e import schema
 [STEP 3/4] Import docenti e relazioni materie
-[STEP 4/4] Import allievi
+[STEP 4/4] Import soci
 
 📊 Statistiche Database:
   👥 Utenti:              1 (admin pronto)
   👨‍🏫 Docenti:             25
   🔗 Relazioni D-M:       30+
-  🎓 Allievi:             230+
+  🎓 Soci:             230+
   🏫 Aule:                6
   📚 Materie:             18
   ⏰ Slot Orari:          17
@@ -266,7 +266,7 @@ MusicAll/
 │   ├── schema_sqlite.sql         # Schema SQLite
 │   ├── schema.sql                # Schema MySQL
 │   ├── insert_docenti.sql        # 25 docenti + relazioni
-│   ├── insert_allievi.sql        # 230+ allievi
+│   ├── insert_soci.sql        # 230+ soci
 │   └── backups/                  # ← Backup automatici qui
 │       ├── musicall_backup_20260204012530.sqlite
 │       ├── musicall_backup_20260204010000.sqlite

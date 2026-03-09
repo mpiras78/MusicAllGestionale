@@ -48,12 +48,12 @@ try {
             l.ora_fine,
             m.nome as materia,
             a.nome as aula,
-            al.cognome || ' ' || al.nome as allievo,
-            al.id as allievo_id
+            al.cognome || ' ' || al.nome as socio,
+            al.id as socio_id
         FROM lezioni l
         INNER JOIN materie m ON l.materia_id = m.id
         LEFT JOIN aule a ON l.aula_id = a.id
-        INNER JOIN allievi al ON l.allievo_id = al.id
+        INNER JOIN soci al ON l.socio_id = al.id
         WHERE l.docente_id = ? AND l.attiva = 1
         ORDER BY 
             CASE l.giorno_settimana

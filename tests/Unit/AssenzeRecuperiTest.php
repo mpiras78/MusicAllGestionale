@@ -4,7 +4,7 @@
  * 
  * Test CRITICI per la business logic delle assenze e recuperi:
  * - Assenze docente sempre da recuperare
- * - Prime 3 assenze allievo obbligatorie
+ * - Prime 3 assenze socio obbligatorie
  * - 4a assenza in poi a discrezione
  * - Conteggio per anno scolastico
  */
@@ -29,33 +29,33 @@ class AssenzeRecuperiTest extends TestCase
     }
     
     /**
-     * Test: Prime 3 assenze allievo sono obbligatorie
+     * Test: Prime 3 assenze socio sono obbligatorie
      */
-    public function testPrime3AssenzeAllievoObbligatorie()
+    public function testPrime3AssenzeSocioObbligatorie()
     {
-        $tipo_assenza = 'allievo';
+        $tipo_assenza = 'socio';
         
         // Simula conteggio assenze precedenti
         for ($conteggio = 0; $conteggio < 3; $conteggio++) {
-            $da_recuperare = ($tipo_assenza === 'allievo' && $conteggio < 3) ? 1 : 0;
+            $da_recuperare = ($tipo_assenza === 'socio' && $conteggio < 3) ? 1 : 0;
             
             $this->assertEquals(1, $da_recuperare, 
-                "Assenza #{$conteggio} allievo deve essere obbligatoria (prime 3)");
+                "Assenza #{$conteggio} socio deve essere obbligatoria (prime 3)");
         }
     }
     
     /**
-     * Test: 4a assenza allievo NON obbligatoria
+     * Test: 4a assenza socio NON obbligatoria
      */
-    public function testQuartaAssenzaAllievoNonObbligatoria()
+    public function testQuartaAssenzaSocioNonObbligatoria()
     {
-        $tipo_assenza = 'allievo';
+        $tipo_assenza = 'socio';
         $conteggio = 3; // 4a assenza (0-indexed)
         
-        $da_recuperare = ($tipo_assenza === 'allievo' && $conteggio < 3) ? 1 : 0;
+        $da_recuperare = ($tipo_assenza === 'socio' && $conteggio < 3) ? 1 : 0;
         
         $this->assertEquals(0, $da_recuperare, 
-            "4a assenza allievo NON deve essere obbligatoria");
+            "4a assenza socio NON deve essere obbligatoria");
     }
     
     /**
@@ -69,7 +69,7 @@ class AssenzeRecuperiTest extends TestCase
                 return 1; // Sempre obbligatorio
             }
             
-            if ($tipo_assenza === 'allievo') {
+            if ($tipo_assenza === 'socio') {
                 return ($conteggio_precedenti < 3) ? 1 : 0;
             }
             
@@ -79,11 +79,11 @@ class AssenzeRecuperiTest extends TestCase
         // Test vari scenari
         $this->assertEquals(1, $determinaDaRecuperare('docente', 0));
         $this->assertEquals(1, $determinaDaRecuperare('docente', 10));
-        $this->assertEquals(1, $determinaDaRecuperare('allievo', 0));
-        $this->assertEquals(1, $determinaDaRecuperare('allievo', 1));
-        $this->assertEquals(1, $determinaDaRecuperare('allievo', 2));
-        $this->assertEquals(0, $determinaDaRecuperare('allievo', 3));
-        $this->assertEquals(0, $determinaDaRecuperare('allievo', 10));
+        $this->assertEquals(1, $determinaDaRecuperare('socio', 0));
+        $this->assertEquals(1, $determinaDaRecuperare('socio', 1));
+        $this->assertEquals(1, $determinaDaRecuperare('socio', 2));
+        $this->assertEquals(0, $determinaDaRecuperare('socio', 3));
+        $this->assertEquals(0, $determinaDaRecuperare('socio', 10));
     }
     
     /**
@@ -109,22 +109,22 @@ class AssenzeRecuperiTest extends TestCase
     }
     
     /**
-     * Test: Conteggio assenze per coppia allievo-lezione
+     * Test: Conteggio assenze per coppia socio-lezione
      */
-    public function testConteggioAssenzePerCoppiaAllieveLezione()
+    public function testConteggioAssenzePerCoppiaSocioLezione()
     {
         // Simula array assenze
         $assenze = [
-            ['allievo_id' => 1, 'lezione_id' => 10, 'data' => '2025-10-01'],
-            ['allievo_id' => 1, 'lezione_id' => 10, 'data' => '2025-11-01'],
-            ['allievo_id' => 1, 'lezione_id' => 10, 'data' => '2025-12-01'],
-            ['allievo_id' => 1, 'lezione_id' => 20, 'data' => '2025-10-15'], // Altra lezione
-            ['allievo_id' => 2, 'lezione_id' => 10, 'data' => '2025-10-20'], // Altro allievo
+            ['socio_id' => 1, 'lezione_id' => 10, 'data' => '2025-10-01'],
+            ['socio_id' => 1, 'lezione_id' => 10, 'data' => '2025-11-01'],
+            ['socio_id' => 1, 'lezione_id' => 10, 'data' => '2025-12-01'],
+            ['socio_id' => 1, 'lezione_id' => 20, 'data' => '2025-10-15'], // Altra lezione
+            ['socio_id' => 2, 'lezione_id' => 10, 'data' => '2025-10-20'], // Altro socio
         ];
         
-        $contaAssenze = function($assenze, $allievo_id, $lezione_id) {
-            return count(array_filter($assenze, function($a) use ($allievo_id, $lezione_id) {
-                return $a['allievo_id'] == $allievo_id && $a['lezione_id'] == $lezione_id;
+        $contaAssenze = function($assenze, $socio_id, $lezione_id) {
+            return count(array_filter($assenze, function($a) use ($socio_id, $lezione_id) {
+                return $a['socio_id'] == $socio_id && $a['lezione_id'] == $lezione_id;
             }));
         };
         

@@ -65,10 +65,10 @@ try {
     echo "📦 STEP 3: Migrazione dati...\n";
     $data_sql = file_get_contents(__DIR__ . '/../database/migration_dati_anagrafica.sql');
 
-    // Se la tabella `allievi` non esiste più, probabilmente la migration è già stata applicata
-    $checkAllievi = $db->query("SELECT name FROM sqlite_master WHERE type='table' AND name='allievi'")->fetch();
-    if (!$checkAllievi) {
-        echo "  ⚠️ Tabella 'allievi' non trovata: salto STEP 3 (presumibilmente già migrato)\n\n";
+    // Se la tabella `soci` non esiste più, probabilmente la migration è già stata applicata
+    $checkSoci = $db->query("SELECT name FROM sqlite_master WHERE type='table' AND name='soci'")->fetch();
+    if (!$checkSoci) {
+        echo "  ⚠️ Tabella 'soci' non trovata: salto STEP 3 (presumibilmente già migrato)\n\n";
     } else {
         // Cattura output del report
         ob_start();
@@ -151,11 +151,11 @@ try {
     echo "🔍 Verifica consistenza:\n";
     // Confronto: usa la tabella backup `_v2_backup` come "vecchia" e la vista `v_soci` come nuova
     // Confronto: usa la tabella backup `_v2_backup` come "vecchia" e la vista `v_soci` come nuova
-    $stmt_old_allievi = $db->query("SELECT COUNT(*) as cnt FROM allievi_v2_backup");
-    $old_a = $stmt_old_allievi->fetch()['cnt'];
+    $stmt_old_soci = $db->query("SELECT COUNT(*) as cnt FROM soci_v2_backup");
+    $old_a = $stmt_old_soci->fetch()['cnt'];
     try {
-        $stmt_new_allievi = $db->query("SELECT COUNT(*) as cnt FROM v_soci");
-        $new_a = $stmt_new_allievi->fetch()['cnt'];
+        $stmt_new_soci = $db->query("SELECT COUNT(*) as cnt FROM v_soci");
+        $new_a = $stmt_new_soci->fetch()['cnt'];
         echo "  Soci: $old_a (backup) → $new_a (vista) " . ($old_a == $new_a ? '✅' : '⚠️') . "\n";
     } catch (Exception $e) {
         echo "  ⚠️ Impossibile leggere v_soci: " . $e->getMessage() . "\n";

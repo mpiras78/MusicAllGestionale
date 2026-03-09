@@ -19,7 +19,7 @@ try {
             -- Riferimenti
             assenza_id INTEGER NOT NULL,
             lezione_originale_id INTEGER NOT NULL,
-            allievo_id INTEGER NOT NULL,
+            socio_id INTEGER NOT NULL,
             docente_id INTEGER NOT NULL,
             materia_id INTEGER NOT NULL,
             
@@ -53,7 +53,7 @@ try {
             -- Foreign Keys
             FOREIGN KEY (assenza_id) REFERENCES assenze(id) ON DELETE CASCADE,
             FOREIGN KEY (lezione_originale_id) REFERENCES lezioni(id),
-            FOREIGN KEY (allievo_id) REFERENCES soci(id),
+            FOREIGN KEY (socio_id) REFERENCES soci(id),
             FOREIGN KEY (docente_id) REFERENCES docenti(id),
             FOREIGN KEY (materia_id) REFERENCES materie(id),
             FOREIGN KEY (aula_id) REFERENCES aule(id),
@@ -75,8 +75,8 @@ try {
     $db->execute("CREATE INDEX IF NOT EXISTS idx_recuperi_docente ON recuperi(docente_id)");
     echo "✓ idx_recuperi_docente\n";
     
-    $db->execute("CREATE INDEX IF NOT EXISTS idx_recuperi_allievo ON recuperi(allievo_id)");
-    echo "✓ idx_recuperi_allievo\n";
+    $db->execute("CREATE INDEX IF NOT EXISTS idx_recuperi_socio ON recuperi(socio_id)");
+    echo "✓ idx_recuperi_socio\n";
     
     $db->execute("CREATE INDEX IF NOT EXISTS idx_recuperi_stato ON recuperi(confermata_da_docente, annullato, data_recupero)");
     echo "✓ idx_recuperi_stato\n\n";
@@ -94,7 +94,7 @@ try {
                 ELSE 'proposta'
             END as stato,
             
-            al.cognome || ' ' || al.nome as allievo,
+            al.cognome || ' ' || al.nome as socio,
             d.cognome || ' ' || d.nome as docente,
             m.nome as materia,
             a.nome as aula,
@@ -107,7 +107,7 @@ try {
             lo.ora_fine as ora_originale_fine
             
         FROM recuperi r
-        LEFT JOIN soci s ON r.allievo_id = s.id
+        LEFT JOIN soci s ON r.socio_id = s.id
         LEFT JOIN persone al ON s.persona_id = al.id
         LEFT JOIN docenti d ON r.docente_id = d.id
         LEFT JOIN materie m ON r.materia_id = m.id
@@ -121,7 +121,7 @@ try {
         CREATE VIEW IF NOT EXISTS v_assenze_da_recuperare AS
         SELECT 
             ass.*,
-            al.cognome || ' ' || al.nome as allievo,
+            al.cognome || ' ' || al.nome as socio,
             d.cognome || ' ' || d.nome as docente,
             m.nome as materia,
             l.giorno_settimana,
@@ -129,11 +129,11 @@ try {
             l.ora_fine,
             
             (SELECT COUNT(*) FROM recuperi WHERE assenza_id = ass.id AND annullato = 0) as recuperi_proposti,
-            (SELECT COUNT(*) FROM assenze WHERE allievo_id = ass.allievo_id AND causata_da = 'allievo') as totale_assenze_allievo
+            (SELECT COUNT(*) FROM assenze WHERE socio_id = ass.socio_id AND causata_da = 'socio') as totale_assenze_socio
             
         FROM assenze ass
         JOIN lezioni l ON ass.lezione_id = l.id
-        JOIN soci s ON l.allievo_id = s.id
+        JOIN soci s ON l.socio_id = s.id
         JOIN persone al ON s.persona_id = al.id
         JOIN docenti d ON l.docente_id = d.id
         JOIN materie m ON l.materia_id = m.id

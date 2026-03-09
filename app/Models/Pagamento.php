@@ -11,7 +11,7 @@ class Pagamento extends Model
     protected $table = 'pagamenti';
     
     protected $fillable = [
-        'allievo_id',
+        'socio_id',
         'iscrizione_id',
         'tipo_pagamento_id',
         'anno_accademico',
@@ -42,11 +42,11 @@ class Pagamento extends Model
     ];
 
     /**
-     * Relazione: allievo
+     * Relazione: socio
      */
-    public function allievo()
+    public function socio()
     {
-        return $this->belongsTo(Allievo::class);
+        return $this->belongsTo(Socio::class);
     }
 
     /**
@@ -98,11 +98,11 @@ class Pagamento extends Model
     }
 
     /**
-     * Scope: per allievo
+     * Scope: per socio
      */
-    public function scopePerAllievo($query, $allievoId)
+    public function scopePerSocio($query, $socioId)
     {
-        return $query->where('allievo_id', $allievoId);
+        return $query->where('socio_id', $socioId);
     }
 
     /**
@@ -187,11 +187,11 @@ class Pagamento extends Model
     }
 
     /**
-     * Get nome allievo
+     * Get nome socio
      */
-    public function getAllievoNomeAttribute()
+    public function getSocioNomeAttribute()
     {
-        return $this->allievo ? $this->allievo->nome . ' ' . $this->allievo->cognome : '';
+        return $this->socio ? $this->socio->nome . ' ' . $this->socio->cognome : '';
     }
 
     /**

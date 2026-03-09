@@ -34,20 +34,20 @@
 - ✅ **Contatore lezioni** programmate per il giorno
 
 #### Interazione Lezioni
-- ✅ **Click su lezione** apre modal dettagli allievo
-- ✅ **Tutta la card cliccabile** (non solo nome allievo)
-- ✅ **Modal info allievo** con:
+- ✅ **Click su lezione** apre modal dettagli socio
+- ✅ **Tutta la card cliccabile** (non solo nome socio)
+- ✅ **Modal info socio** con:
   - Statistiche assenze/recuperi complete
-  - Corsi frequentati dall'allievo
+  - Corsi frequentati dall'socio
   - Prossimi recuperi programmati
   - Pulsante "Segna Assenza" rapido
 
 #### Segna Assenza Rapida
-- ✅ **Pulsante diretto** nella modal info allievo
+- ✅ **Pulsante diretto** nella modal info socio
 - ✅ **Pre-compilazione automatica**:
   - Lezione selezionata
   - Data lezione
-  - Allievo auto-caricato
+  - Socio auto-caricato
 - ✅ **Transizione fluida** tra modal info → modal assenza
 - ✅ **Chiusura automatica** modal precedente
 
@@ -72,7 +72,7 @@
 - ✅ **Animazione fade-out** quando chiusi
 
 ### Modal e Interazioni
-- ✅ **Pulsante "Chiudi"** nel footer modal info allievo
+- ✅ **Pulsante "Chiudi"** nel footer modal info socio
 - ✅ **Multipli metodi chiusura:**
   - Pulsante X header
   - Pulsante "Chiudi" footer
@@ -124,8 +124,8 @@
   - Aggiunto `return false` per prevenire default
 
 ### Modal
-- ✅ **Fixed:** Modal info allievo non si chiudeva
-  - Implementata funzione `chiudiModalInfoAllievo()`
+- ✅ **Fixed:** Modal info socio non si chiudeva
+  - Implementata funzione `chiudiModalInfoSocio()`
   - Gestione doppia chiusura (Bootstrap + fallback manuale)
   - Rimozione backdrop temporaneo
 - ✅ **Fixed:** Pulsante chiudi non funzionante
@@ -154,14 +154,14 @@ config/config.php       → Versione bump a 1.0.0
 ```
 SISTEMA_RECUPERI.md
 api_get_contatori_assenze.php
-api_get_info_allievo.php
-api_get_lezioni_allievo.php
+api_get_info_socio.php
+api_get_lezioni_socio.php
 assenze_docente.php
 assets/js/assenze.js
 database/migration_recuperi.sql
 gestione_assenze.php
 gestione_recuperi.php
-helper_allievi_con_lezioni.php
+helper_soci_con_lezioni.php
 includes/controllers/RecuperiController.php
 includes/views/assenze/*.php
 includes/views/dashboard/*.php

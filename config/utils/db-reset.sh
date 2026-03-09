@@ -86,7 +86,7 @@ if [ $? -eq 0 ]; then
     echo ""
     log_info "Prossimi passi:"
     echo "  1. Importa docenti:  bash config/utils/db-import-docenti.sh"
-    echo "  2. Importa allievi:  bash config/utils/db-import-allievi.sh"
+    echo "  2. Importa soci:  bash config/utils/db-import-soci.sh"
     echo "  3. Import completo:  bash config/utils/db-import-all.sh"
 else
     log_error "Errore durante il reset del database"

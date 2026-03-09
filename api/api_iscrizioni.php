@@ -19,15 +19,15 @@ try {
             $id = $_GET['id'] ?? 0;
             $db = Database::getInstance()->getConnection();
             
-            // Recupera iscrizione con info allievo, materia, docente, tipo corso
+            // Recupera iscrizione con info socio, materia, docente, tipo corso
             $stmt = $db->prepare("
                 SELECT i.*,
-                    CONCAT(a.cognome, ' ', a.nome) as allievo,
+                    (a.cognome || ' ' || a.nome) as socio,
                     m.nome as materia,
-                    CONCAT(d.cognome, ' ', d.nome) as docente,
+                    (d.cognome || ' ' || d.nome) as docente,
                     tcc.nome as tipo_corso
                 FROM iscrizioni i
-                LEFT JOIN allievi a ON i.allievo_id = a.id
+                LEFT JOIN soci a ON i.socio_id = a.id
                 LEFT JOIN materie m ON i.materia_id = m.id
                 LEFT JOIN docenti d ON i.docente_id = d.id
                 LEFT JOIN tipi_corso_config tcc ON i.tipo_corso_config_id = tcc.id
@@ -65,7 +65,7 @@ try {
             
             // 1. Crea iscrizione
             $iscrizioneId = $controller->creaIscrizione([
-                'allievo_id' => $postData['allievo_id'],
+                'socio_id' => $postData['socio_id'],
                 'tipo_corso_config_id' => $postData['tipo_corso_config_id'],
                 'materia_id' => $postData['materia_id'],
                 'docente_id' => $postData['docente_id'],
@@ -100,14 +100,14 @@ try {
             // Controlla sovrapposizioni
             $checkStmt = $db->prepare("
                 SELECT l.id, 
-                       CONCAT(a.cognome, ' ', a.nome) as allievo, 
+                       (a.cognome || ' ' || a.nome) as socio, 
                        m.nome as materia,
-                       CONCAT(d.cognome, ' ', d.nome) as docente,
+                       (d.cognome || ' ' || d.nome) as docente,
                        l.ora_inizio,
                        l.ora_fine,
                        au.nome as aula
                 FROM lezioni l
-                JOIN allievi a ON l.allievo_id = a.id
+                JOIN soci a ON l.socio_id = a.id
                 JOIN materie m ON l.materia_id = m.id
                 JOIN docenti d ON l.docente_id = d.id
                 LEFT JOIN aule au ON l.aula_id = au.id
@@ -125,9 +125,9 @@ try {
             if ($conflitto) {
                 // Trova sale alternative
                 $altStmt = $db->prepare("
-                    SELECT a.id, a.nome
-                    FROM aule a
-                    WHERE a.id NOT IN (
+                    SELECT au2.id, au2.nome
+                    FROM aule au2
+                    WHERE au2.id NOT IN (
                         SELECT DISTINCT l2.aula_id
                         FROM lezioni l2
                         WHERE l2.giorno_settimana = ?
@@ -152,13 +152,13 @@ try {
             }
             
             $stmt = $db->prepare("INSERT INTO lezioni 
-                (iscrizione_id, allievo_id, docente_id, materia_id, aula_id, 
+                (iscrizione_id, socio_id, docente_id, materia_id, aula_id, 
                  giorno_settimana, ora_inizio, ora_fine, attiva) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)");
             
             $stmt->execute([
                 $iscrizioneId,
-                $postData['allievo_id'],
+                $postData['socio_id'],
                 $postData['docente_id'],
                 $postData['materia_id'],
                 $postData['aula_id'] ?? null,

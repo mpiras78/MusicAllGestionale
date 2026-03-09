@@ -55,11 +55,11 @@ vendor/bin/phpunit --coverage-html coverage/
 
 #### AssenzeRecuperiTest.php ⭐⭐⭐ CRITICO
 - ✅ Assenza docente sempre da recuperare
-- ✅ Prime 3 assenze allievo obbligatorie
-- ✅ 4a assenza allievo non obbligatoria
+- ✅ Prime 3 assenze socio obbligatorie
+- ✅ 4a assenza socio non obbligatoria
 - ✅ Logica completa determinazione da_recuperare
 - ✅ Anno scolastico settembre-giugno
-- ✅ Conteggio assenze per coppia allievo-lezione
+- ✅ Conteggio assenze per coppia socio-lezione
 
 #### CalendarioTest.php ⭐⭐⭐
 - ✅ Calcolo rowspan slot 15 minuti
@@ -85,8 +85,8 @@ vendor/bin/phpunit --coverage-html coverage/
 - ✅ Estrazione iniziali nome
 
 #### ValidationTest.php ⭐⭐
-- ✅ Validazione dati allievo completi
-- ✅ Validazione dati allievo incompleti
+- ✅ Validazione dati socio completi
+- ✅ Validazione dati socio incompleti
 - ✅ Validazione orario lezione
 - ✅ Validazione data assenza
 - ✅ Validazione durata lezione standard

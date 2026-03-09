@@ -2,7 +2,7 @@
 /**
  * Script Esecuzione Fase 1: Database Migration
  * 
- * Rinomina allievi → soci + crea 12 nuove tabelle
+ * Rinomina soci → soci + crea 12 nuove tabelle
  * 
  * Uso: php database/run_migration_fase1.php
  */
@@ -25,9 +25,9 @@ try {
     $pdo->exec("PRAGMA foreign_keys = OFF");
     echo "⚠️  Foreign key constraints disabilitate temporaneamente\n\n";
     
-    // DROP viste che dipendono da allievi
-    echo "📋 STEP 0: Rimozione viste dipendenti da allievi...\n";
-    $viste_da_rimuovere = ['v_allievi', 'v_assenze_da_recuperare', 'v_recuperi_con_stato', 
+    // DROP viste che dipendono da soci
+    echo "📋 STEP 0: Rimozione viste dipendenti da soci...\n";
+    $viste_da_rimuovere = ['v_soci', 'v_assenze_da_recuperare', 'v_recuperi_con_stato', 
                            'v_calendario_unificato', 'v_pagamenti_dettagliati', 
                            'v_docenti', 'v_soci_occasionali', 'v_persone_multirolo', 
                            'v_calendario_completo'];
@@ -41,20 +41,20 @@ try {
     }
     echo "✅ Viste rimosse\n\n";
     
-    // BACKUP: Rinomina tabella allievi
-    echo "📋 STEP 1: Backup tabella allievi...\n";
+    // BACKUP: Rinomina tabella soci
+    echo "📋 STEP 1: Backup tabella soci...\n";
     try {
-        $pdo->exec("ALTER TABLE allievi RENAME TO allievi_v2_backup");
-        echo "✅ Tabella allievi rinominata a allievi_v2_backup\n\n";
+        $pdo->exec("ALTER TABLE soci RENAME TO soci_v2_backup");
+        echo "✅ Tabella soci rinominata a soci_v2_backup\n\n";
     } catch (PDOException $e) {
         if (strpos($e->getMessage(), 'no such table') !== false) {
-            echo "⚠️  Tabella allievi non trovata (probabile che sia già stata migrata)\n\n";
+            echo "⚠️  Tabella soci non trovata (probabile che sia già stata migrata)\n\n";
         } else {
             throw $e;
         }
     }
     
-    // CREA TABELLA: soci (da allievi_v2_backup)
+    // CREA TABELLA: soci (da soci_v2_backup)
     echo "📋 STEP 2: Creazione tabella soci...\n";
     
     // Verifica se soci esiste già
@@ -64,8 +64,8 @@ try {
     if ($soci_exists) {
         echo "⊙ Tabella soci esiste già\n";
     } else {
-        // Prima: lettura schema allievi_v2_backup
-        $stmt = $pdo->query("PRAGMA table_info(allievi_v2_backup)");
+        // Prima: lettura schema soci_v2_backup
+        $stmt = $pdo->query("PRAGMA table_info(soci_v2_backup)");
         $columns = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         if (!empty($columns)) {
@@ -79,7 +79,7 @@ try {
             $pdo->exec($sql);
             
             // Copia dati
-            $pdo->exec("INSERT INTO soci SELECT * FROM allievi_v2_backup");
+            $pdo->exec("INSERT INTO soci SELECT * FROM soci_v2_backup");
             
             echo "✅ Tabella soci creata e dati migrati\n";
         } else {
@@ -347,16 +347,16 @@ try {
     echo "👥 Record in tabella soci: " . $result['count'] . "\n";
     
     // Conta record backup
-    $stmt = $pdo->query("SELECT COUNT(*) as count FROM allievi_v2_backup");
+    $stmt = $pdo->query("SELECT COUNT(*) as count FROM soci_v2_backup");
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
-    echo "📦 Record in tabella allievi_v2_backup: " . $result['count'] . "\n\n";
+    echo "📦 Record in tabella soci_v2_backup: " . $result['count'] . "\n\n";
     
     // Riabilita foreign key checks
     $pdo->exec("PRAGMA foreign_keys = ON");
     
     echo "🎉 MIGRAZIONE COMPLETATA CON SUCCESSO!\n\n";
     echo "Prossimi step:\n";
-    echo "1. Aggiorna codebase: rinomina allievi → soci nelle query PHP\n";
+    echo "1. Aggiorna codebase: rinomina soci → soci nelle query PHP\n";
     echo "2. Testa CRUD operations\n";
     echo "3. Verifica audit log funzionante\n";
     

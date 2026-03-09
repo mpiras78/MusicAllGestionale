@@ -206,7 +206,7 @@ body {
     border-left: 3px solid #ff9800;
 }
 
-.lezione-slot.tipo-prova .lezione-allievo::before {
+.lezione-slot.tipo-prova .lezione-socio::before {
     content: "⭐ ";
 }
 
@@ -216,7 +216,7 @@ body {
 }
 
 /* Prenotazioni - TUTTE GIALLE come da legenda */
-.lezione-slot.tipo-prenotazione-allievi,
+.lezione-slot.tipo-prenotazione-soci,
 .lezione-slot.tipo-prenotazione-docente,
 .lezione-slot.tipo-prenotazione-esterno {
     background-color: #fff9c4;
@@ -231,8 +231,8 @@ body {
     vertical-align: middle;
 }
 
-.prenotazione-tipo-icon.tipo-allievi {
-    color: #4caf50; /* Verde per allievi */
+.prenotazione-tipo-icon.tipo-soci {
+    color: #4caf50; /* Verde per soci */
 }
 
 .prenotazione-tipo-icon.tipo-docente {
@@ -260,7 +260,7 @@ body {
     max-width: calc(100% - 15px);
 }
 
-.lezione-slot.lezione-annullata .lezione-allievo,
+.lezione-slot.lezione-annullata .lezione-socio,
 .lezione-slot.lezione-annullata .lezione-docente,
 .lezione-slot.lezione-annullata .lezione-materia-inline,
 .lezione-slot.lezione-annullata .icona-strumento {
@@ -303,7 +303,7 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Header lezione con icona + nome allievo */
+/* Header lezione con icona + nome socio */
 .lezione-header {
     display: flex;
     align-items: center;
@@ -313,7 +313,7 @@ body {
 }
 
 /* Header prenotazioni - NO padding extra, icona inline */
-.tipo-prenotazione-allievi .lezione-header,
+.tipo-prenotazione-soci .lezione-header,
 .tipo-prenotazione-docente .lezione-header,
 .tipo-prenotazione-esterno .lezione-header {
     padding-left: 0; /* Icona inline, no spazio extra */
@@ -325,7 +325,7 @@ body {
     flex-shrink: 0;
 }
 
-.lezione-allievo {
+.lezione-socio {
     font-weight: 700;
     color: #2c3e50;
     font-size: 0.8rem;

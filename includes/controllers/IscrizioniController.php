@@ -1,7 +1,7 @@
 <?php
 /**
  * Iscrizioni Controller
- * Gestione iscrizioni allievi ai corsi
+ * Gestione iscrizioni soci ai corsi
  */
 
 class IscrizioniController {
@@ -14,21 +14,21 @@ class IscrizioniController {
     /**
      * Ottiene tutte le iscrizioni con filtri
      */
-    public function getIscrizioni($anno_scolastico = null, $stato = null, $allievo_id = null) {
+    public function getIscrizioni($anno_scolastico = null, $stato = null, $socio_id = null) {
         $conn = $this->db->getConnection();
         
         $sql = "SELECT i.*, 
-                CONCAT(a.cognome, ' ', a.nome) as allievo,
+                (s.cognome || ' ' || s.nome) as socio,
                 tc.nome as tipo_corso,
                 m.nome as materia,
-                CONCAT(d.cognome, ' ', d.nome) as docente,
+                (d.cognome || ' ' || d.nome) as docente,
                 0 as is_pacchetto,
                 0 as lezioni_utilizzate,
                 0 as lezioni_totali,
                 i.quota_iscrizione as importo_totale,
                 0 as importo_pagato
                 FROM iscrizioni i
-                LEFT JOIN allievi a ON i.allievo_id = a.id
+                LEFT JOIN soci s ON i.socio_id = s.id
                 LEFT JOIN tipi_corso_config tc ON i.tipo_corso_config_id = tc.id
                 LEFT JOIN materie m ON i.materia_id = m.id
                 LEFT JOIN docenti d ON i.docente_id = d.id
@@ -46,9 +46,9 @@ class IscrizioniController {
             $params[] = $stato;
         }
         
-        if ($allievo_id) {
-            $sql .= " AND i.allievo_id = ?";
-            $params[] = $allievo_id;
+        if ($socio_id) {
+            $sql .= " AND i.socio_id = ?";
+            $params[] = $socio_id;
         }
         
         $sql .= " ORDER BY i.created_at DESC";
@@ -69,19 +69,19 @@ class IscrizioniController {
     }
     
     /**
-     * Ottiene iscrizioni attive di un allievo
+     * Ottiene iscrizioni attive di un socio
      */
-    public function getIscrizioniAttiveAllievo($allievo_id) {
+    public function getIscrizioniAttiveSocio($socio_id) {
         $conn = $this->db->getConnection();
         $stmt = $conn->prepare("
             SELECT i.*, tc.nome as tipo_corso, m.nome as materia
             FROM iscrizioni i
             LEFT JOIN tipi_corso_config tc ON i.tipo_corso_config_id = tc.id
             LEFT JOIN materie m ON i.materia_id = m.id
-            WHERE i.allievo_id = ? AND i.stato = 'attiva'
+            WHERE i.socio_id = ? AND i.stato = 'attiva'
             ORDER BY i.data_inizio DESC
         ");
-        $stmt->execute([$allievo_id]);
+        $stmt->execute([$socio_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
@@ -102,16 +102,14 @@ class IscrizioniController {
             $data['data_fine'] = "{$anno}-07-31";
         }
         
-        $stmt = $conn->prepare("
-            INSERT INTO iscrizioni (
-                allievo_id, tipo_corso_config_id, materia_id, docente_id,
+        $stmt = $conn->prepare("INSERT INTO iscrizioni (
+                socio_id, tipo_corso_config_id, materia_id, docente_id,
                 anno_accademico, data_inizio, data_fine,
                 stato, quota_iscrizione, sconto_fratelli, sconto_meta_anno, note
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ");
-        
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
         $stmt->execute([
-            $data['allievo_id'],
+            $data['socio_id'],
             $data['tipo_corso_config_id'],
             $data['materia_id'],
             $data['docente_id'],
@@ -267,10 +265,10 @@ class IscrizioniController {
         $sql = "
             SELECT 
                 i.id,
-                CONCAT(a.cognome, ' ', a.nome) as allievo,
+                        (a.cognome || ' ' || a.nome) as socio,
                 tcc.nome as tipo_corso,
                 m.nome as materia,
-                CONCAT(d.cognome, ' ', d.nome) as docente,
+                (d.cognome || ' ' || d.nome) as docente,
                 i.data_inizio,
                 i.data_fine,
                 i.stato,
@@ -280,7 +278,7 @@ class IscrizioniController {
                 0 as lezioni_utilizzate,
                 0 as lezioni_totali
             FROM iscrizioni i
-            INNER JOIN allievi a ON i.allievo_id = a.id
+            INNER JOIN soci a ON i.socio_id = a.id
             LEFT JOIN tipi_corso_config tcc ON i.tipo_corso_config_id = tcc.id
             LEFT JOIN materie m ON i.materia_id = m.id
             LEFT JOIN docenti d ON i.docente_id = d.id
@@ -288,6 +286,7 @@ class IscrizioniController {
             AND i.data_inizio <= ?
             AND i.data_fine >= ?
             ORDER BY a.cognome, a.nome ASC
+
         ";
         
         $stmt = $conn->prepare($sql);
@@ -297,9 +296,9 @@ class IscrizioniController {
         ]);
         
         $iscrizioni = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        // Log della query
-        $this->logQuery($sql, [$ultimo_giorno_mese, $primo_giorno_mese], $anno_selezionato, $mese_num, count($iscrizioni));
+
+        // Log della query (safely count results)
+        $this->logQuery($sql, [$ultimo_giorno_mese, $primo_giorno_mese], $anno_selezionato, $mese_num, is_countable($iscrizioni) ? count($iscrizioni) : 0);
         
         return $iscrizioni;
     }

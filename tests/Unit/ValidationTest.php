@@ -17,7 +17,7 @@ class ValidationTest extends TestCase
     /**
      * Test: Validazione dati socio completi
      */
-    public function testValidazioneDatiAllievoCompleti()
+    public function testValidazioneDatiSocioCompleti()
     {
         $validaSocio = function($dati) {
             $errori = [];
@@ -43,7 +43,7 @@ class ValidationTest extends TestCase
     /**
      * Test: Validazione dati socio incompleti
      */
-    public function testValidazioneDatiAllievoIncompleti()
+    public function testValidazioneDatiSocioIncompleti()
     {
         $validaSocio = function($dati) {
             $errori = [];

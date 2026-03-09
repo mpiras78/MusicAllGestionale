@@ -50,7 +50,7 @@ if (!isset($docenti) || !isset($soci)) {
                 <label class="form-label">Cerca</label>
                 <input type="text" name="search" class="form-control" 
                        value="<?= e($_GET['search'] ?? '') ?>" 
-                       placeholder="Nome allievo o docente">
+                       placeholder="Nome socio o docente">
             </div>
             <div class="col-md-2">
                 <label class="form-label">Docente</label>
@@ -64,11 +64,11 @@ if (!isset($docenti) || !isset($soci)) {
                 </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label">Allievo</label>
-                <select name="allievo_id" class="form-select">
+                <label class="form-label">Socio</label>
+                <select name="socio_id" class="form-select">
                     <option value="">Tutti</option>
                     <?php foreach ($soci as $all): ?>
-                        <option value="<?= $all['id'] ?>" <?= ($_GET['allievo_id'] ?? '') == $all['id'] ? 'selected' : '' ?>>
+                        <option value="<?= $all['id'] ?>" <?= ($_GET['socio_id'] ?? '') == $all['id'] ? 'selected' : '' ?>>
                             <?= e($all['nome_completo']) ?>
                         </option>
                     <?php endforeach; ?>
@@ -78,7 +78,7 @@ if (!isset($docenti) || !isset($soci)) {
                 <label class="form-label">Causata da</label>
                 <select name="causata_da" class="form-select form-select-sm">
                     <option value="">Tutti</option>
-                    <option value="allievo" <?= ($_GET['causata_da'] ?? '') == 'allievo' ? 'selected' : '' ?>>Allievo</option>
+                    <option value="socio" <?= ($_GET['causata_da'] ?? '') == 'socio' ? 'selected' : '' ?>>Socio</option>
                     <option value="docente" <?= ($_GET['causata_da'] ?? '') == 'docente' ? 'selected' : '' ?>>Docente</option>
                 </select>
             </div>

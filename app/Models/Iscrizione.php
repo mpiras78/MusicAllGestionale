@@ -4,14 +4,14 @@ namespace MusicAll\Models;
 
 /**
  * Model per iscrizioni
- * Gestione iscrizioni allievi per anno accademico
+ * Gestione iscrizioni soci per anno accademico
  */
 class Iscrizione extends Model
 {
     protected $table = 'iscrizioni';
     
     protected $fillable = [
-        'allievo_id',
+        'socio_id',
         'anno_accademico',
         'materia_id',
         'docente_id',
@@ -30,11 +30,11 @@ class Iscrizione extends Model
     ];
 
     /**
-     * Relazione: allievo
+     * Relazione: socio
      */
-    public function allievo()
+    public function socio()
     {
-        return $this->belongsTo(Allievo::class);
+        return $this->belongsTo(Socio::class);
     }
 
     /**
@@ -86,11 +86,11 @@ class Iscrizione extends Model
     }
 
     /**
-     * Scope: per allievo
+     * Scope: per socio
      */
-    public function scopePerAllievo($query, $allievoId)
+    public function scopePerSocio($query, $socioId)
     {
-        return $query->where('allievo_id', $allievoId);
+        return $query->where('socio_id', $socioId);
     }
 
     /**
@@ -103,7 +103,7 @@ class Iscrizione extends Model
         $tipoQuotaId = TipoPagamento::getQuotaAssociativa()->id;
         
         // Cerca pagamento quota associativa o pagamento con quota inclusa
-        return Pagamento::where('allievo_id', $this->allievo_id)
+        return Pagamento::where('socio_id', $this->socio_id)
             ->where('anno_accademico', $this->anno_accademico)
             ->where(function($q) use ($tipoQuotaId) {
                 $q->where('tipo_pagamento_id', $tipoQuotaId)
@@ -132,11 +132,11 @@ class Iscrizione extends Model
     }
 
     /**
-     * Get nome completo allievo
+     * Get nome completo socio
      */
-    public function getAllievoNomeAttribute()
+    public function getSocioNomeAttribute()
     {
-        return $this->allievo ? $this->allievo->nome . ' ' . $this->allievo->cognome : '';
+        return $this->socio ? $this->socio->nome . ' ' . $this->socio->cognome : '';
     }
 
     /**

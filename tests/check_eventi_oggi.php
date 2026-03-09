@@ -25,7 +25,7 @@ $stmt = $db->prepare("
         COALESCE(a.cognome || ' ' || a.nome, d.cognome || ' ' || d.nome, se.cognome || ' ' || se.nome, 'N/D') as partecipante
     FROM eventi_calendario e
     INNER JOIN tipologie_evento t ON e.tipologia_id = t.id
-    LEFT JOIN soci s ON e.allievo_id = s.id
+    LEFT JOIN soci s ON e.socio_id = s.id
     LEFT JOIN persone a ON s.persona_id = a.id
     LEFT JOIN docenti d ON e.docente_id = d.id
     LEFT JOIN soci_esterni se ON e.socio_occasionale_id = se.id

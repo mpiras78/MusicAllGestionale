@@ -17,22 +17,34 @@ try {
         case 'create':
             $postData = $data['data'];
             $db = Database::getInstance()->getConnection();
-            
-            $stmt = $db->prepare("
-                INSERT INTO allievi (cognome, nome, data_nascita, email, telefono, indirizzo, attivo)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ");
-            
+
+            $stmt = $db->prepare(
+                "INSERT INTO soci (cognome, nome, email, telefono, cellulare, data_nascita, luogo_nascita,
+                    codice_fiscale, indirizzo, cap, citta, provincia, nazione,
+                    note_anagrafiche, tipo_socio, data_inizio, stato, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))"
+            );
+
             $stmt->execute([
-                $postData['cognome'],
-                $postData['nome'],
-                $postData['data_nascita'] ?? null,
+                $postData['cognome'] ?? null,
+                $postData['nome'] ?? null,
                 $postData['email'] ?? null,
                 $postData['telefono'] ?? null,
+                $postData['cellulare'] ?? null,
+                $postData['data_nascita'] ?? null,
+                $postData['luogo_nascita'] ?? null,
+                $postData['codice_fiscale'] ?? null,
                 $postData['indirizzo'] ?? null,
-                $postData['attivo'] ?? 1
+                $postData['cap'] ?? null,
+                $postData['citta'] ?? null,
+                $postData['provincia'] ?? null,
+                $postData['nazione'] ?? null,
+                $postData['note_anagrafiche'] ?? null,
+                $postData['tipo_socio'] ?? 'socio',
+                $postData['data_inizio'] ?? date('Y-m-d'),
+                $postData['stato'] ?? 'attivo'
             ]);
-            
+
             $id = $db->lastInsertId();
             echo json_encode(['success' => true, 'id' => $id]);
             break;
@@ -40,11 +52,11 @@ try {
         case 'delete':
             $id = $data['id'] ?? 0;
             if (!$id) {
-                throw new Exception('ID allievo mancante');
+                throw new Exception('ID socio mancante');
             }
             
             $db = Database::getInstance()->getConnection();
-            $stmt = $db->prepare("UPDATE allievi SET attivo = 0 WHERE id = ?");
+            $stmt = $db->prepare("UPDATE soci SET attivo = 0 WHERE id = ?");
             $stmt->execute([$id]);
             
             echo json_encode(['success' => true]);

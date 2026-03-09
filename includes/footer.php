@@ -127,7 +127,7 @@ window.addEventListener('load', function() {
                             <i class="bi bi-star-fill text-warning"></i> Caratteristiche
                         </h6>
                         <ul class="list-unstyled text-start mb-0">
-                            <li><i class="bi bi-check-circle text-success"></i> Gestione Allievi e Docenti</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Gestione Soci e Docenti</li>
                             <li><i class="bi bi-check-circle text-success"></i> Calendario Settimanale Interattivo</li>
                             <li><i class="bi bi-check-circle text-success"></i> Tracciamento Assenze e Recuperi</li>
                             <li><i class="bi bi-check-circle text-success"></i> Statistiche e Report</li>

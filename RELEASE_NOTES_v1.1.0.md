@@ -12,14 +12,14 @@ Ora è possibile registrare assenze direttamente dal calendario settimanale!
 
 **Come funziona:**
 1. Click su una lezione nel calendario
-2. Si apre modal con info allievo
+2. Si apre modal con info socio
 3. Click su "Segna Assenza"
-4. Scegli causale (Allievo/Docente)
+4. Scegli causale (Socio/Docente)
 5. Conferma → Assenza salvata nel database
 
 **Caratteristiche:**
 - ✅ Salvataggio immediato nel database
-- ✅ Scelta causale assenza (Allievo/Docente)
+- ✅ Scelta causale assenza (Socio/Docente)
 - ✅ Campo note opzionale
 - ✅ Recupero automatico se causata da docente
 - ✅ Validazione duplicati
@@ -80,7 +80,7 @@ Contiene:
 - 🎵 Logo MusicAll
 - 🏷️ Badge versione app (alert-info)
 - 📋 Lista caratteristiche principali:
-  - Gestione Allievi e Docenti
+  - Gestione Soci e Docenti
   - Calendario Settimanale Interattivo
   - Tracciamento Assenze e Recuperi
   - Statistiche e Report
@@ -186,17 +186,17 @@ git pull origin main
 - [ ] **Modifica Lezioni:** Drag & drop per spostare lezioni
 - [ ] **Export PDF:** Generazione calendario stampabile
 
-### **Gestione Allievi & Docenti:**
-- [ ] **Pagina Lista Allievi:** Tabella completa con ricerca/filtri
-- [ ] **Pagina Nuovo Allievo:** Form inserimento con validazione
+### **Gestione Soci & Docenti:**
+- [ ] **Pagina Lista Soci:** Tabella completa con ricerca/filtri
+- [ ] **Pagina Nuovo Socio:** Form inserimento con validazione
 - [ ] **Pagina Lista Docenti:** Gestione completa docenti
 - [ ] **Pagina Nuovo Docente:** Form inserimento docente
-- [ ] **Dettaglio Allievo:** Scheda completa con storico
+- [ ] **Dettaglio Socio:** Scheda completa con storico
 - [ ] **Dettaglio Docente:** Panoramica lezioni e statistiche
 
 ### **Azioni Rapide Dashboard:**
 - [ ] **Aggancio Funzionalità:** Collegare pulsanti box "Azioni Rapide" a:
-  - Aggiungi Allievo → Form nuovo allievo
+  - Aggiungi Socio → Form nuovo socio
   - Aggiungi Docente → Form nuovo docente
   - Registra Assenza → Modal assenza rapida
   - Programma Recupero → Form recupero
@@ -205,7 +205,7 @@ git pull origin main
 
 ### **Sistema Audit & Logging:**
 - [ ] **Tabella Audit:** Tracciamento completo azioni utenti
-  - Inserimento/modifica/cancellazione allievi
+  - Inserimento/modifica/cancellazione soci
   - Inserimento/modifica/cancellazione docenti
   - Creazione/modifica/cancellazione lezioni
   - Registrazione assenze e recuperi

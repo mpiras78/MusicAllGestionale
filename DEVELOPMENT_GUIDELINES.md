@@ -37,7 +37,7 @@ MusicAll/
 ### ✅ Query Corrette (Database-Agnostic)
 ```sql
 -- Concatenazione: usa || (standard SQL)
-SELECT cognome || ' ' || nome as nome_completo FROM allievi;
+SELECT cognome || ' ' || nome as nome_completo FROM soci;
 
 -- Date/Time SQLite
 SELECT datetime('now');
@@ -49,7 +49,7 @@ SELECT strftime('%Y-%m', data) = strftime('%Y-%m', 'now');
 ### ❌ Query Sbagliate (Database-Specific)
 ```sql
 -- NO! CONCAT è MySQL-specific
-SELECT CONCAT(cognome, ' ', nome) FROM allievi;
+SELECT CONCAT(cognome, ' ', nome) FROM soci;
 
 -- NO! NOW() è MySQL-specific  
 SELECT NOW();
@@ -72,26 +72,26 @@ WHERE MONTH(data) = MONTH(NOW());
 ### ✅ Corretto
 ```php
 // index.php (VIEW)
-$allieviCtrl = new AllieviController();
-$allievi = $allieviCtrl->getAllievi();
+$sociCtrl = new SociController();
+$soci = $sociCtrl->getSoci();
 ```
 
 ### ❌ Sbagliato
 ```php
 // index.php (VIEW)
-$allievi = $db->query("SELECT * FROM allievi"); // NO!
+$soci = $db->query("SELECT * FROM soci"); // NO!
 ```
 
 ### Struttura Controller
 ```php
-class AllieviController {
+class SociController {
     private $db;
     
     public function __construct() {
         $this->db = Database::getInstance();
     }
     
-    public function getAllievi($attivi_only = true) {
+    public function getSoci($attivi_only = true) {
         // Query qui, non nelle view
         return $this->db->query("SELECT...");
     }
@@ -103,8 +103,8 @@ class AllieviController {
 ## 📝 Convenzioni Codice
 
 ### Naming
-- **Classi**: PascalCase (es: `AllieviController`)
-- **Metodi**: camelCase (es: `getAllievi()`)
+- **Classi**: PascalCase (es: `SociController`)
+- **Metodi**: camelCase (es: `getSoci()`)
 - **Variabili**: snake_case (es: `$prossime_lezioni`)
 - **Costanti**: UPPER_CASE (es: `BASE_URL`)
 
@@ -117,10 +117,10 @@ class AllieviController {
 ```php
 /**
  * Descrizione metodo
- * @param int $id ID dell'allievo
- * @return array Dati allievo
+ * @param int $id ID dell'socio
+ * @return array Dati socio
  */
-public function getAllievoById($id) {
+public function getSocioById($id) {
     // Implementazione
 }
 ```
@@ -228,10 +228,10 @@ Dettagli (opzionale)
 
 **Esempio:**
 ```
-feat: Implementato AllieviController
+feat: Implementato SociController
 
-- Creato controller per gestione allievi
-- Metodi: getAllievi, countAllievi, searchAllievi
+- Creato controller per gestione soci
+- Metodi: getSoci, countSoci, searchSoci
 - Query database-agnostiche
 ```
 
@@ -300,7 +300,7 @@ Vedi `includes/helpers.php`:
 ## 🎯 Prossimi Step
 
 ### TODO
-- [X] Implementare CRUD completo allievi
+- [X] Implementare CRUD completo soci
 - [ ] Calendario interattivo
 - [ ] Sistema notifiche
 - [ ] API REST endpoints

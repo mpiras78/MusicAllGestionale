@@ -6,7 +6,7 @@
 require_once 'includes/bootstrap.php';
 
 // Simula parametro GET
-$allievo_id = $_GET['allievo_id'] ?? 98; // Garau di default
+$socio_id = $_GET['socio_id'] ?? 98; // Garau di default
 
 header('Content-Type: application/json');
 
@@ -23,7 +23,7 @@ try {
         FROM lezioni l
         JOIN materie m ON l.materia_id = m.id
         JOIN docenti d ON l.docente_id = d.id
-        WHERE l.allievo_id = ?
+        WHERE l.socio_id = ?
         ORDER BY 
             CASE l.giorno_settimana
                 WHEN 'Lunedì' THEN 1
@@ -35,16 +35,16 @@ try {
                 WHEN 'Domenica' THEN 7
             END,
             l.ora_inizio
-    ", [$allievo_id]);
+    ", [$socio_id]);
     
     // Response strutturata come l'API reale
     echo json_encode([
         'success' => true,
         'lezioni' => $lezioni ?: [],
         'count' => count($lezioni ?: []),
-        'message' => empty($lezioni) ? 'Nessuna lezione trovata per questo allievo' : null,
+        'message' => empty($lezioni) ? 'Nessuna lezione trovata per questo socio' : null,
         'debug' => [
-            'allievo_id' => $allievo_id,
+            'socio_id' => $socio_id,
             'query_executed' => true,
             'raw_count' => count($lezioni)
         ]

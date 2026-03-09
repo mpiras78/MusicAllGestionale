@@ -23,7 +23,7 @@ echo "✓ Tipologia recupero ID: {$tipologia_id}\n\n";
 
 // 2. Trova tutti i recuperi in eventi_calendario
 $stmt = $db->prepare("
-    SELECT e.id, e.data_evento, e.ora_inizio, e.allievo_id, e.note
+    SELECT e.id, e.data_evento, e.ora_inizio, e.socio_id, e.note
     FROM eventi_calendario e
     WHERE e.tipologia_id = ?
     ORDER BY e.data_evento, e.ora_inizio
@@ -51,10 +51,10 @@ try {
             FROM recuperi r
             WHERE r.data_recupero = ?
             AND r.ora_inizio = ?
-            AND r.allievo_id = ?
+            AND r.socio_id = ?
             LIMIT 1
         ");
-        $stmt->execute([$evt['data_evento'], $evt['ora_inizio'], $evt['allievo_id']]);
+        $stmt->execute([$evt['data_evento'], $evt['ora_inizio'], $evt['socio_id']]);
         $recupero = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if ($recupero) {

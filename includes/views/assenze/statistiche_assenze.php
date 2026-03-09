@@ -28,8 +28,8 @@ if (!isset($conta)) {
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <p class="stat-label mb-1">Da Allievo</p>
-                        <h3 class="stat-value text-warning"><?= $conta['da_allievo'] ?></h3>
+                        <p class="stat-label mb-1">Da Socio</p>
+                        <h3 class="stat-value text-warning"><?= $conta['da_socio'] ?></h3>
                     </div>
                     <i class="bi bi-person-x stat-icon text-warning"></i>
                 </div>

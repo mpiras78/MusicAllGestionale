@@ -30,8 +30,8 @@ if (!isset($assenze_da_recuperare)) {
                             <div class="d-flex w-100 justify-content-between align-items-start">
                                 <div>
                                     <h6 class="mb-1">
-                                        <?= e($assenza['allievo']) ?>
-                                        <span class="badge bg-<?= $assenza['tipo'] == 'allievo' ? 'warning' : 'info' ?>">
+                                        <?= e($assenza['socio']) ?>
+                                        <span class="badge bg-<?= $assenza['tipo'] == 'socio' ? 'warning' : 'info' ?>">
                                             <?= e($assenza['tipo']) ?>
                                         </span>
                                     </h6>

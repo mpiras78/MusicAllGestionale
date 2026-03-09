@@ -9,7 +9,7 @@
 ### 1. Backend API ✅
 - ✅ `api_eventi.php` - CRUD completo eventi
 - ✅ `api_get_tipologie.php` - Lista tipologie eventi
-- ✅ `api_get_helpers.php` - API unificata per allievi/docenti/materie/aule
+- ✅ `api_get_helpers.php` - API unificata per soci/docenti/materie/aule
 - ✅ `app/Models/EventoCalendario.php` - Model con relazioni
 - ✅ `app/Models/TipologiaEvento.php` - Model tipologie
 
@@ -59,7 +59,7 @@
 ✅ Aula
 ✅ Docente (opzionale)
 ✅ Materia (opzionale)
-✅ Allievo (opzionale)
+✅ Socio (opzionale)
 ✅ Titolo (opzionale)
 ✅ Descrizione (opzionale)
 ✅ Note (opzionale)
@@ -123,7 +123,7 @@
 - [x] API PUT modifica evento
 - [x] API DELETE elimina evento
 - [x] API GET tipologie
-- [x] API GET helpers (aule, docenti, materie, allievi)
+- [x] API GET helpers (aule, docenti, materie, soci)
 
 ---
 

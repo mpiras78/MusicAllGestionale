@@ -11,18 +11,18 @@ echo "🎵 CORREZIONE MATERIA DIACONITA\n";
 echo str_repeat("=", 50) . "\n\n";
 
 try {
-    // Trova socio (ex allievo) Diaconita nella nuova anagrafica
-    $allievo = $db->queryOne("SELECT s.id as id, p.cognome as cognome, p.nome as nome
+    // Trova socio (ex socio) Diaconita nella nuova anagrafica
+    $socio = $db->queryOne("SELECT s.id as id, p.cognome as cognome, p.nome as nome
         FROM soci s
         JOIN persone p ON s.persona_id = p.id
         WHERE p.cognome LIKE '%Diaconita%'");
     
-    if (!$allievo) {
+    if (!$socio) {
         echo "❌ Socio Diaconita non trovato!\n";
         exit(1);
     }
     
-    echo "📋 Socio: {$allievo['cognome']} {$allievo['nome']}\n\n";
+    echo "📋 Socio: {$socio['cognome']} {$socio['nome']}\n\n";
     
     // Trova materia Canto
     $canto = $db->queryOne("SELECT * FROM materie WHERE nome LIKE '%Canto%'");
@@ -44,8 +44,8 @@ try {
         JOIN materie m ON l.materia_id = m.id
         JOIN docenti d ON l.docente_id = d.id
         JOIN aule a ON l.aula_id = a.id
-        WHERE l.allievo_id = ?
-    ", [$allievo['id']]);
+        WHERE l.socio_id = ?
+    ", [$socio['id']]);
     
     echo "📚 Lezioni trovate:\n\n";
     
@@ -85,8 +85,8 @@ try {
         JOIN materie m ON l.materia_id = m.id
         JOIN docenti d ON l.docente_id = d.id
         JOIN aule a ON l.aula_id = a.id
-        WHERE l.allievo_id = ?
-    ", [$allievo['id']]);
+        WHERE l.socio_id = ?
+    ", [$socio['id']]);
     
     foreach ($verificaLezioni as $lez) {
         echo "   ✓ Lezione ID {$lez['id']}:\n";

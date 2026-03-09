@@ -13,20 +13,20 @@ echo "🔄 AGGIORNAMENTO LEZIONI DIACONITA\n";
 echo str_repeat("=", 50) . "\n\n";
 
 try {
-    // 1. Trova socio (ex allievo) Diaconita tramite anagrafica persone
-    $allievo = $db->queryOne("SELECT s.id as id, p.cognome as cognome, p.nome as nome
+    // 1. Trova socio (ex socio) Diaconita tramite anagrafica persone
+    $socio = $db->queryOne("SELECT s.id as id, p.cognome as cognome, p.nome as nome
         FROM soci s
         JOIN persone p ON s.persona_id = p.id
         WHERE p.cognome LIKE '%Diaconita%' OR p.nome LIKE '%Diaconita%'");
     
-    if (!$allievo) {
+    if (!$socio) {
         echo "❌ Socio Diaconita non trovato!\n";
         exit(1);
     }
     
     echo "📋 Socio trovato:\n";
-    echo "   ID: {$allievo['id']}\n";
-    echo "   Nome: {$allievo['cognome']} {$allievo['nome']}\n\n";
+    echo "   ID: {$socio['id']}\n";
+    echo "   Nome: {$socio['cognome']} {$socio['nome']}\n\n";
     
     // 2. Trova docente Tessitore (vecchio)
     $tessitore = $db->queryOne("SELECT * FROM docenti WHERE cognome LIKE '%Tessitore%'");
@@ -59,8 +59,8 @@ try {
     echo "   Nome: {$magna['nome']}\n\n";
     
     // 6. Trova lezioni da aggiornare
-    $whereConditions = ["allievo_id = ?"]; // la colonna nelle lezioni resta `allievo_id`
-    $params = [$allievo['id']];
+    $whereConditions = ["socio_id = ?"]; // la colonna nelle lezioni resta `socio_id`
+    $params = [$socio['id']];
     
     if ($tessitore) {
         $whereConditions[] = "docente_id = ?";
@@ -99,8 +99,8 @@ try {
             JOIN docenti d ON l.docente_id = d.id
             JOIN aule a ON l.aula_id = a.id
             JOIN materie m ON l.materia_id = m.id
-            WHERE l.allievo_id = ?
-        ", [$allievo['id']]);
+            WHERE l.socio_id = ?
+        ", [$socio['id']]);
     }
     
     echo "📚 Lezioni trovate: " . count($lezioni) . "\n\n";
@@ -141,8 +141,8 @@ try {
             JOIN docenti d ON l.docente_id = d.id
             JOIN aule a ON l.aula_id = a.id
             JOIN materie m ON l.materia_id = m.id
-            WHERE l.allievo_id = ?
-        ", [$allievo['id']]);
+            WHERE l.socio_id = ?
+        ", [$socio['id']]);
         
         foreach ($verificaLezioni as $lez) {
             echo "   ✓ Lezione ID {$lez['id']}:\n";

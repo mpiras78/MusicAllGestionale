@@ -1,7 +1,7 @@
 <?php
 /**
  * Pagina Assenze - Per Docenti
- * Visualizza solo le assenze dei propri allievi
+ * Visualizza solo le assenze dei propri soci
  */
 
 require_once 'includes/bootstrap.php';
@@ -38,7 +38,7 @@ $assenze = $assenzeCtrl->getAllAssenze($filters);
 // Conta assenze
 $stats = [
     'totale' => count($assenze),
-    'da_allievo' => count(array_filter($assenze, fn($a) => $a['causata_da'] == 'allievo')),
+    'da_socio' => count(array_filter($assenze, fn($a) => $a['causata_da'] == 'socio')),
     'da_docente' => count(array_filter($assenze, fn($a) => $a['causata_da'] == 'docente')),
     'da_recuperare' => count(array_filter($assenze, fn($a) => $a['necessita_recupero'] == 1 && $a['ha_recupero'] == 0))
 ];
@@ -55,7 +55,7 @@ require_once 'includes/header.php';
             <h1 class="h3 mb-0">
                 <i class="bi bi-calendar-x"></i> Le Mie Assenze
             </h1>
-            <p class="text-muted mb-0">Visualizza le assenze dei tuoi allievi</p>
+            <p class="text-muted mb-0">Visualizza le assenze dei tuoi soci</p>
         </div>
     </div>
 
@@ -82,8 +82,8 @@ require_once 'includes/header.php';
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <p class="stat-label mb-1">Da Allievo</p>
-                            <h3 class="stat-value text-warning"><?= $stats['da_allievo'] ?></h3>
+                            <p class="stat-label mb-1">Da Socio</p>
+                            <h3 class="stat-value text-warning"><?= $stats['da_socio'] ?></h3>
                         </div>
                         <div class="stat-icon text-warning">
                             <i class="bi bi-person-x"></i>
@@ -134,16 +134,16 @@ require_once 'includes/header.php';
         <div class="card-body">
             <form method="GET" class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">Cerca Allievo</label>
+                    <label class="form-label">Cerca Socio</label>
                     <input type="text" name="search" class="form-control" 
-                           placeholder="Nome o cognome allievo..." 
+                           placeholder="Nome o cognome socio..." 
                            value="<?= e($_GET['search'] ?? '') ?>">
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Causata da</label>
                     <select name="causata_da" class="form-select">
                         <option value="">Tutti</option>
-                        <option value="allievo" <?= ($_GET['causata_da'] ?? '') == 'allievo' ? 'selected' : '' ?>>Allievo</option>
+                        <option value="socio" <?= ($_GET['causata_da'] ?? '') == 'socio' ? 'selected' : '' ?>>Socio</option>
                         <option value="docente" <?= ($_GET['causata_da'] ?? '') == 'docente' ? 'selected' : '' ?>>Docente</option>
                     </select>
                 </div>
@@ -181,7 +181,7 @@ require_once 'includes/header.php';
                         <thead>
                             <tr>
                                 <th>Data</th>
-                                <th>Allievo</th>
+                                <th>Socio</th>
                                 <th>Materia</th>
                                 <th>Lezione</th>
                                 <th>Causata da</th>
@@ -194,7 +194,7 @@ require_once 'includes/header.php';
                                 <tr>
                                     <td><?= formatDate($ass['data']) ?></td>
                                     <td>
-                                        <strong><?= e($ass['allievo']) ?></strong>
+                                        <strong><?= e($ass['socio']) ?></strong>
                                     </td>
                                     <td><?= e($ass['materia'] ?? '-') ?></td>
                                     <td>
@@ -204,7 +204,7 @@ require_once 'includes/header.php';
                                         </small>
                                     </td>
                                     <td>
-                                        <span class="badge bg-<?= $ass['causata_da'] == 'allievo' ? 'warning' : 'info' ?>">
+                                        <span class="badge bg-<?= $ass['causata_da'] == 'socio' ? 'warning' : 'info' ?>">
                                             <?= e($ass['causata_da']) ?>
                                         </span>
                                     </td>

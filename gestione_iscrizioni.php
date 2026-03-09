@@ -165,7 +165,7 @@ include 'includes/header.php';
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th>Allievo</th>
+                            <th>Socio</th>
                             <th>Tipo Corso</th>
                             <th>Materia</th>
                             <th>Docente</th>
@@ -187,7 +187,7 @@ include 'includes/header.php';
                         <?php else: ?>
                             <?php foreach ($iscrizioni as $i): ?>
                                 <tr>
-                                    <td><?= e($i['allievo']) ?></td>
+                                    <td><?= e($i['socio']) ?></td>
                                     <td>
                                         <?= e($i['tipo_corso']) ?>
                                         <?php if ($i['is_pacchetto']): ?>
@@ -243,8 +243,8 @@ include 'includes/header.php';
             <div class="modal-body">
                 <div class="row mb-4">
                     <div class="col-md-6">
-                        <h6 class="text-muted small mb-2">ALLIEVO</h6>
-                        <p class="mb-0 fw-bold" id="det_allievo">-</p>
+                        <h6 class="text-muted small mb-2">SOCIO</h6>
+                        <p class="mb-0 fw-bold" id="det_socio">-</p>
                     </div>
                     <div class="col-md-6">
                         <h6 class="text-muted small mb-2">STATO</h6>
@@ -333,7 +333,7 @@ include 'includes/header.php';
                 <div class="d-flex justify-content-between mb-4">
                     <div class="text-center flex-fill" id="step1Indicator">
                         <div class="badge bg-success">1</div>
-                        <div class="small mt-1">Allievo</div>
+                        <div class="small mt-1">Socio</div>
                     </div>
                     <div class="text-center flex-fill" id="step2Indicator">
                         <div class="badge bg-secondary">2</div>
@@ -347,33 +347,33 @@ include 'includes/header.php';
 
                 <form id="formIscrizione">
                     <input type="hidden" id="iscrizione_id" name="id">
-                    <input type="hidden" id="selected_allievo_id" name="allievo_id">
+                    <input type="hidden" id="selected_socio_id" name="socio_id">
                     
-                    <!-- STEP 1: Selezione/Creazione Allievo -->
+                    <!-- STEP 1: Selezione/Creazione Socio -->
                     <div id="step1" class="wizard-step">
-                        <h5 class="mb-3">Seleziona o Crea Allievo</h5>
+                        <h5 class="mb-3">Seleziona o Crea Socio</h5>
                         
                         <div class="btn-group w-100 mb-3" role="group">
-                            <input type="radio" class="btn-check" name="allievo_mode" id="mode_existing" value="existing" checked>
+                            <input type="radio" class="btn-check" name="socio_mode" id="mode_existing" value="existing" checked>
                             <label class="btn btn-outline-primary" for="mode_existing">
-                                <i class="bi bi-person-check"></i> Allievo Esistente
+                                <i class="bi bi-person-check"></i> Socio Esistente
                             </label>
-                            <input type="radio" class="btn-check" name="allievo_mode" id="mode_new" value="new">
+                            <input type="radio" class="btn-check" name="socio_mode" id="mode_new" value="new">
                             <label class="btn btn-outline-success" for="mode_new">
-                                <i class="bi bi-person-plus"></i> Nuovo Allievo
+                                <i class="bi bi-person-plus"></i> Nuovo Socio
                             </label>
                         </div>
                         
-                        <!-- Selezione Allievo Esistente -->
-                        <div id="div_existing_allievo">
-                            <label class="form-label">Cerca Allievo</label>
-                            <select class="form-select form-select-lg" id="select_allievo">
-                                <option value="">Seleziona allievo...</option>
+                        <!-- Selezione Socio Esistente -->
+                        <div id="div_existing_socio">
+                            <label class="form-label">Cerca Socio</label>
+                            <select class="form-select form-select-lg" id="select_socio">
+                                <option value="">Seleziona socio...</option>
                             </select>
                         </div>
                         
-                        <!-- Form Nuovo Allievo -->
-                        <div id="div_new_allievo" style="display:none;">
+                        <!-- Form Nuovo Socio -->
+                        <div id="div_new_socio" style="display:none;">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Cognome *</label>
@@ -563,24 +563,24 @@ include 'includes/header.php';
 
 <script>
 let currentStep = 1;
-let newAllieveId = null;
+let newSocioId = null;
 
 // Carica dati iniziali
 document.addEventListener('DOMContentLoaded', function() {
-    caricaAllievi();
+    caricaSoci();
     caricaTipiCorso();
     caricaMaterie();
     caricaAule();
     
-    // Toggle allievo mode
-    document.querySelectorAll('[name="allievo_mode"]').forEach(radio => {
+    // Toggle socio mode
+    document.querySelectorAll('[name="socio_mode"]').forEach(radio => {
         radio.addEventListener('change', function() {
             if (this.value === 'existing') {
-                document.getElementById('div_existing_allievo').style.display = 'block';
-                document.getElementById('div_new_allievo').style.display = 'none';
+                document.getElementById('div_existing_socio').style.display = 'block';
+                document.getElementById('div_new_socio').style.display = 'none';
             } else {
-                document.getElementById('div_existing_allievo').style.display = 'none';
-                document.getElementById('div_new_allievo').style.display = 'block';
+                document.getElementById('div_existing_socio').style.display = 'none';
+                document.getElementById('div_new_socio').style.display = 'block';
             }
         });
     });
@@ -646,26 +646,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function nextStep() {
     if (currentStep === 1) {
-        const mode = document.querySelector('[name="allievo_mode"]:checked').value;
+        const mode = document.querySelector('[name="socio_mode"]:checked').value;
         if (mode === 'existing') {
-            const allieveId = document.getElementById('select_allievo').value;
-            if (!allieveId) {
-                mostraToast('Attenzione', 'Seleziona un allievo', 'warning');
+            const socioId = document.getElementById('select_socio').value;
+            if (!socioId) {
+                mostraToast('Attenzione', 'Seleziona un socio', 'warning');
                 return;
             }
-            document.getElementById('selected_allievo_id').value = allieveId;
+            document.getElementById('selected_socio_id').value = socioId;
         } else {
-            // Nuovo allievo
-            if (newAllieveId) {
+            // Nuovo socio
+            if (newSocioId) {
                 // Già creato, vai avanti
-                document.getElementById('selected_allievo_id').value = newAllieveId;
+                document.getElementById('selected_socio_id').value = newSocioId;
             } else {
                 // Crea nuovo
                 if (!document.getElementById('new_cognome').value || !document.getElementById('new_nome').value) {
                     mostraToast('Attenzione', 'Inserisci cognome e nome', 'warning');
                     return;
                 }
-                creaAllievo();
+                creaSocio();
                 return; // Aspetta callback
             }
         }
@@ -715,7 +715,7 @@ function showStep(step) {
     document.getElementById('btnClose').style.display = (step === 5) ? 'inline-block' : 'none';
 }
 
-function creaAllievo() {
+function creaSocio() {
     const data = {
         cognome: document.getElementById('new_cognome').value,
         nome: document.getElementById('new_nome').value,
@@ -726,7 +726,7 @@ function creaAllievo() {
         attivo: 1
     };
     
-    fetch('<?= BASE_URL ?>/api/api_allievi_crud.php', {
+    fetch('<?= BASE_URL ?>/api/api_soci_crud.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({action: 'create', data: data})
@@ -734,9 +734,9 @@ function creaAllievo() {
     .then(r => r.json())
     .then(result => {
         if (result.success) {
-            newAllieveId = result.id;
-            document.getElementById('selected_allievo_id').value = newAllieveId;
-            mostraToast('Successo', 'Allievo creato', 'success');
+            newSocioId = result.id;
+            document.getElementById('selected_socio_id').value = newSocioId;
+            mostraToast('Successo', 'Socio creato', 'success');
             currentStep++;
             showStep(currentStep);
         } else {
@@ -761,7 +761,7 @@ function checkConflicts() {
             alert.classList.remove('d-none');
             
             let html = '<p><strong>Lezione esistente:</strong></p>';
-            html += `<ul><li>${data.conflict.allievo} - ${data.conflict.materia}</li>`;
+            html += `<ul><li>${data.conflict.socio} - ${data.conflict.materia}</li>`;
             html += `<li>Docente: ${data.conflict.docente}</li>`;
             html += `<li>Orario: ${data.conflict.ora_inizio} - ${data.conflict.ora_fine}</li></ul>`;
             document.getElementById('conflitti_details').innerHTML = html;
@@ -787,12 +787,12 @@ function selectAula(aulaId) {
     checkConflicts();
 }
 
-function caricaAllievi() {
-    fetch('<?= BASE_URL ?>/api/api_get_helpers.php?type=allievi')
+function caricaSoci() {
+    fetch('<?= BASE_URL ?>/api/api_get_helpers.php?type=soci')
     .then(r => r.json())
     .then(data => {
-        const select = document.getElementById('select_allievo');
-        select.innerHTML = '<option value="">Seleziona allievo...</option>';
+        const select = document.getElementById('select_socio');
+        select.innerHTML = '<option value="">Seleziona socio...</option>';
         if (data.success && data.data) {
             data.data.forEach(a => {
                 select.innerHTML += `<option value="${a.id}">${a.cognome} ${a.nome}</option>`;
@@ -865,7 +865,7 @@ function salvaIscrizione() {
     .then(data => {
         if (data.success) {
             // Mostra step successo
-            const allievoNome = document.getElementById('select_allievo').selectedOptions[0]?.text || 
+            const socioNome = document.getElementById('select_socio').selectedOptions[0]?.text || 
                                (document.getElementById('new_cognome').value + ' ' + document.getElementById('new_nome').value);
             const materiaNome = document.getElementById('materia_id').selectedOptions[0]?.text;
             const docenteNome = document.getElementById('docente_id').selectedOptions[0]?.text;
@@ -876,7 +876,7 @@ function salvaIscrizione() {
             document.getElementById('success_details').innerHTML = `
                 <h5>Riepilogo Iscrizione</h5>
                 <ul class="list-unstyled mb-0">
-                    <li><strong>Allievo:</strong> ${allievoNome}</li>
+                    <li><strong>Socio:</strong> ${socioNome}</li>
                     <li><strong>Materia:</strong> ${materiaNome}</li>
                     <li><strong>Docente:</strong> ${docenteNome}</li>
                     <li><strong>Orario:</strong> ${giornoNome} alle ${oraInizio}</li>
@@ -894,7 +894,7 @@ function salvaIscrizione() {
             // Mostra step errore con conflitto
             const conf = data.conflict;
             let html = `<h6>Lezione già presente:</h6><ul class="mb-0">`;
-            html += `<li><strong>Allievo:</strong> ${conf.allievo}</li>`;
+            html += `<li><strong>Socio:</strong> ${conf.socio}</li>`;
             html += `<li><strong>Materia:</strong> ${conf.materia}</li>`;
             html += `<li><strong>Docente:</strong> ${conf.docente}</li>`;
             html += `<li><strong>Aula:</strong> ${conf.aula}</li>`;
@@ -958,7 +958,7 @@ function caricaDettagliIscrizione(id) {
         window.currentIscrizioneId = i.id;
         
         // Popola i dettagli
-        document.getElementById('det_allievo').textContent = i.allievo || '-';
+        document.getElementById('det_socio').textContent = i.socio || '-';
         
         // Stato con badge
         const statoBadgeClass = {
@@ -1037,7 +1037,7 @@ function apriModificaIscrizione(id) {
         console.log('Iscrizione caricata:', i);
         
         document.getElementById('iscrizione_id').value = i.id;
-        document.getElementById('selected_allievo_id').value = i.allievo_id;
+        document.getElementById('selected_socio_id').value = i.socio_id;
         document.getElementById('tipo_corso_id').value = i.tipo_corso_config_id;
         document.getElementById('materia_id').value = i.materia_id;
         

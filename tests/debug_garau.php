@@ -36,7 +36,7 @@ $tutte_lezioni = $db->query(
     FROM lezioni l
     LEFT JOIN materie m ON l.materia_id = m.id
     LEFT JOIN docenti d ON l.docente_id = d.id
-    WHERE l.allievo_id = ?",
+    WHERE l.socio_id = ?",
     [$garau['id']]
 );
 
@@ -70,7 +70,7 @@ foreach ($test_cases as $day_format) {
     $count = $db->queryOne(
         "SELECT COUNT(*) as cnt 
         FROM lezioni 
-        WHERE allievo_id = ? 
+        WHERE socio_id = ? 
         AND giorno_settimana = ?",
         [$garau['id'], $day_format]
     );
@@ -82,7 +82,7 @@ echo "\n=== TEST CASE-INSENSITIVE ===\n";
 $count_ci = $db->queryOne(
     "SELECT COUNT(*) as cnt 
     FROM lezioni 
-    WHERE allievo_id = ? 
+    WHERE socio_id = ? 
     AND LOWER(giorno_settimana) = LOWER('lunedì')",
     [$garau['id']]
 );

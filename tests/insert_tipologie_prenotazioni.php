@@ -20,9 +20,9 @@ try {
     $tipologie = [
         [
             'categoria' => 'prenotazione',
-            'codice' => 'PREN_SALA_ALLIEVI',
-            'nome' => 'Prenotazione Sala Allievi',
-            'descrizione' => 'Prenotazione sala per allievi iscritti (gratuita)',
+            'codice' => 'PREN_SALA_SOCI',
+            'nome' => 'Prenotazione Sala Soci',
+            'descrizione' => 'Prenotazione sala per soci iscritti (gratuita)',
             'colore_bg' => '#e8f5e9',
             'colore_border' => '#4caf50',
             'icona' => 'bi-door-open',

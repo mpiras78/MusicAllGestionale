@@ -11,9 +11,9 @@ class LezioneCustom extends Model
         'durata_minuti' => 'integer',
     ];
     
-    public function allievo()
+    public function socio()
     {
-        return $this->belongsTo(Allievo::class, 'allievo_id');
+        return $this->belongsTo(Socio::class, 'socio_id');
     }
     
     public function docente()

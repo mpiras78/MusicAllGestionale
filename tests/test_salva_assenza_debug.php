@@ -11,7 +11,7 @@ $_SERVER['REQUEST_METHOD'] = 'POST';
 $test_data = [
     'lezione_id' => 1,  // MODIFICA: usa un ID lezione esistente
     'data_lezione' => '2026-02-10',  // MODIFICA: usa una data valida
-    'causale' => 'allievo',
+    'causale' => 'socio',
     'note' => 'Test assenza da debug'
 ];
 
@@ -67,7 +67,7 @@ try {
     // Test 4: Prova creazione assenza
     echo "4. Creazione assenza...\n";
     $assenza_data = [
-        'allievo_id' => $lezione['allievo_id'],
+        'socio_id' => $lezione['socio_id'],
         'lezione_id' => $test_data['lezione_id'],
         'data_assenza' => $test_data['data_lezione'],
         'causale' => $test_data['causale'],

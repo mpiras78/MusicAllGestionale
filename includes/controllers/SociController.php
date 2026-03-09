@@ -1,7 +1,7 @@
 <?php
 /**
- * Soci Controller (Rinomina da AllieviController)
- * Gestione logica business per soci (ex allievi)
+ * Soci Controller (Rinomina da SociController)
+ * Gestione logica business per soci (ex soci)
  */
 
 class SociController {
@@ -133,10 +133,10 @@ class SociController {
                 s.id,
                 s.cognome || ' ' || s.nome as nome_completo,
                 COUNT(DISTINCT l.id) as num_lezioni,
-                GROUP_CONCAT(DISTINCT m.nome) as materie,
-                GROUP_CONCAT(DISTINCT l.giorno_settimana) as giorni
+                    GROUP_CONCAT(DISTINCT m.nome) as materie,
+                    GROUP_CONCAT(DISTINCT l.giorno_settimana) as giorni
             FROM soci s
-            JOIN lezioni l ON s.id = l.allievo_id
+                JOIN lezioni l ON s.id = l.socio_id
             JOIN materie m ON l.materia_id = m.id
             WHERE l.attiva = 1 AND s.attivo = 1
             GROUP BY s.id, s.cognome, s.nome
@@ -172,15 +172,5 @@ class SociController {
         ];
     }
     
-    /**
-     * Alias di compatibilità (per refactoring graduale)
-     * TODO: Rimuovere dopo che tutto il codebase è aggiornato
-     */
-    public function getAllievi($attivi_only = true, $limit = null, $offset = 0) {
-        return $this->getSoci($attivi_only, $limit, $offset);
-    }
-    
-    public function getAllievoById($id) {
-        return $this->getSocioById($id);
-    }
+    // Retrocompatibilità rimossa: usare direttamente i metodi `getSoci` e `getSocioById`.
 }

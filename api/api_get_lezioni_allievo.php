@@ -1,6 +1,6 @@
 <?php
 /**
- * API: Ottieni lezioni per allievo
+ * API: Ottieni lezioni per socio
  * Usata dal form creazione assenze
  */
 
@@ -31,11 +31,11 @@ if (!$auth->hasRole(['admin', 'segreteria'])) {
 }
 
 // Ottieni parametro
-$allievo_id = $_GET['allievo_id'] ?? null;
+$socio_id = $_GET['socio_id'] ?? null;
 
-if (!$allievo_id) {
+if (!$socio_id) {
     http_response_code(400);
-    echo json_encode(['error' => 'Parametro allievo_id mancante']);
+    echo json_encode(['error' => 'Parametro socio_id mancante']);
     exit;
 }
 
@@ -43,7 +43,7 @@ try {
     // Ottieni istanza Database
     $db = Database::getInstance();
     
-    // Query lezioni dell'allievo
+    // Query lezioni dell'socio
     $lezioni = $db->query("
         SELECT 
             l.id,
@@ -56,7 +56,7 @@ try {
         FROM lezioni l
         JOIN materie m ON l.materia_id = m.id
         JOIN docenti d ON l.docente_id = d.id
-        WHERE l.allievo_id = ?
+        WHERE l.socio_id = ?
         ORDER BY 
             CASE l.giorno_settimana
                 WHEN 'Lunedì' THEN 1
@@ -68,13 +68,13 @@ try {
                 WHEN 'Domenica' THEN 7
             END,
             l.ora_inizio
-    ", [$allievo_id]);
+    ", [$socio_id]);
     
     echo json_encode([
         'success' => true,
         'lezioni' => $lezioni ?: [],
         'count' => count($lezioni ?: []),
-        'message' => empty($lezioni) ? 'Nessuna lezione trovata per questo allievo' : null
+        'message' => empty($lezioni) ? 'Nessuna lezione trovata per questo socio' : null
     ]);
     
 } catch (Exception $e) {

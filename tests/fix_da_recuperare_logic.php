@@ -4,7 +4,7 @@
  * 
  * REGOLA:
  * - Assenze DOCENTE: sempre da_recuperare = 1
- * - Assenze ALLIEVO: prime 3 assenze da_recuperare = 1, dalla 4a in poi da_recuperare = 0
+ * - Assenze SOCIO: prime 3 assenze da_recuperare = 1, dalla 4a in poi da_recuperare = 0
  */
 
 require_once __DIR__ . '/../includes/bootstrap.php';
@@ -19,22 +19,22 @@ echo "1. Imposto tutte le assenze DOCENTE a da_recuperare = 1...\n";
 $result = $db->execute("UPDATE assenze SET da_recuperare = 1 WHERE tipo = 'docente'");
 echo "   ✓ Aggiornate assenze docente\n\n";
 
-// Step 2: Ottieni tutte le assenze ALLIEVO ordinate per allievo, lezione e data
-echo "2. Elaboro assenze ALLIEVO secondo la regola delle 3 assenze...\n";
+// Step 2: Ottieni tutte le assenze SOCIO ordinate per socio, lezione e data
+echo "2. Elaboro assenze SOCIO secondo la regola delle 3 assenze...\n";
 
-$assenze_allievo = $db->query("
-    SELECT id, allievo_id, lezione_id, data_assenza, tipo
+$assenze_socio = $db->query("
+    SELECT id, socio_id, lezione_id, data_assenza, tipo
     FROM assenze
-    WHERE tipo = 'allievo'
-    ORDER BY allievo_id, lezione_id, data_assenza ASC
+    WHERE tipo = 'socio'
+    ORDER BY socio_id, lezione_id, data_assenza ASC
 ");
 
-echo "   Trovate " . count($assenze_allievo) . " assenze allievo da processare\n";
+echo "   Trovate " . count($assenze_socio) . " assenze socio da processare\n";
 
-// Raggruppa per allievo+lezione
+// Raggruppa per socio+lezione
 $grouped = [];
-foreach ($assenze_allievo as $ass) {
-    $key = $ass['allievo_id'] . '_' . $ass['lezione_id'];
+foreach ($assenze_socio as $ass) {
+    $key = $ass['socio_id'] . '_' . $ass['lezione_id'];
     if (!isset($grouped[$key])) {
         $grouped[$key] = [];
     }
@@ -93,8 +93,8 @@ foreach ($grouped as $key => $assenze_gruppo) {
 }
 
 echo "\n=== RIEPILOGO ===\n";
-echo "Assenze allievo processate: $totali\n";
-echo "Assenze allievo aggiornate: $aggiornate\n";
+echo "Assenze socio processate: $totali\n";
+echo "Assenze socio aggiornate: $aggiornate\n";
 
 // Step 3: Verifica risultati
 echo "\n3. Verifica risultati:\n";
@@ -104,9 +104,9 @@ $stats = $db->queryOne("
         COUNT(*) as totale,
         SUM(CASE WHEN tipo = 'docente' THEN 1 ELSE 0 END) as docente_totale,
         SUM(CASE WHEN tipo = 'docente' AND da_recuperare = 1 THEN 1 ELSE 0 END) as docente_recupero,
-        SUM(CASE WHEN tipo = 'allievo' THEN 1 ELSE 0 END) as allievo_totale,
-        SUM(CASE WHEN tipo = 'allievo' AND da_recuperare = 1 THEN 1 ELSE 0 END) as allievo_recupero,
-        SUM(CASE WHEN tipo = 'allievo' AND da_recuperare = 0 THEN 1 ELSE 0 END) as allievo_no_recupero
+        SUM(CASE WHEN tipo = 'socio' THEN 1 ELSE 0 END) as socio_totale,
+        SUM(CASE WHEN tipo = 'socio' AND da_recuperare = 1 THEN 1 ELSE 0 END) as socio_recupero,
+        SUM(CASE WHEN tipo = 'socio' AND da_recuperare = 0 THEN 1 ELSE 0 END) as socio_no_recupero
     FROM assenze
 ");
 
@@ -116,9 +116,9 @@ echo "  - Totali: {$stats['docente_totale']}\n";
 echo "  - Da recuperare (= 1): {$stats['docente_recupero']}\n";
 echo "  - ✓ Tutte le assenze docente hanno da_recuperare = 1\n";
 
-echo "\nAssenze ALLIEVO:\n";
-echo "  - Totali: {$stats['allievo_totale']}\n";
-echo "  - Da recuperare (= 1): {$stats['allievo_recupero']} (prime 3 per ogni lezione)\n";
-echo "  - A discrezione (= 0): {$stats['allievo_no_recupero']} (dalla 4a in poi)\n";
+echo "\nAssenze SOCIO:\n";
+echo "  - Totali: {$stats['socio_totale']}\n";
+echo "  - Da recuperare (= 1): {$stats['socio_recupero']} (prime 3 per ogni lezione)\n";
+echo "  - A discrezione (= 0): {$stats['socio_no_recupero']} (dalla 4a in poi)\n";
 
 echo "\n✅ Migrazione completata con successo!\n";

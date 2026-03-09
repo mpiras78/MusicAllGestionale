@@ -65,7 +65,7 @@ include 'includes/header.php';
                                 </div>
                                 <div class="col-md-4">
                                     <input type="number" class="form-control form-control-sm" 
-                                           id="allievo_id" name="allievo_id" placeholder="Allievo ID">
+                                           id="socio_id" name="socio_id" placeholder="Socio ID">
                                 </div>
                             </div>
                         </div>

@@ -36,7 +36,7 @@
 
 - ✅ **Click recupero apre modal corretta**
   - Tutti gli eventi (recuperi e prenotazioni) usano `mostraInfoEvento()`
-  - Rimossa logica condizionale errata che apriva modal info allievo
+  - Rimossa logica condizionale errata che apriva modal info socio
 
 ### Fix UI e Layout
 - ✅ **Sovrapposizione icona/testo risolta**

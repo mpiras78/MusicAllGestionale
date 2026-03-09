@@ -52,8 +52,8 @@ DEBUG Slot: 18:15:00 in aula AULA PIANO (2 elementi)
 
 === CASO 3 RILEVATO ===
 Data: 2026-02-10, Aula: AULA PIANO, Slot: 18:15:00
-Lezione: {"id":113,"allievo":"BRITTI Giulia","materia":"Pianoforte","ora_inizio":"18:15","ora_fine":"19:15","attiva":0}
-Evento: {"id":60,"tipo":"PREN_SALA_ALLIEVI","allievo":"BASILE Irene","ora_inizio":"18:30:00","ora_fine":"19:00:00"}
+Lezione: {"id":113,"socio":"BRITTI Giulia","materia":"Pianoforte","ora_inizio":"18:15","ora_fine":"19:15","attiva":0}
+Evento: {"id":60,"tipo":"PREN_SALA_SOCI","socio":"BASILE Irene","ora_inizio":"18:30:00","ora_fine":"19:00:00"}
 
 DEBUG Slot: 18:15:00 in aula SALA JAZZ (1 elementi)
 DEBUG Slot: 18:15:00 in aula SALA POP (1 elementi)
@@ -95,8 +95,8 @@ DEBUG Slot: 18:15:00 in aula AULA PIANO (2 elementi)
 
 === CASO 3 RILEVATO ===
 Data: 2026-02-10, Aula: AULA PIANO, Slot: 18:15:00
-Lezione: {"id":113,"allievo":"BRITTI Giulia","materia":"Pianoforte","ora_inizio":"18:15","ora_fine":"19:15","attiva":0}
-Evento: {"id":60,"tipo":"PREN_SALA_ALLIEVI","allievo":"BASILE Irene","ora_inizio":"18:30:00","ora_fine":"19:00:00"}
+Lezione: {"id":113,"socio":"BRITTI Giulia","materia":"Pianoforte","ora_inizio":"18:15","ora_fine":"19:15","attiva":0}
+Evento: {"id":60,"tipo":"PREN_SALA_SOCI","socio":"BASILE Irene","ora_inizio":"18:30:00","ora_fine":"19:00:00"}
 
 DEBUG Slot: 18:15:00 in aula SALA JAZZ (1 elementi)
 DEBUG Slot: 18:15:00 in aula SALA POP (1 elementi)
@@ -10309,3 +10309,143 @@ SLOT SALTATO (rowspan): 18:15:00 in aula SALA POP
 DEBUG Slot: 18:30:00 in aula SALA JAZZ (1 elementi)
 SLOT SALTATO (rowspan): 18:30:00 in aula SALA POP
 DEBUG Slot: 18:45:00 in aula SALA JAZZ (1 elementi)
+DEBUG Slot: 17:45:00 in aula AULA MIDI (1 elementi)
+DEBUG Slot: 18:00:00 in aula AULA MIDI (1 elementi)
+SLOT SALTATO (rowspan): 18:15:00 in aula AULA MIDI
+DEBUG Slot: 17:45:00 in aula AULA MIDI (1 elementi)
+DEBUG Slot: 18:00:00 in aula AULA MIDI (1 elementi)
+SLOT SALTATO (rowspan): 18:15:00 in aula AULA MIDI
+DEBUG Slot: 17:45:00 in aula AULA MIDI (1 elementi)
+DEBUG Slot: 18:00:00 in aula AULA MIDI (1 elementi)
+SLOT SALTATO (rowspan): 18:15:00 in aula AULA MIDI
+DEBUG Slot: 17:45:00 in aula AULA MIDI (1 elementi)
+DEBUG Slot: 18:00:00 in aula AULA MIDI (1 elementi)
+SLOT SALTATO (rowspan): 18:15:00 in aula AULA MIDI
+DEBUG Slot: 13:45:00 in aula SALA ROCK (1 elementi)
+DEBUG Slot: 14:00:00 in aula SALA ROCK (1 elementi)
+SLOT SALTATO (rowspan): 14:15:00 in aula SALA ROCK
+SLOT SALTATO (rowspan): 14:30:00 in aula SALA ROCK
+DEBUG Slot: 17:45:00 in aula AULA MIDI (1 elementi)
+DEBUG Slot: 17:45:00 in aula SALA JAZZ (1 elementi)
+DEBUG Slot: 17:45:00 in aula SALA POP (1 elementi)
+DEBUG Slot: 18:00:00 in aula AULA MIDI (1 elementi)
+DEBUG Slot: 18:00:00 in aula SALA JAZZ (1 elementi)
+DEBUG Slot: 18:00:00 in aula SALA POP (1 elementi)
+SLOT SALTATO (rowspan): 18:15:00 in aula AULA MIDI
+SLOT SALTATO (rowspan): 18:15:00 in aula SALA JAZZ
+SLOT SALTATO (rowspan): 18:15:00 in aula SALA POP
+SLOT SALTATO (rowspan): 18:30:00 in aula SALA JAZZ
+SLOT SALTATO (rowspan): 18:30:00 in aula SALA POP
+SLOT SALTATO (rowspan): 18:45:00 in aula SALA JAZZ
+DEBUG Slot: 13:45:00 in aula SALA ROCK (1 elementi)
+DEBUG Slot: 14:00:00 in aula SALA ROCK (1 elementi)
+SLOT SALTATO (rowspan): 14:15:00 in aula SALA ROCK
+SLOT SALTATO (rowspan): 14:30:00 in aula SALA ROCK
+DEBUG Slot: 17:45:00 in aula AULA MIDI (1 elementi)
+DEBUG Slot: 17:45:00 in aula SALA JAZZ (1 elementi)
+DEBUG Slot: 17:45:00 in aula SALA POP (1 elementi)
+DEBUG Slot: 18:00:00 in aula AULA MIDI (1 elementi)
+DEBUG Slot: 18:00:00 in aula SALA JAZZ (1 elementi)
+DEBUG Slot: 18:00:00 in aula SALA POP (1 elementi)
+SLOT SALTATO (rowspan): 18:15:00 in aula AULA MIDI
+SLOT SALTATO (rowspan): 18:15:00 in aula SALA JAZZ
+SLOT SALTATO (rowspan): 18:15:00 in aula SALA POP
+SLOT SALTATO (rowspan): 18:30:00 in aula SALA JAZZ
+SLOT SALTATO (rowspan): 18:30:00 in aula SALA POP
+SLOT SALTATO (rowspan): 18:45:00 in aula SALA JAZZ
+DEBUG Slot: 13:45:00 in aula SALA ROCK (1 elementi)
+DEBUG Slot: 14:00:00 in aula SALA ROCK (1 elementi)
+SLOT SALTATO (rowspan): 14:15:00 in aula SALA ROCK
+SLOT SALTATO (rowspan): 14:30:00 in aula SALA ROCK
+DEBUG Slot: 17:45:00 in aula AULA MIDI (1 elementi)
+DEBUG Slot: 17:45:00 in aula SALA JAZZ (1 elementi)
+DEBUG Slot: 17:45:00 in aula SALA POP (1 elementi)
+DEBUG Slot: 18:00:00 in aula AULA MIDI (1 elementi)
+DEBUG Slot: 18:00:00 in aula SALA JAZZ (1 elementi)
+DEBUG Slot: 18:00:00 in aula SALA POP (1 elementi)
+SLOT SALTATO (rowspan): 18:15:00 in aula AULA MIDI
+SLOT SALTATO (rowspan): 18:15:00 in aula SALA JAZZ
+SLOT SALTATO (rowspan): 18:15:00 in aula SALA POP
+SLOT SALTATO (rowspan): 18:30:00 in aula SALA JAZZ
+SLOT SALTATO (rowspan): 18:30:00 in aula SALA POP
+SLOT SALTATO (rowspan): 18:45:00 in aula SALA JAZZ
+DEBUG Slot: 13:45:00 in aula SALA ROCK (1 elementi)
+DEBUG Slot: 14:00:00 in aula SALA ROCK (1 elementi)
+SLOT SALTATO (rowspan): 14:15:00 in aula SALA ROCK
+SLOT SALTATO (rowspan): 14:30:00 in aula SALA ROCK
+DEBUG Slot: 17:45:00 in aula AULA MIDI (1 elementi)
+DEBUG Slot: 17:45:00 in aula SALA JAZZ (1 elementi)
+DEBUG Slot: 17:45:00 in aula SALA POP (1 elementi)
+DEBUG Slot: 18:00:00 in aula AULA MIDI (1 elementi)
+DEBUG Slot: 18:00:00 in aula SALA JAZZ (1 elementi)
+DEBUG Slot: 18:00:00 in aula SALA POP (1 elementi)
+SLOT SALTATO (rowspan): 18:15:00 in aula AULA MIDI
+SLOT SALTATO (rowspan): 18:15:00 in aula SALA JAZZ
+SLOT SALTATO (rowspan): 18:15:00 in aula SALA POP
+SLOT SALTATO (rowspan): 18:30:00 in aula SALA JAZZ
+SLOT SALTATO (rowspan): 18:30:00 in aula SALA POP
+SLOT SALTATO (rowspan): 18:45:00 in aula SALA JAZZ
+DEBUG Slot: 13:45:00 in aula SALA ROCK (1 elementi)
+DEBUG Slot: 14:00:00 in aula SALA ROCK (1 elementi)
+SLOT SALTATO (rowspan): 14:15:00 in aula SALA ROCK
+SLOT SALTATO (rowspan): 14:30:00 in aula SALA ROCK
+DEBUG Slot: 17:45:00 in aula AULA MIDI (1 elementi)
+DEBUG Slot: 17:45:00 in aula SALA JAZZ (1 elementi)
+DEBUG Slot: 17:45:00 in aula SALA POP (1 elementi)
+DEBUG Slot: 18:00:00 in aula AULA MIDI (1 elementi)
+DEBUG Slot: 18:00:00 in aula SALA JAZZ (1 elementi)
+DEBUG Slot: 18:00:00 in aula SALA POP (1 elementi)
+SLOT SALTATO (rowspan): 18:15:00 in aula AULA MIDI
+SLOT SALTATO (rowspan): 18:15:00 in aula SALA JAZZ
+SLOT SALTATO (rowspan): 18:15:00 in aula SALA POP
+SLOT SALTATO (rowspan): 18:30:00 in aula SALA JAZZ
+SLOT SALTATO (rowspan): 18:30:00 in aula SALA POP
+SLOT SALTATO (rowspan): 18:45:00 in aula SALA JAZZ
+DEBUG Slot: 13:45:00 in aula SALA ROCK (1 elementi)
+DEBUG Slot: 14:00:00 in aula SALA ROCK (1 elementi)
+SLOT SALTATO (rowspan): 14:15:00 in aula SALA ROCK
+SLOT SALTATO (rowspan): 14:30:00 in aula SALA ROCK
+DEBUG Slot: 17:45:00 in aula AULA MIDI (1 elementi)
+DEBUG Slot: 17:45:00 in aula SALA JAZZ (1 elementi)
+DEBUG Slot: 17:45:00 in aula SALA POP (1 elementi)
+DEBUG Slot: 18:00:00 in aula AULA MIDI (1 elementi)
+DEBUG Slot: 18:00:00 in aula SALA JAZZ (1 elementi)
+DEBUG Slot: 18:00:00 in aula SALA POP (1 elementi)
+SLOT SALTATO (rowspan): 18:15:00 in aula AULA MIDI
+SLOT SALTATO (rowspan): 18:15:00 in aula SALA JAZZ
+SLOT SALTATO (rowspan): 18:15:00 in aula SALA POP
+SLOT SALTATO (rowspan): 18:30:00 in aula SALA JAZZ
+SLOT SALTATO (rowspan): 18:30:00 in aula SALA POP
+SLOT SALTATO (rowspan): 18:45:00 in aula SALA JAZZ
+DEBUG Slot: 13:45:00 in aula SALA ROCK (1 elementi)
+DEBUG Slot: 14:00:00 in aula SALA ROCK (1 elementi)
+SLOT SALTATO (rowspan): 14:15:00 in aula SALA ROCK
+SLOT SALTATO (rowspan): 14:30:00 in aula SALA ROCK
+DEBUG Slot: 17:45:00 in aula AULA MIDI (1 elementi)
+DEBUG Slot: 17:45:00 in aula SALA JAZZ (1 elementi)
+DEBUG Slot: 17:45:00 in aula SALA POP (1 elementi)
+DEBUG Slot: 18:00:00 in aula AULA MIDI (1 elementi)
+DEBUG Slot: 18:00:00 in aula SALA JAZZ (1 elementi)
+DEBUG Slot: 18:00:00 in aula SALA POP (1 elementi)
+SLOT SALTATO (rowspan): 18:15:00 in aula AULA MIDI
+SLOT SALTATO (rowspan): 18:15:00 in aula SALA JAZZ
+SLOT SALTATO (rowspan): 18:15:00 in aula SALA POP
+SLOT SALTATO (rowspan): 18:30:00 in aula SALA JAZZ
+SLOT SALTATO (rowspan): 18:30:00 in aula SALA POP
+SLOT SALTATO (rowspan): 18:45:00 in aula SALA JAZZ
+DEBUG Slot: 13:45:00 in aula SALA ROCK (1 elementi)
+DEBUG Slot: 14:00:00 in aula SALA ROCK (1 elementi)
+SLOT SALTATO (rowspan): 14:15:00 in aula SALA ROCK
+SLOT SALTATO (rowspan): 14:30:00 in aula SALA ROCK
+DEBUG Slot: 17:45:00 in aula AULA MIDI (1 elementi)
+DEBUG Slot: 17:45:00 in aula SALA JAZZ (1 elementi)
+DEBUG Slot: 17:45:00 in aula SALA POP (1 elementi)
+DEBUG Slot: 18:00:00 in aula AULA MIDI (1 elementi)
+DEBUG Slot: 18:00:00 in aula SALA JAZZ (1 elementi)
+DEBUG Slot: 18:00:00 in aula SALA POP (1 elementi)
+SLOT SALTATO (rowspan): 18:15:00 in aula AULA MIDI
+SLOT SALTATO (rowspan): 18:15:00 in aula SALA JAZZ
+SLOT SALTATO (rowspan): 18:15:00 in aula SALA POP
+SLOT SALTATO (rowspan): 18:30:00 in aula SALA JAZZ
+SLOT SALTATO (rowspan): 18:30:00 in aula SALA POP
+SLOT SALTATO (rowspan): 18:45:00 in aula SALA JAZZ

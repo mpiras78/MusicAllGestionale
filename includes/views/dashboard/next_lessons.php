@@ -30,7 +30,7 @@ if (!isset($prossime_lezioni) || !isset($giorno_corrente)) {
                             <div class="d-flex w-100 justify-content-between align-items-start">
                                 <div>
                                     <h6 class="mb-1">
-                                        <?= e($lezione['allievo']) ?>
+                                        <?= e($lezione['socio']) ?>
                                         <span class="badge bg-<?= getTipoLezioneBadge($lezione['tipo']) ?>">
                                             <?= e($lezione['tipo']) ?>
                                         </span>

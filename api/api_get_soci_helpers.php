@@ -1,7 +1,7 @@
 <?php
 /**
  * API Helper: Recupera soci con lezioni per UI
- * Sostituisce l'helper per allievi
+ * Sostituisce l'helper per soci
  */
 
 require_once __DIR__ . '/../includes/bootstrap.php';
@@ -20,7 +20,7 @@ try {
             echo json_encode(['success' => true, 'data' => $soci]);
             break;
             
-        case 'allievi_con_lezioni':
+        case 'soci_con_lezioni':
             // Retrocompatibilità - restituisce stessi dati con nome diverso
             $controller = new SociController();
             $soci = $controller->getSociConLezioni();

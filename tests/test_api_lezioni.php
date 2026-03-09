@@ -1,6 +1,6 @@
 <?php
 /**
- * Test API get_lezioni_allievo
+ * Test API get_lezioni_socio
  */
 
 require_once __DIR__ . '/../includes/bootstrap.php';
@@ -13,7 +13,7 @@ $_SESSION['username'] = 'admin';
 // Ottieni istanza database
 $db = Database::getInstance();
 
-// Test con socio ID = 1 (ex allievo)
+// Test con socio ID = 1 (ex socio)
 $socio_id = 1;
 
 echo "=== TEST API LEZIONI SOCIO ===\n\n";
@@ -32,8 +32,8 @@ try {
         FROM lezioni l
         JOIN materie m ON l.materia_id = m.id
         JOIN docenti d ON l.docente_id = d.id
-            -- la tabella `lezioni` nel DB attuale usa ancora la colonna `allievo_id`
-            WHERE l.allievo_id = ?
+            -- la tabella `lezioni` nel DB attuale usa ancora la colonna `socio_id`
+            WHERE l.socio_id = ?
         ORDER BY 
             CASE l.giorno_settimana
                 WHEN 'lunedi' THEN 1
@@ -58,7 +58,7 @@ try {
     
     if (empty($lezioni)) {
         echo "NESSUNA LEZIONE TROVATA!\n";
-        echo "Verifica che esistano lezioni per questo allievo.\n\n";
+        echo "Verifica che esistano lezioni per questo socio.\n\n";
         
         // Check se il socio esiste (recupera anche dati anagrafici da `persone`)
         $socio = $db->queryOne("SELECT s.*, p.cognome as cognome, p.nome as nome

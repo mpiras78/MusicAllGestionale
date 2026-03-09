@@ -3,7 +3,7 @@
 ## Riepilogo Esecuzione Fase 1 (8 Marzo 2026)
 
 ### Obiettivo
-Migrazione completa del database e codebase: **allievi → soci**
+Migrazione completa del database e codebase: **soci → soci**
 
 ### Deliverables Completati
 
@@ -11,11 +11,11 @@ Migrazione completa del database e codebase: **allievi → soci**
 - **Script**: `database/run_migration_fase1.php`
 - **Stato**: Eseguito e testato (3 iterazioni)
 - **Risultati**:
-  - 245 record migrati da `allievi` → `soci`
+  - 245 record migrati da `soci` → `soci`
   - 12 nuove tabelle create (iscrizioni_annuali, pagamenti, famiglia, audit_log, etc.)
   - 5 nuove colonne aggiunte (telefono_2, cap, citta, created_at, updated_at)
   - 9 viste rimosse durante migrazione (risolte issue di dipendenza)
-  - Backup creato: `allievi_v2_backup` (229 record)
+  - Backup creato: `soci_v2_backup` (229 record)
 
 #### 2. Ricreazione Viste Database ✅
 - **Script**: `database/recreate_views_fase1.php`
@@ -32,50 +32,49 @@ Migrazione completa del database e codebase: **allievi → soci**
 
 #### 3. Refactoring Codebase - Controllers ✅
 - **Nuovo**: `includes/controllers/SociController.php`
-  - Sostituisce `AllieviController.php`
-  - Metodi rinominati: getAllievi* → getSoci*, createAllievo → createSocio, etc.
-  - Mantiene retrocompatibilità con alias deprecated getAllievi()
+  - Sostituisce `SociController.php`
+  - Metodi rinominati: getSoci* -> getSoci*, createSocio -> createSocio, etc.
   - 10 metodi pubblici implementati
   
 - **Aggiornato**: `includes/controllers/AssenzeController.php`
-  - Rinomina  metodo: `getAllievi()` con `getSoci()` 
+  - Rinomina  metodo: `getSoci()` con `getSoci()` 
   - Modifica tutte le classi che chiamano il vecchio metodo 
-  - Query da `allievi` → `soci`
+  - Query da `soci` → `soci`
 
 - **Aggiornato**: `includes/bootstrap.php`
   - Importazione aggiornata: `SociController.php`
 
 #### 4. Refactoring Codebase - Views/UI ✅
-- **Aggiornato**: `gestione_allievi.php`
-  - Rinominata UI: "Gestione Allievi" → "Gestione Soci"
-  - Tabella: `id="tabellaAllievi"` → `id="tavollaSoci"`
-  - Variabili: `$allievi` → `$soci`
-  - Funzioni JS: `visualizzaAllievo()` → `visualizzaSocio()`, etc.
-  - Form fields: `allievo_id` → `socio_id`
+- **Aggiornato**: `gestione_soci.php`
+  - Rinominata UI: "Gestione Soci"
+  - Tabella: `id="tabellaSoci"`
+  - Variabili: `$soci`
+  - Funzioni JS: `visualizzaSocio()`
+  - Form fields: `socio_id`
 
-- **Aggiornato**: `index.php` (Dashboard)
-  - Istanza: `$allieviCtrl` → `$sociCtrl`
-  - Metodi: `countAllievi()` → `countSoci()`, etc.
-  - Variabili: `$ultimi_allievi` → `$ultimi_soci`
+-- **Aggiornato**: `index.php` (Dashboard)
+  - Istanza: `$sociCtrl`
+  - Metodi: `countSoci()`
+  - Variabili: `$ultimi_soci`
 
-- **Aggiornato**: `gestione_lezioni.php`
-  - Istanza: `$allieviCtrl` → `$sociCtrl`
-  - Variabili: `$allievi` → `$soci`
-  - Select label: "Allievo *" → "Socio *"
+-- **Aggiornato**: `gestione_lezioni.php`
+  - Istanza: `$sociCtrl`
+  - Variabili: `$soci`
+  - Select label: "Socio *"
 
-- **Aggiornato**: `gestione_assenze.php`
-  - Variabili: `$allievi` → `$soci`
-  - Metodo: `getAllievi()` → `getSoci()`
+-- **Aggiornato**: `gestione_assenze.php`
+  - Variabili: `$soci`
+  - Metodo: `getSoci()`
 
-- **Aggiornato**: `helper_allievi_con_lezioni.php`
-  - Istanza: `$allieviCtrl` → `$sociCtrl`
-  - Metodi: `getAllieviConLezioni()` → `getSociConLezioni()`, etc.
-  - Titolo: "Allievi con Lezioni" → "Soci con Lezioni"
+-- **Aggiornato**: `helper_soci_con_lezioni.php`
+  - Istanza: `$sociCtrl`
+  - Metodi: `getSociConLezioni()`
+  - Titolo: "Soci con Lezioni"
 
 #### 5. Refactoring Codebase - API Endpoints ✅
-- **Nuovo**: `api/api_soci.php` (Endpoint principale per soci)
+-- **Nuovo**: `api/api_soci.php` (Endpoint principale per soci)
   - Actions: list, get, search, create, update, delete, count, stats
-  - Query da `allievi` → `soci`
+  - Query da `soci` → `soci`
   - Metodi: `$controller->createSocio()`, `updateSocio()`, etc.
 
 - **Nuovo**: `api/api_get_info_socio.php`
@@ -83,30 +82,30 @@ Migrazione completa del database e codebase: **allievi → soci**
   - Assenze, recuperi, corsi frequentati, iscrizioni
 
 - **Nuovo**: `api/api_get_soci_helpers.php`
-  - Rinomina allievi_con_lezioni in `soci_con_lezioni`
-  - Modifica le classi che chiamavano `allievi_con_lezioni` con nuovo metodo
+  - Rinomina soci_con_lezioni in `soci_con_lezioni`
+  - Modifica le classi che chiamavano `soci_con_lezioni` con nuovo metodo
 
-- **Aggiornato**: `api/api_allievi.php`
-  - Retrocompatibilità: usa `SociController`: no, usa refactor
-  - Query da `allievi` → `soci`
+-- **Aggiornato**: `api/api_soci.php`
+  - Rimossa retrocompatibilità: usare `api_soci.php`
+  - Query da `soci` → `soci`
 
-- **Aggiornato**: `api/api_allievi_crud.php`
+- **Aggiornato**: `api/api_soci_crud.php`
   - Istanza: `$controller = new SociController()`
 
 - **Aggiornato**: `api/api_get_helpers.php`
   - Nuovo case: `soci_con_lezioni`
-  - crea soci al posto di  `allievi`
-  - Query da `allievi` → `soci`
+  - crea soci al posto di  `soci`
+  - Query da `soci` → `soci`
   - Modifica che classi che chiamavano vecchio metodo
 
-- **Aggiornato**: `api/api_get_info_allievo.php`
-  - Retrocompatibilità: no, sostituisci con `socio_id` le ricorrenze di `allievo_id`
-  - Query da `allievi_id` → `socio_id`
-  - Variabili: `$allievo` → `$socio`
+-- **Aggiornato**: `api/api_get_info_socio.php`
+  - Sostituisci con `socio_id` le ricorrenze di `socio_id`
+  - Query da `soci_id` → `socio_id`
+  - Variabili: `$socio`
 
 - **Aggiornato**: `api/api_salva_prenotazione.php`
-  - Query da `allievi` → `soci`
-  - Parametro: `allievo_id_pren` → `socio_id_pren`
+  - Query da `soci` → `soci`
+  - Parametro: `socio_id_pren` → `socio_id_pren`
 
 #### 6. Qualità Codice ✅
 - **Sintassi PHP**: Verificata su tutti i file
@@ -114,7 +113,7 @@ Migrazione completa del database e codebase: **allievi → soci**
   - **Risultato**: ✅ No errors
 
 #### 7. Version Control ✅
-- **Commit 1**: `refactor(fase1): Rinomina allievi → soci in codebase`
+- **Commit 1**: `refactor(fase1): Rinomina soci → soci in codebase`
   - 13 file modificati, 920 insertions, 158 deletions
   - SociController creato, bootstrap aggiornato, UI rinominata
 
@@ -139,24 +138,19 @@ Migrazione completa del database e codebase: **allievi → soci**
 | **Commit effettuati** | 4 |
 | **Righe aggiunte** | ~1,305 |
 | **Righe rimosse** | ~214 |
-| **Tabelle migrate** | 1 (allievi → soci) |
+| **Tabelle migrate** | 1 (soci → soci) |
 | **Record migrati** | 245 |
 | **Nuove tabelle create** | 12 |
 | **Viste ricreate** | 9 |
 | **Metodi rinominati** | 8+ |
 | **Endpoint API** | 8 (6 nuovi/aggiornati) |
 
-### Retrocompatibilità ✅
-Non mantenere retrocompatibilità, adatta le ricorrenze nei seguenti file e modifica i chiamanti
-- `AllieviController` contiene alias `getAllievi()` → `getSocio()`
-- `api_allievi.php` reindirizza a `SociController`
-- `api_get_helpers.php` supporta sia `allievi` che `soci_con_lezioni`
-- `api_get_info_allievo.php` accetta sia `allievo_id` che `socio_id`
-- `AssenzeController::getAllievi()` chiama `getSoci()`
+### Retrocompatibilità: non mantenuta
+Tutte le occorrenze di "socio/soci" sono state sostituite con "socio/soci" e i chiamanti devono usare i nuovi nomi (classi, endpoint e campi).
 
 ### Database Schema Aggiornato
 
-#### Tabella `soci` (da allievi)
+#### Tabella `soci` (da soci)
 ```sql
 CREATE TABLE soci (
   id INTEGER PRIMARY KEY,
@@ -195,7 +189,7 @@ CREATE TABLE soci (
 - [ ] Aggiornare documentazione utente
 
 ### Note Importanti
-1. **Database backup salvato**: `allievi_v2_backup` con 229 record
+1. **Database backup salvato**: `soci_v2_backup` con 229 record
 2. **Script idempotente**: Può essere rieseguito senza errori
 3. **Zero data loss**: Tutti i 245 record migrati correttamente
 4. **Views ricreate**: Tutte le 9 viste operative e testate

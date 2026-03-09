@@ -7,13 +7,13 @@
 ### Logica Recuperi Assenze Migliorata
 - **Nuova regola di business per recuperi obbligatori**:
   - Assenze **docente**: sempre da recuperare (obbligatorio)
-  - Assenze **allievo**: 
+  - Assenze **socio**: 
     - Prime 3 assenze per lezione nell'anno scolastico → recupero obbligatorio
     - Dalla 4ª assenza in poi → recupero a discrezione (direzione/insegnante)
 
 ### Inversione Icone Prenotazioni
 - **Scambiate le icone** per prenotazioni nel calendario:
-  - Prenotazione Allievi: ora usa `bi-person-badge` (badge persona)
+  - Prenotazione Soci: ora usa `bi-person-badge` (badge persona)
   - Prenotazione Docente: ora usa `bi-door-open` (porta aperta)
   - Prenotazione Esterno: rimane `bi-calendar-event` (invariata)
 
@@ -29,10 +29,10 @@
 - **Script di migrazione** `tests/fix_da_recuperare_logic.php`:
   - Aggiorna tutte le assenze esistenti secondo la nuova logica
   - Processa assenze per anno scolastico corrente (settembre-giugno)
-  - Raggruppa per allievo-lezione e applica la regola posizionale
+  - Raggruppa per socio-lezione e applica la regola posizionale
 
 - **Script inversione icone** `tests/swap_icone_prenotazioni.php`:
-  - Inverte icone tra PREN_SALA_ALLIEVI e PREN_DOCENTE
+  - Inverte icone tra PREN_SALA_SOCI e PREN_DOCENTE
   - Mantiene traccia del prima/dopo per verifica
 
 ### Script di Utilità
@@ -42,7 +42,7 @@
 
 ### Assenze Processate
 - **Assenze Docente**: tutte impostate a `da_recuperare = 1`
-- **Assenze Allievo**: 6 processate nell'anno scolastico 2025/2026
+- **Assenze Socio**: 6 processate nell'anno scolastico 2025/2026
   - Tutte prime assenze per le rispettive lezioni
   - Tutte impostate a `da_recuperare = 1`
 
@@ -79,14 +79,14 @@ php tests/check_icone_db.php
 ```
 
 ## 🐛 Bug Fix
-- Corretta logica errata che impostava `da_recuperare = 0` per tutte le assenze allievo
+- Corretta logica errata che impostava `da_recuperare = 0` per tutte le assenze socio
 - Allineato comportamento API con policy scuola
 
 ## 📖 Documentazione
 
 ### Regole Business Implementate
 1. **Anno scolastico**: settembre anno N → giugno anno N+1
-2. **Conteggio assenze**: per coppia allievo-lezione nell'anno scolastico
+2. **Conteggio assenze**: per coppia socio-lezione nell'anno scolastico
 3. **Soglia recupero obbligatorio**: prime 3 assenze
 4. **Recuperi docente**: sempre obbligatori indipendentemente dal numero
 
@@ -95,7 +95,7 @@ php tests/check_icone_db.php
 - `tests/fix_da_recuperare_logic.php` - Script migrazione dati esistenti
 - `tests/swap_icone_prenotazioni.php` - Script inversione icone
 - `tests/check_icone_db.php` - Script verifica icone
-- Database: campo `icona` in `tipologie_evento` (PREN_SALA_ALLIEVI, PREN_DOCENTE)
+- Database: campo `icona` in `tipologie_evento` (PREN_SALA_SOCI, PREN_DOCENTE)
 
 ## 🎓 Impatto Utenti
 
@@ -111,7 +111,7 @@ php tests/check_icone_db.php
 
 ## 🔮 Prossimi Sviluppi
 - Possibile aggiunta configurazione soglia recuperi (attualmente hardcoded a 3)
-- Dashboard statistiche recuperi per allievo/lezione
+- Dashboard statistiche recuperi per socio/lezione
 - Notifiche automatiche al raggiungimento soglia recuperi
 
 ---

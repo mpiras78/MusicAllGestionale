@@ -63,7 +63,7 @@ def extract_time_and_name(cell_value):
     if len(end_time.split(':')[0]) == 1:
         end_time = '0' + end_time
     
-    # Estrai nome allievo (rimuovi orario e pulisci)
+    # Estrai nome socio (rimuovi orario e pulisci)
     name_part = re.sub(time_pattern, '', value).strip()
     name_part = re.sub(r'\([^)]*\)', '', name_part).strip()  # Rimuovi note tra parentesi
     
@@ -217,7 +217,7 @@ def process_day(giorno, giorno_it):
             return None
         
         for lez in lezioni:
-            sql = f"""INSERT INTO lezioni (giorno_settimana, ora_inizio, ora_fine, id_aula, id_allievo, id_docente, id_materia)
+            sql = f"""INSERT INTO lezioni (giorno_settimana, ora_inizio, ora_fine, id_aula, id_socio, id_docente, id_materia)
 SELECT '{giorno_it.upper()}', '{lez['ora_inizio']}', '{lez['ora_fine']}',
        (SELECT id FROM aule WHERE UPPER(nome) LIKE '%{lez['aula']}%' LIMIT 1),
        (SELECT s.id FROM soci s JOIN persone p ON s.persona_id = p.id WHERE UPPER(p.cognome) LIKE '%{lez['cognome']}%' LIMIT 1),

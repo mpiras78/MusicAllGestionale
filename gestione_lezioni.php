@@ -19,7 +19,7 @@ $stats = [
 $giorni = ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato'];
 foreach ($giorni as $giorno) {
     $lezioni_giorno = $lezioniCtrl->getLezioniPerGiorno($giorno, true);
-    $stats['per_giorno'][$giorno] = count($lezioni_giorno);
+    $stats['per_giorno'][$giorno] = is_countable($lezioni_giorno) ? count($lezioni_giorno) : 0;
 }
 
 $lezioni = $lezioniCtrl->getAllLezioni();
@@ -117,9 +117,9 @@ include 'includes/header.php';
     <!-- Tabella Lezioni -->
     <div class="card">
         <div class="card-header">
-            <h5 class="mb-0">
+                <h5 class="mb-0">
                 <i class="bi bi-list-ul"></i> Elenco Lezioni
-                <span class="badge bg-primary ms-2" id="countLezioni"><?= count($lezioni) ?></span>
+                <span class="badge bg-primary ms-2" id="countLezioni"><?= is_countable($lezioni) ? count($lezioni) : 0 ?></span>
             </h5>
         </div>
         <div class="card-body p-0">
@@ -129,7 +129,7 @@ include 'includes/header.php';
                         <tr>
                             <th>Giorno</th>
                             <th>Orario</th>
-                            <th>Allievo</th>
+                            <th>Socio</th>
                             <th>Materia</th>
                             <th>Docente</th>
                             <th>Aula</th>
@@ -153,7 +153,7 @@ include 'includes/header.php';
                                         <span class="badge bg-primary"><?= ucfirst(getGiornoItaliano($l['giorno_settimana'])) ?></span>
                                     </td>
                                     <td><?= formatTime($l['ora_inizio']) ?> - <?= formatTime($l['ora_fine']) ?></td>
-                                    <td><?= e($l['allievo']) ?></td>
+                                    <td><?= e($l['socio']) ?></td>
                                     <td><?= e($l['materia']) ?></td>
                                     <td><?= e($l['docente']) ?></td>
                                     <td><?= e($l['aula']) ?></td>
@@ -161,7 +161,7 @@ include 'includes/header.php';
                                         <button class="btn btn-sm btn-warning" onclick="modificaLezione(<?= $l['id'] ?>)" title="Modifica">
                                             <i class="bi bi-pencil"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-danger" onclick="confermaEliminazione(<?= $l['id'] ?>, '<?= addslashes($l['allievo']) ?>')" title="Elimina">
+                                        <button class="btn btn-sm btn-danger" onclick="confermaEliminazione(<?= $l['id'] ?>, '<?= addslashes($l['socio']) ?>')" title="Elimina">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </td>
@@ -190,25 +190,25 @@ include 'includes/header.php';
                     <i class="bi bi-info-circle"></i> Le lezioni di prova sono lezioni singole non legate a iscrizioni
                 </div>
                 <form id="formNuovaLezione">
-                    <h6 class="mb-3">Dati Allievo</h6>
+                    <h6 class="mb-3">Dati Socio</h6>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Nome *</label>
-                            <input type="text" class="form-control" name="nome_allievo" required>
+                            <input type="text" class="form-control" name="nome_socio" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Cognome *</label>
-                            <input type="text" class="form-control" name="cognome_allievo" required>
+                            <input type="text" class="form-control" name="cognome_socio" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Email</label>
-                            <input type="email" class="form-control" name="email_allievo">
+                            <input type="email" class="form-control" name="email_socio">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Telefono</label>
-                            <input type="tel" class="form-control" name="telefono_allievo">
+                            <input type="tel" class="form-control" name="telefono_socio">
                         </div>
                     </div>
                     
@@ -381,7 +381,7 @@ include 'includes/header.php';
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Sei sicuro di voler eliminare la lezione di <strong id="nomeAllievoDaEliminare"></strong>?</p>
+                <p>Sei sicuro di voler eliminare la lezione di <strong id="nomeSocioDaEliminare"></strong>?</p>
                 <div class="alert alert-warning">
                     <i class="bi bi-info-circle"></i>
                     Questa azione non può essere annullata.
@@ -411,7 +411,7 @@ document.querySelector('#addLezioneModal select[name="materia_id"]').addEventLis
         return;
     }
     
-    fetch(`<?= BASE_URL ?>/api_docenti_per_materia.php?materia_id=${materiaId}`)
+    fetch(`<?= BASE_URL ?>/api/api_docenti_per_materia.php?materia_id=${materiaId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -434,7 +434,7 @@ document.getElementById('editMateriaId').addEventListener('change', function() {
         return;
     }
     
-    fetch(`<?= BASE_URL ?>/api_docenti_per_materia.php?materia_id=${materiaId}`)
+    fetch(`<?= BASE_URL ?>/api/api_docenti_per_materia.php?materia_id=${materiaId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -522,7 +522,7 @@ function modificaLezione(id) {
             if (data.success) {
                 const l = data.data;
                 document.getElementById('editLezioneId').value = l.id;
-                document.getElementById('editAllieveId').value = l.allievo_id;
+                document.getElementById('editSocioId').value = l.socio_id;
                 document.getElementById('editMateriaId').value = l.materia_id;
                 document.getElementById('editDocenteId').value = l.docente_id;
                 document.getElementById('editAulaId').value = l.aula_id;
@@ -570,8 +570,8 @@ function aggiornaLezione() {
     .catch(error => mostraToast('Errore', error.message, 'danger'));
 }
 
-function confermaEliminazione(id, allievo) {
-    document.getElementById('nomeAllievoDaEliminare').textContent = allievo;
+function confermaEliminazione(id, socio) {
+    document.getElementById('nomeSocioDaEliminare').textContent = socio;
     document.getElementById('idLezioneDaEliminare').value = id;
     
     const modal = new bootstrap.Modal(document.getElementById('confermaEliminazioneModal'));

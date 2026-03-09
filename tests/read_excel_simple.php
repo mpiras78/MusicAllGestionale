@@ -3,7 +3,7 @@
  * Legge file Excel usando ZipArchive (già disponibile in PHP)
  */
 
-$excelFile = __DIR__ . '/../template/Orario Allievi MusicAll.xlsx';
+$excelFile = __DIR__ . '/../template/Orario Soci MusicAll.xlsx';
 
 if (!file_exists($excelFile)) {
     echo "❌ File non trovato: $excelFile\n";
@@ -24,14 +24,14 @@ if (!class_exists('ZipArchive')) {
     $content = file_get_contents($excelFile);
     
     // Cerca nomi (pattern comuni)
-    $allievi = [];
+    $soci = [];
     $docenti = [];
     
     // Pattern per nomi italiani (Cognome Nome)
     preg_match_all('/\b([A-Z][a-zàèéìòù]+)\s+([A-Z][a-zàèéìòù]+)\b/', $content, $matches);
     
     if (!empty($matches[0])) {
-        echo "Nomi trovati nel file (potrebbero includere allievi e docenti):\n";
+        echo "Nomi trovati nel file (potrebbero includere soci e docenti):\n";
         $nomiTrovati = array_unique($matches[0]);
         sort($nomiTrovati);
         
@@ -40,7 +40,7 @@ if (!class_exists('ZipArchive')) {
         }
         
         echo "\n⚠️  Nota: Questi sono tutti i nomi trovati nel file.\n";
-        echo "Non posso distinguere automaticamente allievi da docenti senza leggere la struttura.\n\n";
+        echo "Non posso distinguere automaticamente soci da docenti senza leggere la struttura.\n\n";
     }
     
     echo "========================================\n";
@@ -49,7 +49,7 @@ if (!class_exists('ZipArchive')) {
     echo "Per procedere, ho bisogno che tu mi fornisca:\n\n";
     echo "1. L'elenco dei DOCENTI del file Excel\n";
     echo "2. Oppure una descrizione della struttura del file\n";
-    echo "   (es. quali colonne contengono allievi, docenti, materie, ecc.)\n\n";
+    echo "   (es. quali colonne contengono soci, docenti, materie, ecc.)\n\n";
     
     exit(0);
 }

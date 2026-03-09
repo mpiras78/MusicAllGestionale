@@ -22,7 +22,7 @@ Creare una nuova pagina accessibile solo da amministratore che permetta di inser
 - PEC
 
 ## 🎯 Gestione iscrizioni e corsi lato segreteria
-Cambiare tutte le lable Allievo con Socio
+Cambiare tutte le lable Socio con Socio
 Queste funzionalità sono visibili solamente per ruoli segreteria e amministratore
 # Iscrizione Socio annuale
 Aggiungere al menù gestioni una nuova voce Gestione Costi iscrizione
@@ -45,7 +45,7 @@ Per l'invio della mail ti fornirò io il codice sorgente
 
 # Gestione Corsi: dettagli
 # Azioni elenco soci 1
-Nella pagina di elenco soci ( attualmente gestione_allievi ) inserire una icona nelle azioni per modificare i corsi a cui è iscritto il socio. Il click su questa nuova icona entra in una nuova pagina con le informazioni anagrafiche del socio in alto come riepilogo, l'elenco dei corsi associati con tasto di modifica e cancellazione e un pulsante per l'aggiunta di un nuovo corso
+Nella pagina di elenco soci ( attualmente `gestione_soci` ) inserire una icona nelle azioni per modificare i corsi a cui è iscritto il socio. Il click su questa nuova icona entra in una nuova pagina con le informazioni anagrafiche del socio in alto come riepilogo, l'elenco dei corsi associati con tasto di modifica e cancellazione e un pulsante per l'aggiunta di un nuovo corso
 # Modifica iscrizione
 La pagina di modifica iscrizione mostra già i dati anagrafici completi del socio, permette la modifica della tipologia di corso , data, ora, sala , materia e insegnante. Il pulsante modifica applica una data fine al corso precedente e ne crea uno nuovo, in modo da mantenere lo storico e calcolare in modo corretto il prezzo nella pagina di pagamento. Quando mi troverò nella pagina di caricamento dovrai effettuare il calcolo preciso, esempio:
 - Corso X di lunedì , disattivato in data dd/mm/yyyy , numero lunedì del mese=1 , costo 200€ al mese ( intesto per 4 settimane), calcolo (200:4) * 1
@@ -60,15 +60,15 @@ Il pagamento dell'iscrizione avviene mensilmente, quindi ogni mese si ricalcola 
  Le festività sono quelle presenti dal calendario italiano standard, in più va considerata una tabella in cui inserire i periodi di chiusura attività.
  
 ## Gestione corsi : dettaglio
- - Cambiare voce "Allievi" del menu Gestione con Elenco Soci
+ - Cambiare voce "Soci" del menu Gestione con Elenco Soci
 
 ## ASSENZE E RECUPERI
 - Nell'elenco dei recuperi aggiungere tasto "modifica" per la modifica delle informazioni di recupero
 - Nell'elenco delle assenze, se il periodo di assenza è stato già completamente recuperato nascondere l'icona di "Programma recupero" nelle azioni
 - Se l'orario del recupero non copre completamente l'orario di assenza, permettere di inserire un nuovo recupero solamente per i rimanente tempo da recuperare.
 - Nella pagina di inserimento nuovo recupero mostrare il tempo da recuperare , totale o parziale se esiste già un recupero che copre parzialmente il tempo totale dell'assenza
-- Creare una pagina di configurazione accessibile solo da utenza con ruolo admin per la definizione del numero di recuperi garantiti. SI definisce un numero X, dopo di cui se l'allievo ha già recuperato quel numero X di volte, il recupero diventa opzionale
-- Al superamente delle assenze causate da socio predisporre invio email da inviare al socio allievo con riepilogo recuperi effettutati. Nella email inserire l'elenco completo delle assenze e recuperi già effettuati
+- Creare una pagina di configurazione accessibile solo da utenza con ruolo admin per la definizione del numero di recuperi garantiti. SI definisce un numero X, dopo di cui se l'socio ha già recuperato quel numero X di volte, il recupero diventa opzionale
+- Al superamente delle assenze causate da socio predisporre invio email da inviare al socio socio con riepilogo recuperi effettutati. Nella email inserire l'elenco completo delle assenze e recuperi già effettuati
 
 ## PAGAMENTI
 Creare nuova tabella pagamenti
@@ -106,7 +106,7 @@ https://github.com/pmill/php-scheduler
 
 # Grafica
 Sul calendario nel box delle lezioni, il nome e cognome del socio devono avere lo stesso colore della sala in cui fanno lezione
-Nella pagina Gestione_Allievi nella colonna Lezioni devono essere visualizzati i corsi effettuati dal socio: Batteria  con Insegnante x, Laboratorio y
+ Nella pagina `Gestione_Soci` nella colonna Lezioni devono essere visualizzati i corsi effettuati dal socio: Batteria  con Insegnante x, Laboratorio y
 # Modifiche al menù
 Rimuovi la voce di menù Gestione -> Lezioni
 Aggiungi al menù principale la voce Nuova iscrizione
@@ -128,7 +128,7 @@ Per sospensione definitiva, eliminare tutte eventuali ricorrenze future di quel 
 # Tabelle
 -- Già suggerito ma confermare:
 - dati_associazione (✓ ben definito)
-- soci (attualmente allievi - rinominare)
+- soci (rinominati)
 - iscrizioni_annuali (per tracciare iscrizioni)
 - corsi_soci (il mapping socio-corso attuale)
 - pagamenti_storico (per tracciare ogni transazione)
@@ -143,7 +143,7 @@ Deve esistere una tabella di audit che contiene tutte le attività e le modifich
 - tipo modifica : modifica corso, rimozione corso, inserimento assenza, inserimento recupero , etc etc, 
 - vecchia informazione
 - nuova informazione
-Nel caso in cui si aggiunge semplicemente un nuovo allievo le informazioni saranno:
+Nel caso in cui si aggiunge semplicemente un nuovo socio le informazioni saranno:
 - utente che effettua la modifica: Mario Rossi
 - data modifica: 26/09/2025 10:00
 - tipo modifica: inserimento nuovo socio
@@ -206,7 +206,7 @@ Chi definisce le chiusure? Solo admin? SI
 
 # DOMANDE assenze e recuperi:
 Es: Recuperi garantiti = 3
-Allievo ha 5 assenze
+Socio ha 5 assenze
 Ha già i primi 3 recuperi, gli altri sono "opzionali"? SI
 Chi decide se farli? (Docente? Segreteria?) Insieme Docente e Segreteria in base alla disponibilità del docente e alla disponibilità delle sale
 Non si può programmare il recupero 4 e 5?Come sopra, si programma a discrezione della segreteria e della disponibilità dell'insegnante

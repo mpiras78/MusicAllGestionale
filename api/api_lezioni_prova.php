@@ -66,7 +66,7 @@ try {
             $checkLezioni = $db->prepare("
                 SELECT 
                     l.id,
-                    CONCAT(a.cognome, ' ', a.nome) as allievo,
+                    CONCAT(a.cognome, ' ', a.nome) as socio,
                     m.nome as materia,
                     l.ora_inizio,
                     l.ora_fine,
@@ -75,7 +75,7 @@ try {
                         ELSE 0
                     END as ha_assenza
                 FROM lezioni l
-                INNER JOIN allievi a ON l.allievo_id = a.id
+                INNER JOIN soci a ON l.socio_id = a.id
                 INNER JOIN materie m ON l.materia_id = m.id
                 LEFT JOIN assenze ass ON ass.lezione_id = l.id 
                     AND ass.data_assenza = ?
@@ -100,12 +100,12 @@ try {
             
             // Se c'è una lezione ricorrente E NON ha assenza, è un conflitto
             if ($conflittoLezione && $conflittoLezione['ha_assenza'] == 0) {
-                throw new Exception("Conflitto orario: lezione di {$conflittoLezione['allievo']} ({$conflittoLezione['materia']}) già presente dalle {$conflittoLezione['ora_inizio']} alle {$conflittoLezione['ora_fine']}");
+                throw new Exception("Conflitto orario: lezione di {$conflittoLezione['socio']} ({$conflittoLezione['materia']}) già presente dalle {$conflittoLezione['ora_inizio']} alle {$conflittoLezione['ora_fine']}");
             }
             
             // Inserisci evento lezione di prova
-            $titolo = 'Lezione di Prova - ' . $postData['cognome_allievo'] . ' ' . $postData['nome_allievo'];
-            $descrizione = 'Email: ' . ($postData['email_allievo'] ?? 'N/D') . ' | Tel: ' . ($postData['telefono_allievo'] ?? 'N/D');
+            $titolo = 'Lezione di Prova - ' . $postData['cognome_socio'] . ' ' . $postData['nome_socio'];
+            $descrizione = 'Email: ' . ($postData['email_socio'] ?? 'N/D') . ' | Tel: ' . ($postData['telefono_socio'] ?? 'N/D');
             
             $stmt = $db->prepare("
                 INSERT INTO eventi_calendario (

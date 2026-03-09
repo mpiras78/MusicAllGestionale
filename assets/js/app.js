@@ -242,7 +242,7 @@ var CalendarioApp = {
     renderLezioneDetail: function(lezione) {
         return `
             <div class="mb-3">
-                <strong>Allievo:</strong> ${lezione.allievo_nome}
+                <strong>Socio:</strong> ${lezione.socio_nome}
             </div>
             <div class="mb-3">
                 <strong>Docente:</strong> ${lezione.docente_nome}

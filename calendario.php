@@ -96,6 +96,14 @@ if ($auth->hasRole('docente') && !DOCENTE_VIEW_ALL_CALENDAR) {
 // Carica eventi specifici da eventi_calendario tramite controller
 $eventi = $eventiCtrl->getEventiPerData($data_selezionata);
 
+// Defensive: ensure we have arrays to merge (some controllers may return false on error)
+if (!is_array($lezioni)) {
+    $lezioni = [];
+}
+if (!is_array($eventi)) {
+    $eventi = [];
+}
+
 // Aggiungi marker source_type alle lezioni ricorrenti
 foreach ($lezioni as &$lez) {
     $lez['source_type'] = 'lezione';
@@ -124,7 +132,7 @@ if (isset($calendario[$aula_piano_id]) && $data_selezionata == '2026-02-10') {
     foreach ($calendario[$aula_piano_id] as $idx => $elem) {
         $log_msg .= "[$idx] " . ($elem['source_type'] == 'evento' ? 'EVENTO' : 'LEZIONE') . " ID {$elem['id']}: ";
         $log_msg .= "{$elem['ora_inizio']}-{$elem['ora_fine']} ";
-        $log_msg .= "(" . ($elem['allievo'] ?? 'N/D') . ")\n";
+        $log_msg .= "(" . ($elem['socio'] ?? 'N/D') . ")\n";
     }
     $log_msg .= "\n";
     file_put_contents($log_file, $log_msg, FILE_APPEND);
@@ -456,7 +464,7 @@ include 'includes/header.php';
                                             if ($is_annullata):
                                                 // Lezione ANNULLATA: mostra solo icona piccola + pulsante +
                                                 $motivo = $giorno_festivita ? $giorno_festivita['nome'] : 'Assenza';
-                                                $tooltip = e($lezione_slot['allievo']) . ' - ' . e($lezione_slot['materia']) . ' (' . $motivo . ')';
+                                                $tooltip = e($lezione_slot['socio']) . ' - ' . e($lezione_slot['materia']) . ' (' . $motivo . ')';
                                         ?>
                                                 <!-- Icona lezione annullata piccola in alto a sinistra -->
                                                 <div style="position: absolute; top: 5px; left: 5px; z-index: 10;">
@@ -476,18 +484,18 @@ include 'includes/header.php';
                                         ?>
                                             <div class="lezione-slot tipo-<?= e($lezione_slot['tipo']) ?>" 
                                                  data-lezione-id="<?= $lezione_slot['id'] ?>"
-                                                 title="<?= e($lezione_slot['allievo']) ?> - <?= e($lezione_slot['materia']) ?>">
+                                                 title="<?= e($lezione_slot['socio']) ?> - <?= e($lezione_slot['materia']) ?>">
                                                 <div class="lezione-orario-badge">
                                                     <?= date('H:i', strtotime($lezione_slot['ora_inizio'])) ?>-<?= date('H:i', strtotime($lezione_slot['ora_fine'])) ?>
                                                 </div>
                                                 <div class="lezione-header">
                                                     <span class="icona-strumento" style="font-size: 1.2rem;"><?= $icona ?></span>
-                                                    <span class="lezione-allievo" 
+                                                    <span class="lezione-socio" 
                                                           style="cursor: pointer; text-decoration: underline;" 
-                                                          data-allievo-id="<?= $lezione_slot['allievo_id'] ?>"
+                                                          data-socio-id="<?= $lezione_slot['socio_id'] ?>"
                                                           data-lezione-id="<?= $lezione_slot['id'] ?>"
-                                                          onclick="caricaInfoAllievo(<?= $lezione_slot['allievo_id'] ?>, <?= $lezione_slot['id'] ?>, '<?= addslashes($lezione_slot['allievo']) ?>', '<?= addslashes($lezione_slot['materia']) ?>', '<?= $data_selezionata ?>'); return false;">
-                                                        <?= e($lezione_slot['allievo']) ?>
+                                                          onclick="caricaInfoSocio(<?= $lezione_slot['socio_id'] ?>, <?= $lezione_slot['id'] ?>, '<?= addslashes($lezione_slot['socio']) ?>', '<?= addslashes($lezione_slot['materia']) ?>', '<?= $data_selezionata ?>'); return false;">
+                                                        <?= e($lezione_slot['socio']) ?>
                                                     </span>
                                                 </div>
                                                 <div class="lezione-info-row">
@@ -520,9 +528,9 @@ include 'includes/header.php';
                                                 if (strpos($tipo_lower, 'recupero') !== false || $tipo_lower === 'lez_recupero') {
                                                     $tipo_css = 'recupero';
                                                 } elseif (strpos($tipo_lower, 'pren_sala') !== false) {
-                                                    $tipo_css = 'prenotazione-allievi';
+                                                    $tipo_css = 'prenotazione-soci';
                                                     $icona_prenotazione = '👨‍🎓';
-                                                    $classe_icona_pren = 'tipo-allievi';
+                                                    $classe_icona_pren = 'tipo-soci';
                                                     $is_prenotazione = true;
                                                 } elseif (strpos($tipo_lower, 'pren_docente') !== false) {
                                                     $tipo_css = 'prenotazione-docente';
@@ -543,7 +551,7 @@ include 'includes/header.php';
                                             <div class="lezione-slot tipo-<?= e($tipo_css) ?><?= $classe_annullata ?>" 
                                                  data-lezione-id="<?= $evento_slot['id'] ?>"
                                                  data-evento-id="<?= $evento_slot['id'] ?>"
-                                                 title="<?= e($evento_slot['allievo'] ?: $evento_slot['docente'] ?: 'Prenotazione') ?>"
+                                                 title="<?= e($evento_slot['socio'] ?: $evento_slot['docente'] ?: 'Prenotazione') ?>"
                                                  style="cursor: pointer;"
                                                  onclick="<?= $onclick_action ?>">
                                                 <div class="lezione-orario-badge">
@@ -553,7 +561,7 @@ include 'includes/header.php';
                                             <?php if ($is_prenotazione): ?>
                                                     <!-- Layout uniforme per PRENOTAZIONI -->
                                                     <div class="lezione-header">
-                                                        <span class="lezione-allievo">
+                                                        <span class="lezione-socio">
                                                             <?php if ($icona_prenotazione): ?>
                                                                 <span class="prenotazione-tipo-icon <?= $classe_icona_pren ?>" style="font-size: 1.1rem;"><?= $icona_prenotazione ?></span>
                                                             <?php endif; ?>
@@ -566,15 +574,15 @@ include 'includes/header.php';
                                                     <div class="lezione-info-row">
                                                         <div class="lezione-docente">
                                                             <i class="bi bi-person-fill"></i> 
-                                                            <?= e($evento_slot['allievo'] ?: $evento_slot['docente'] ?: 'Partecipante') ?>
+                                                            <?= e($evento_slot['socio'] ?: $evento_slot['docente'] ?: 'Partecipante') ?>
                                                         </div>
                                                     </div>
                                                 <?php else: ?>
                                                     <!-- Layout standard per RECUPERI e altri eventi -->
                                                     <div class="lezione-header">
                                                         <span class="icona-strumento" style="font-size: 1.2rem;"><?= $icona ?></span>
-                                                        <span class="lezione-allievo">
-                                                            <?= e($evento_slot['allievo'] ?: ($evento_slot['docente'] ?: 'Evento')) ?>
+                                                        <span class="lezione-socio">
+                                                            <?= e($evento_slot['socio'] ?: ($evento_slot['docente'] ?: 'Evento')) ?>
                                                             <?php if (isset($evento_slot['confermato']) && $evento_slot['confermato'] == 0): ?>
                                                                 <i class="bi bi-clock-history text-warning" title="Da confermare"></i>
                                                             <?php endif; ?>
@@ -607,7 +615,7 @@ include 'includes/header.php';
                                             $log_msg .= "Data: {$data_selezionata}, Aula: {$aula['nome']}, Slot: {$slot['inizio']}\n";
                                             $log_msg .= "Lezione: " . json_encode([
                                                 'id' => $lezione_slot['id'],
-                                                'allievo' => $lezione_slot['allievo'],
+                                                'socio' => $lezione_slot['socio'],
                                                 'materia' => $lezione_slot['materia'],
                                                 'ora_inizio' => $lezione_slot['ora_inizio'],
                                                 'ora_fine' => $lezione_slot['ora_fine'],
@@ -616,7 +624,7 @@ include 'includes/header.php';
                                             $log_msg .= "Evento: " . json_encode([
                                                 'id' => $evento_slot['id'],
                                                 'tipo' => $evento_slot['tipo'] ?? 'N/D',
-                                                'allievo' => $evento_slot['allievo'] ?? 'N/D',
+                                                'socio' => $evento_slot['socio'] ?? 'N/D',
                                                 'ora_inizio' => $evento_slot['ora_inizio'],
                                                 'ora_fine' => $evento_slot['ora_fine']
                                             ]) . "\n\n";
@@ -635,9 +643,9 @@ include 'includes/header.php';
                                                 if (strpos($tipo_lower, 'recupero') !== false) {
                                                     $tipo_css_evt = 'recupero';
                                                 } elseif (strpos($tipo_lower, 'pren_sala') !== false) {
-                                                    $tipo_css_evt = 'prenotazione-allievi';
+                                                    $tipo_css_evt = 'prenotazione-soci';
                                                     $icona_prenotazione_evt = '👨‍🎓';
-                                                    $classe_icona_pren_evt = 'tipo-allievi';
+                                                    $classe_icona_pren_evt = 'tipo-soci';
                                                     $is_prenotazione_evt = true;
                                                 } elseif (strpos($tipo_lower, 'pren_docente') !== false) {
                                                     $tipo_css_evt = 'prenotazione-docente';
@@ -653,7 +661,7 @@ include 'includes/header.php';
                                             }
                                             
                                             // Info tooltip lezione annullata
-                                            $tooltip_annullata = e($lezione_slot['allievo']) . ' - ' . e($lezione_slot['materia']) . ' (ANNULLATA)';
+                                            $tooltip_annullata = e($lezione_slot['socio']) . ' - ' . e($lezione_slot['materia']) . ' (ANNULLATA)';
                                         ?>
                                             <!-- Piccola icona lezione annullata in alto a sinistra -->
                                             <div class="lezione-annullata-indicator" 
@@ -665,7 +673,7 @@ include 'includes/header.php';
                                             <div class="lezione-slot tipo-<?= e($tipo_css_evt) ?>"
                                                  data-lezione-id="<?= $evento_slot['id'] ?>"
                                                  data-evento-id="<?= $evento_slot['id'] ?>"
-                                                 title="<?= e($evento_slot['allievo'] ?: ($evento_slot['docente'] ?: 'Prenotazione')) ?>"
+                                                 title="<?= e($evento_slot['socio'] ?: ($evento_slot['docente'] ?: 'Prenotazione')) ?>"
                                                  style="cursor: pointer;"
                                                  onclick="mostraInfoEvento(<?= $evento_slot['id'] ?>); return false;">
                                                 <div class="lezione-orario-badge">
@@ -675,7 +683,7 @@ include 'includes/header.php';
                                                 <?php if ($is_prenotazione_evt): ?>
                                                     <!-- Layout uniforme per PRENOTAZIONI -->
                                                     <div class="lezione-header">
-                                                        <span class="lezione-allievo">
+                                                        <span class="lezione-socio">
                                                             <?php if ($icona_prenotazione_evt): ?>
                                                                 <span class="prenotazione-tipo-icon <?= $classe_icona_pren_evt ?>" style="font-size: 1.1rem;"><?= $icona_prenotazione_evt ?></span>
                                                             <?php endif; ?>
@@ -688,15 +696,15 @@ include 'includes/header.php';
                                                     <div class="lezione-info-row">
                                                         <div class="lezione-docente">
                                                             <i class="bi bi-person-fill"></i> 
-                                                            <?= e($evento_slot['allievo'] ?: $evento_slot['docente'] ?: 'Esterno') ?>
+                                                            <?= e($evento_slot['socio'] ?: $evento_slot['docente'] ?: 'Esterno') ?>
                                                         </div>
                                                     </div>
                                                 <?php else: ?>
                                                     <!-- Layout standard per RECUPERI e altri eventi -->
                                                     <div class="lezione-header">
                                                         <span class="icona-strumento" style="font-size: 1.2rem;"><?= $icona_evt ?></span>
-                                                        <span class="lezione-allievo">
-                                                            <?= e($evento_slot['allievo'] ?: ($evento_slot['docente'] ?: 'Evento')) ?>
+                                                        <span class="lezione-socio">
+                                                            <?= e($evento_slot['socio'] ?: ($evento_slot['docente'] ?: 'Evento')) ?>
                                                             <?php if (isset($evento_slot['confermato']) && $evento_slot['confermato'] == 0): ?>
                                                                 <i class="bi bi-clock-history text-warning" title="Da confermare"></i>
                                                             <?php endif; ?>
@@ -783,7 +791,7 @@ include 'includes/header.php';
                 <div class="mb-3">
                     <label class="form-label fw-bold">Causale Assenza *</label>
                     <select class="form-select" id="causaleAssenza" required>
-                        <option value="allievo">Causata da Allievo</option>
+                        <option value="socio">Causata da Socio</option>
                         <option value="docente">Causata da Docente (genera recupero automatico)</option>
                     </select>
                 </div>
@@ -840,17 +848,17 @@ include 'includes/header.php';
     </div>
 </div>
 
-<!-- Modal Info Allievo -->
-<div class="modal fade" id="infoAllieviModal" tabindex="-1">
+<!-- Modal Info Socio -->
+<div class="modal fade" id="infoSociModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header" style="background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%); color: white;">
                 <h5 class="modal-title">
-                    <i class="bi bi-person-circle"></i> <span id="modalAllieviNome">Info Allievo</span>
+                    <i class="bi bi-person-circle"></i> <span id="modalSociNome">Info Socio</span>
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="modalAllieviBody">
+            <div class="modal-body" id="modalSociBody">
                 <div class="text-center py-5">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Caricamento...</span>
@@ -858,7 +866,7 @@ include 'includes/header.php';
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="chiudiModalInfoAllievo()">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="chiudiModalInfoSocio()">
                     <i class="bi bi-x-circle"></i> Chiudi
                 </button>
             </div>
@@ -902,17 +910,17 @@ include 'includes/header.php';
                         <label class="form-label fw-bold">Tipo Prenotazione *</label>
                         <select class="form-select" id="prenotTipo" name="tipo" required onchange="cambiaTipoPrenotazione()">
                             <option value="">Seleziona tipo...</option>
-                            <option value="PREN_SALA">👨‍🎓 Prenotazione Allievi (lezione)</option>
+                            <option value="PREN_SALA">👨‍🎓 Prenotazione Soci (lezione)</option>
                             <option value="PREN_DOCENTE">🎓 Prenotazione Docente (personale)</option>
                             <option value="PREN_ESTERNO">👤 Prenotazione Esterno</option>
                         </select>
                     </div>
                     
-                    <!-- Campi Prenotazione Allievi -->
-                    <div id="campiAllievi" style="display: none;">
+                    <!-- Campi Prenotazione Soci -->
+                    <div id="campiSoci" style="display: none;">
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Allievo *</label>
-                            <select class="form-select" id="prenotAllievoId" name="allievo_id">
+                            <label class="form-label fw-bold">Socio *</label>
+                            <select class="form-select" id="prenotSocioId" name="socio_id">
                                 <option value="">Caricamento...</option>
                             </select>
                         </div>
@@ -1054,7 +1062,7 @@ function apriModalNuovaPrenotazione(aulaId, aulaNome, ora, giorno, data, oraIniz
         selectOra.required = false;
     }
     
-    // Carica select allievi, docenti, materie
+    // Carica select soci, docenti, materie
     caricaOpzioniPrenotazione();
     
     // Apri modal
@@ -1081,18 +1089,18 @@ function generaSlotOrari(oraInizio, oraFine) {
 
 function cambiaTipoPrenotazione() {
     const tipo = document.getElementById('prenotTipo').value;
-    const campiAllievi = document.getElementById('campiAllievi');
+    const campiSoci = document.getElementById('campiSoci');
     const campiDocente = document.getElementById('campiDocente');
     const campiEsterno = document.getElementById('campiEsterno');
     
     // Nascondi tutti
-    campiAllievi.style.display = 'none';
+    campiSoci.style.display = 'none';
     campiDocente.style.display = 'none';
     campiEsterno.style.display = 'none';
     
     // Mostra in base al tipo
     if (tipo === 'PREN_SALA') {
-        campiAllievi.style.display = 'block';
+        campiSoci.style.display = 'block';
     } else if (tipo === 'PREN_DOCENTE') {
         campiDocente.style.display = 'block';
     } else if (tipo === 'PREN_ESTERNO') {
@@ -1118,32 +1126,32 @@ function toggleNuovoSocioEsterno() {
 }
 
 function caricaOpzioniPrenotazione() {
-    const selectAllievo = document.getElementById('prenotAllievoId');
+    const selectSocio = document.getElementById('prenotSocioId');
     const selectDocenteSolo = document.getElementById('prenotDocenteSoloId');
     const selectSocioEsterno = document.getElementById('prenotSocioEsternoId');
     
     // Mostra loading
-    selectAllievo.innerHTML = '<option value="">Caricamento...</option>';
+    selectSocio.innerHTML = '<option value="">Caricamento...</option>';
     selectDocenteSolo.innerHTML = '<option value="">Caricamento...</option>';
     selectSocioEsterno.innerHTML = '<option value="">Caricamento...</option>';
     
-    // Carica allievi
-    fetch('<?= BASE_URL ?>/api/api_get_helpers.php?type=allievi')
+    // Carica soci
+    fetch('<?= BASE_URL ?>/api/api_get_helpers.php?type=soci')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                let htmlAllievi = '<option value="">Seleziona allievo...</option>';
+                let htmlSoci = '<option value="">Seleziona socio...</option>';
                 data.data.forEach(a => {
-                    htmlAllievi += `<option value="${a.id}">${a.cognome} ${a.nome}</option>`;
+                    htmlSoci += `<option value="${a.id}">${a.cognome} ${a.nome}</option>`;
                 });
-                selectAllievo.innerHTML = htmlAllievi;
+                selectSocio.innerHTML = htmlSoci;
             } else {
                 throw new Error(data.error);
             }
         })
         .catch(error => {
-            console.error('Errore caricamento allievi:', error);
-            selectAllievo.innerHTML = '<option value="">Errore caricamento</option>';
+            console.error('Errore caricamento soci:', error);
+            selectSocio.innerHTML = '<option value="">Errore caricamento</option>';
         });
     
     // Carica docenti
@@ -1221,17 +1229,17 @@ function salvaPrenotazione() {
     
     // Aggiungi campi specifici per tipo
     if (tipo === 'PREN_SALA') {
-        // Prenotazione Allievi - richiede solo allievo (materia rimossa)
-        const allieviId = formData.get('allievo_id');
+        // Prenotazione Soci - richiede solo socio (materia rimossa)
+        const sociId = formData.get('socio_id');
         
-        if (!allieviId) {
-            mostraToast('Errore', 'Seleziona un allievo', 'danger');
+        if (!sociId) {
+            mostraToast('Errore', 'Seleziona un socio', 'danger');
             btnSalva.disabled = false;
             btnSalva.innerHTML = '<i class="bi bi-check-circle"></i> Crea Prenotazione';
             return;
         }
         
-        data.allievo_id = parseInt(allieviId);
+        data.socio_id = parseInt(sociId);
         
     } else if (tipo === 'PREN_DOCENTE') {
         // Prenotazione Docente - richiede solo docente
@@ -1282,7 +1290,7 @@ function salvaPrenotazione() {
     
     // Converti tipo in tipologia_id (ID reali dal database)
     const tipoToTipologiaId = {
-        'PREN_SALA': 6,  // ID 6 = PREN_SALA_ALLIEVI
+        'PREN_SALA': 6,  // ID 6 = PREN_SALA_SOCI
         'PREN_DOCENTE': 7,  // ID 7 = PREN_DOCENTE
         'PREN_ESTERNO': 8   // ID 8 = PREN_ESTERNO
     };
@@ -1299,7 +1307,7 @@ function salvaPrenotazione() {
     
     // Aggiungi campi specifici per tipo con nomi corretti per API
     if (tipo === 'PREN_SALA') {
-        formDataToSend.append('allievo_id_pren', data.allievo_id);
+        formDataToSend.append('socio_id_pren', data.socio_id);
     } else if (tipo === 'PREN_DOCENTE') {
         formDataToSend.append('docente_id_pren', data.docente_id);
         formDataToSend.append('titolo', data.motivo || 'Prenotazione Docente');
@@ -1368,8 +1376,8 @@ function mostraInfoEvento(eventoId) {
                 let nomePartecipante = '';
                 if (evt.partecipante_nome) {
                     nomePartecipante = evt.partecipante_nome;
-                } else if (evt.allievo_id && evt.docente_nome) {
-                    // Se allievo_id è presente, docente_nome contiene in realtà "Cognome Nome" dell'allievo
+                } else if (evt.socio_id && evt.docente_nome) {
+                    // Se socio_id è presente, docente_nome contiene in realtà "Cognome Nome" dell'socio
                     nomePartecipante = evt.docente_nome;
                 } else if (evt.docente_nome) {
                     nomePartecipante = evt.docente_nome;
@@ -1384,13 +1392,13 @@ function mostraInfoEvento(eventoId) {
                         <div class="alert alert-success">
                             <h5><i class="bi bi-calendar-check"></i> RECUPERO LEZIONE</h5>
                             <p class="mb-0" style="text-transform: uppercase;">
-                                ${nomePartecipante ? `<strong>ALLIEVO:</strong> ${nomePartecipante}<br>` : ''}
+                                ${nomePartecipante ? `<strong>SOCIO:</strong> ${nomePartecipante}<br>` : ''}
                                 <strong>DATA RECUPERO:</strong> ${new Date(evt.data_evento).toLocaleDateString('it-IT')}<br>
                                 <strong>ORARIO:</strong> ${evt.ora_inizio.substr(0,5)} - ${evt.ora_fine.substr(0,5)}<br>
                                 <strong>AULA:</strong> ${evt.aula_nome || 'N/D'}<br>
                                 ${evt.materia_nome ? `<strong>MATERIA:</strong> ${evt.materia_nome}<br>` : ''}
                                 ${evt.assenza_data ? `<strong>ASSENZA DEL:</strong> ${new Date(evt.assenza_data).toLocaleDateString('it-IT')} 
-                                    ${evt.assenza_causata_da ? `(${evt.assenza_causata_da === 'allievo' ? 'causata da allievo' : 'causata da docente'})` : ''}<br>` : ''}
+                                    ${evt.assenza_causata_da ? `(${evt.assenza_causata_da === 'socio' ? 'causata da socio' : 'causata da docente'})` : ''}<br>` : ''}
                             </p>
                             ${evt.note ? `<p class="mb-0 mt-2"><strong>NOTE:</strong><br>${evt.note}</p>` : ''}
                         </div>
@@ -1401,7 +1409,7 @@ function mostraInfoEvento(eventoId) {
                         <div class="alert alert-info">
                             <h5><i class="bi bi-calendar-event"></i> ${evt.tipologia_nome}</h5>
                             <p class="mb-0">
-                                ${nomePartecipante ? `<strong>${evt.allievo_id ? 'Allievo' : 'Docente'}:</strong> ${nomePartecipante}<br>` : ''}
+                                ${nomePartecipante ? `<strong>${evt.socio_id ? 'Socio' : 'Docente'}:</strong> ${nomePartecipante}<br>` : ''}
                                 <strong>Data:</strong> ${new Date(evt.data_evento).toLocaleDateString('it-IT')}<br>
                                 <strong>Orario:</strong> ${evt.ora_inizio.substr(0,5)} - ${evt.ora_fine.substr(0,5)}<br>
                                 <strong>Aula:</strong> ${evt.aula_nome || 'N/D'}<br>
@@ -1423,13 +1431,13 @@ function mostraInfoEvento(eventoId) {
                     </div>
                 `;
                 
-                // Usa modal info allievo per mostrare info evento
-                const modalBody = document.getElementById('modalAllieviBody');
-                const modalNome = document.getElementById('modalAllieviNome');
+                // Usa modal info socio per mostrare info evento
+                const modalBody = document.getElementById('modalSociBody');
+                const modalNome = document.getElementById('modalSociNome');
                 modalNome.textContent = titoloModal;
                 modalBody.innerHTML = html;
                 
-                const modalElement = document.getElementById('infoAllieviModal');
+                const modalElement = document.getElementById('infoSociModal');
                 const modal = new bootstrap.Modal(modalElement);
                 modal.show();
             } else {
@@ -1545,7 +1553,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.success) {
                     // Chiudi entrambe le modal
                     const modalConferma = bootstrap.Modal.getInstance(document.getElementById('confermaAnnullamentoModal'));
-                    const modalInfo = bootstrap.Modal.getInstance(document.getElementById('infoAllieviModal'));
+                    const modalInfo = bootstrap.Modal.getInstance(document.getElementById('infoSociModal'));
                     if (modalConferma) modalConferma.hide();
                     if (modalInfo) modalInfo.hide();
                     
@@ -1564,10 +1572,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function caricaInfoAllievo(allieviId, lezioneId = null, nomeAllievo = '', materiaLezione = '', dataLezione = '') {
-    const modalBody = document.getElementById('modalAllieviBody');
-    const modalNome = document.getElementById('modalAllieviNome');
-    const modalElement = document.getElementById('infoAllieviModal');
+function caricaInfoSocio(sociId, lezioneId = null, nomeSocio = '', materiaLezione = '', dataLezione = '') {
+    const modalBody = document.getElementById('modalSociBody');
+    const modalNome = document.getElementById('modalSociNome');
+    const modalElement = document.getElementById('infoSociModal');
     
     // Apri la modal (verifica che Bootstrap sia caricato)
     if (typeof bootstrap !== 'undefined') {
@@ -1589,7 +1597,7 @@ function caricaInfoAllievo(allieviId, lezioneId = null, nomeAllievo = '', materi
     // Salva dati lezione corrente per pulsante assenza
     currentLezioneData = lezioneId ? {
         lezione_id: lezioneId,
-        allievo_nome: nomeAllievo,
+        socio_nome: nomeSocio,
         materia: materiaLezione,
         data: dataLezione
     } : null;
@@ -1604,7 +1612,7 @@ function caricaInfoAllievo(allieviId, lezioneId = null, nomeAllievo = '', materi
     `;
     
     // Fetch dati
-    fetch(`<?= BASE_URL ?>/api/api_get_info_allievo.php?allievo_id=${allieviId}`)
+    fetch(`<?= BASE_URL ?>/api/api_get_info_socio.php?socio_id=${sociId}`)
         .then(response => response.json())
         .then(data => {
             if (data.error) {
@@ -1612,7 +1620,7 @@ function caricaInfoAllievo(allieviId, lezioneId = null, nomeAllievo = '', materi
             }
             
             // Aggiorna titolo
-            modalNome.textContent = data.allievo.nome_completo;
+            modalNome.textContent = data.socio.nome_completo;
             
             // Costruisci HTML stile card recuperi
             let html = `
@@ -1645,8 +1653,8 @@ function caricaInfoAllievo(allieviId, lezioneId = null, nomeAllievo = '', materi
                                     <span class="badge bg-danger">${data.statistiche.assenze.da_recuperare}</span>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span>Causate da Allievo:</span>
-                                    <span class="badge bg-warning text-dark">${data.statistiche.assenze.causate_da_allievo}</span>
+                                    <span>Causate da Socio:</span>
+                                    <span class="badge bg-warning text-dark">${data.statistiche.assenze.causate_da_socio}</span>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span>Causate da Docente:</span>
@@ -1751,8 +1759,8 @@ function caricaInfoAllievo(allieviId, lezioneId = null, nomeAllievo = '', materi
         });
 }
 
-function chiudiModalInfoAllievo() {
-    const modalElement = document.getElementById('infoAllieviModal');
+function chiudiModalInfoSocio() {
+    const modalElement = document.getElementById('infoSociModal');
     
     if (typeof bootstrap !== 'undefined') {
         // Usa API Bootstrap
@@ -1786,20 +1794,20 @@ function segnaAssenza() {
         return;
     }
     
-    // Chiudi modal info allievo
-    chiudiModalInfoAllievo();
+    // Chiudi modal info socio
+    chiudiModalInfoSocio();
     
     // Apri modal segna assenza
     setTimeout(() => {
         const assenzaInfo = document.getElementById('assenzaInfo');
         assenzaInfo.innerHTML = `
-            <strong>Allievo:</strong> ${currentLezioneData.allievo_nome}<br>
+            <strong>Socio:</strong> ${currentLezioneData.socio_nome}<br>
             <strong>Materia:</strong> ${currentLezioneData.materia}<br>
             <strong>Data:</strong> ${new Date(currentLezioneData.data).toLocaleDateString('it-IT')}
         `;
         
         // Reset form
-        document.getElementById('causaleAssenza').value = 'allievo';
+        document.getElementById('causaleAssenza').value = 'socio';
         document.getElementById('noteAssenza').value = '';
         
         // Apri modal
@@ -1946,19 +1954,19 @@ function mostraToast(titolo, messaggio, tipo = 'info') {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Click su lezione apre modal info allievo
+    // Click su lezione apre modal info socio
     const lezioniSlots = document.querySelectorAll('.lezione-slot');
     lezioniSlots.forEach(slot => {
         slot.addEventListener('click', function(e) {
-            // Se il click è sul nome allievo, non fare nulla (ha già il suo onclick)
-            if (e.target.classList.contains('lezione-allievo') || e.target.closest('.lezione-allievo')) {
+            // Se il click è sul nome socio, non fare nulla (ha già il suo onclick)
+            if (e.target.classList.contains('lezione-socio') || e.target.closest('.lezione-socio')) {
                 return;
             }
             
-            // Altrimenti apri modal info allievo
-            const allieviSpan = this.querySelector('.lezione-allievo');
-            if (allieviSpan) {
-                allieviSpan.click();
+            // Altrimenti apri modal info socio
+            const sociSpan = this.querySelector('.lezione-socio');
+            if (sociSpan) {
+                sociSpan.click();
             }
         });
     });

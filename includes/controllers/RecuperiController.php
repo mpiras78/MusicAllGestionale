@@ -66,10 +66,24 @@ class RecuperiController {
         $limit_clause = $limit ? "LIMIT ?" : "";
         if ($limit) $params[] = $limit;
         
+        $where_clause = $where ? $where : "WHERE 1=1";
+
         return $this->db->query("
-            SELECT * FROM v_recuperi_con_stato 
-            $where 
-            ORDER BY data_recupero, ora_inizio 
+            SELECT 
+                r.*,
+                al.cognome || ' ' || al.nome as socio,
+                d.cognome || ' ' || d.nome as docente,
+                m.nome as materia,
+                au.nome as aula,
+                a.data_assenza
+            FROM recuperi r
+            LEFT JOIN assenze a ON r.assenza_id = a.id
+            LEFT JOIN soci al ON r.socio_id = al.id
+            LEFT JOIN docenti d ON r.docente_id = d.id
+            LEFT JOIN materie m ON r.materia_id = m.id
+            LEFT JOIN aule au ON r.aula_id = au.id
+            $where_clause
+            ORDER BY r.data_recupero, r.ora_inizio
             $limit_clause
         ", $params);
     }
@@ -92,7 +106,7 @@ class RecuperiController {
                 a.id,
                 a.data_assenza as data,
                 a.tipo as causata_da,
-                al.cognome || ' ' || al.nome as allievo,
+                al.cognome || ' ' || al.nome as socio,
                 d.cognome || ' ' || d.nome as docente,
                 m.nome as materia,
                 l.giorno_settimana,
@@ -105,10 +119,10 @@ class RecuperiController {
                     WHERE r.assenza_id = a.id 
                     AND r.annullato = 0
                 ), 0) as minuti_recuperati,
-                (SELECT COUNT(*) FROM assenze WHERE allievo_id = a.allievo_id AND da_recuperare = 1) as totale_assenze_allievo
+                (SELECT COUNT(*) FROM assenze WHERE socio_id = a.socio_id AND da_recuperare = 1) as totale_assenze_socio
             FROM assenze a
             JOIN lezioni l ON a.lezione_id = l.id
-            JOIN allievi al ON a.allievo_id = al.id
+            JOIN soci al ON a.socio_id = al.id
             JOIN docenti d ON a.docente_id = d.id
             LEFT JOIN materie m ON l.materia_id = m.id
             WHERE a.da_recuperare = 1
@@ -137,8 +151,8 @@ class RecuperiController {
         
         // Ottieni dati assenza con minuti
         $assenza = $this->db->queryOne("
-            SELECT ass.*, 
-                   l.allievo_id, l.docente_id, l.materia_id,
+                 SELECT ass.*, 
+                     l.socio_id, l.docente_id, l.materia_id,
                    ass.minuti_da_recuperare,
                    COALESCE((
                        SELECT SUM((strftime('%s', r.ora_fine) - strftime('%s', r.ora_inizio)) / 60)
@@ -185,17 +199,16 @@ class RecuperiController {
         }
         
         // Inserisci recupero - GIÀ CONFERMATO (flusso semplificato)
-        $recupero_id = $this->db->insert("
-            INSERT INTO recuperi (
-                assenza_id, lezione_originale_id, allievo_id, docente_id, materia_id,
+            $recupero_id = $this->db->insert(
+            "INSERT INTO recuperi (
+                assenza_id, lezione_originale_id, socio_id, docente_id, materia_id,
                 data_recupero, ora_inizio, ora_fine, aula_id,
                 note_segreteria, created_by,
                 confermata_da_segreteria, confermata_da_user_id, data_conferma
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, CURRENT_TIMESTAMP)
-        ", [
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, CURRENT_TIMESTAMP)", [
             $data['assenza_id'],
             $assenza['lezione_id'],
-            $assenza['allievo_id'],
+            $assenza['socio_id'],
             $assenza['docente_id'],
             $assenza['materia_id'],
             $data['data_recupero'],
@@ -223,7 +236,7 @@ class RecuperiController {
             $this->db->execute("
                 INSERT INTO eventi_calendario (
                     tipologia_id, ricorrente, giorno_settimana, data_evento,
-                    ora_inizio, ora_fine, aula_id, docente_id, allievo_id, materia_id,
+                    ora_inizio, ora_fine, aula_id, docente_id, socio_id, materia_id,
                     titolo, note, confermato, attivo, created_at
                 ) VALUES (?, 0, NULL, ?, ?, ?, ?, ?, ?, ?, 'Recupero', ?, 1, 1, datetime('now', 'localtime'))
             ", [
@@ -233,7 +246,7 @@ class RecuperiController {
                 $data['ora_fine'],
                 $data['aula_id'] ?? null,
                 $assenza['docente_id'],
-                $assenza['allievo_id'],
+                $assenza['socio_id'],
                 $assenza['materia_id'],
                 $note_recupero
             ]);

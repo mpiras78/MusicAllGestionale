@@ -140,9 +140,9 @@ if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data)) {
 // calendario.php - Carica lezioni
 $lezioni = $lezioniCtrl->getLezioniPerGiorno($giorno_selezionato);
 
-// Poi per ogni lezione fa query separate per allievo/docente
+// Poi per ogni lezione fa query separate per socio/docente
 foreach ($lezioni as $lezione) {
-    $allievo = getAllievoById($lezione['allievo_id']); // ❌ N+1
+    $socio = getSocioById($lezione['socio_id']); // ❌ N+1
     $docente = getDocenteById($lezione['docente_id']); // ❌ N+1
 }
 ```
@@ -155,14 +155,14 @@ public function getLezioniPerGiorno($giorno, $with_relations = true) {
         // JOIN per caricare tutto in una query
         $sql = "SELECT 
                     l.*,
-                    a.nome as allievo_nome,
-                    a.cognome as allievo_cognome,
+                    a.nome as socio_nome,
+                    a.cognome as socio_cognome,
                     d.nome as docente_nome,
                     d.cognome as docente_cognome,
                     m.nome as materia_nome,
                     au.nome as aula_nome
                 FROM lezioni l
-                LEFT JOIN allievi a ON l.allievo_id = a.id
+                LEFT JOIN soci a ON l.socio_id = a.id
                 LEFT JOIN docenti d ON l.docente_id = d.id
                 LEFT JOIN materie m ON l.materia_id = m.id
                 LEFT JOIN aule au ON l.aula_id = au.id
@@ -229,7 +229,7 @@ if ($aule === null) {
 ```sql
 -- Aggiungi indici per query frequenti
 CREATE INDEX idx_lezioni_giorno ON lezioni(giorno_settimana);
-CREATE INDEX idx_lezioni_allievo ON lezioni(allievo_id);
+CREATE INDEX idx_lezioni_socio ON lezioni(socio_id);
 CREATE INDEX idx_lezioni_docente ON lezioni(docente_id);
 CREATE INDEX idx_assenze_data ON assenze(data_assenza);
 CREATE INDEX idx_assenze_lezione ON assenze(lezione_id);
@@ -414,8 +414,8 @@ class AssenzeService {
             return true;
         }
         
-        $conteggio = $this->assenzeRepo->countByAllieveLezione(
-            $lezione->allievo_id,
+        $conteggio = $this->assenzeRepo->countBySocioLezione(
+            $lezione->socio_id,
             $lezione->id
         );
         
@@ -471,7 +471,7 @@ class PrenotazioneValidator {
 
 ```
 Lezioni per giorno:        1 query
-Allievi (N+1):            ~50 query
+Soci (N+1):            ~50 query
 Docenti (N+1):            ~50 query
 Materie (N+1):            ~50 query
 Aule (N+1):               ~50 query
@@ -553,14 +553,14 @@ Miglioramento:            80-90% più veloce
 
 -- Indici lezioni
 CREATE INDEX IF NOT EXISTS idx_lezioni_giorno ON lezioni(giorno_settimana);
-CREATE INDEX IF NOT EXISTS idx_lezioni_allievo ON lezioni(allievo_id);
+CREATE INDEX IF NOT EXISTS idx_lezioni_socio ON lezioni(socio_id);
 CREATE INDEX IF NOT EXISTS idx_lezioni_docente ON lezioni(docente_id);
 CREATE INDEX IF NOT EXISTS idx_lezioni_giorno_aula ON lezioni(giorno_settimana, aula_id);
 
 -- Indici assenze
 CREATE INDEX IF NOT EXISTS idx_assenze_data ON assenze(data_assenza);
 CREATE INDEX IF NOT EXISTS idx_assenze_lezione ON assenze(lezione_id);
-CREATE INDEX IF NOT EXISTS idx_assenze_allievo ON assenze(allievo_id);
+CREATE INDEX IF NOT EXISTS idx_assenze_socio ON assenze(socio_id);
 
 -- Indici eventi
 CREATE INDEX IF NOT EXISTS idx_eventi_data ON eventi_calendario(data_evento);

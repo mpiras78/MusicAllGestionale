@@ -39,7 +39,7 @@
 
 | File | Linee | Scopo |
 |------|-------|-------|
-| **database/migrations/001_fase1_setup.sql** | 400 | SQL migration: allievi→soci + 12 tabelle |
+| **database/migrations/001_fase1_setup.sql** | 400 | SQL migration: soci→soci + 12 tabelle |
 | **database/ISTRUZIONI_FASE_1.md** | 350 | Guida esecuzione, troubleshooting, validazione |
 | **includes/controllers/AuditLogController.php** | 350 | Audit trail system - CREATE/UPDATE/DELETE logging |
 | **includes/helpers/CostCalculationsHelper.php** | 450 | Pro-rata, iscrizioni, sconti, calcoli |

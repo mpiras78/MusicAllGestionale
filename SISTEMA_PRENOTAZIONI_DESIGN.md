@@ -2,13 +2,13 @@
 
 ## 📋 Overview
 
-Sistema per gestire **iscrizioni/prenotazioni** degli allievi agli eventi (lezioni, saggi, workshop, etc.) con conferma admin, pagamenti e notifiche.
+Sistema per gestire **iscrizioni/prenotazioni** degli soci agli eventi (lezioni, saggi, workshop, etc.) con conferma admin, pagamenti e notifiche.
 
 ---
 
 ## 🎯 Casi d'Uso
 
-### 1. Allievo/Genitore (Portale Pubblico)
+### 1. Socio/Genitore (Portale Pubblico)
 - Visualizza calendario eventi disponibili
 - Prenota posto per evento singolo
 - Iscrive a corso ricorrente (es: 10 lezioni piano)
@@ -26,7 +26,7 @@ Sistema per gestire **iscrizioni/prenotazioni** degli allievi agli eventi (lezio
 ### 3. Docente
 - Vede chi è iscritto alle sue lezioni
 - Segna presenze
-- Vede storico allievi
+- Vede storico soci
 
 ---
 
@@ -40,7 +40,7 @@ CREATE TABLE prenotazioni (
     
     -- Relazioni
     evento_id INTEGER NOT NULL,
-    allievo_id INTEGER NOT NULL,
+    socio_id INTEGER NOT NULL,
     
     -- Dati prenotazione
     tipo_prenotazione VARCHAR(20) NOT NULL, -- 'singola', 'pacchetto', 'abbonamento'
@@ -84,14 +84,14 @@ CREATE TABLE prenotazioni (
     
     -- Constraints
     FOREIGN KEY (evento_id) REFERENCES eventi_calendario(id),
-    FOREIGN KEY (allievo_id) REFERENCES allievi(id),
+    FOREIGN KEY (socio_id) REFERENCES soci(id),
     FOREIGN KEY (creato_da) REFERENCES users(id),
     FOREIGN KEY (confermato_da) REFERENCES users(id)
 );
 
 -- Indici per performance
 CREATE INDEX idx_prenotazioni_evento ON prenotazioni(evento_id);
-CREATE INDEX idx_prenotazioni_allievo ON prenotazioni(allievo_id);
+CREATE INDEX idx_prenotazioni_socio ON prenotazioni(socio_id);
 CREATE INDEX idx_prenotazioni_stato ON prenotazioni(stato);
 CREATE INDEX idx_prenotazioni_pagamento ON prenotazioni(stato_pagamento);
 ```
@@ -183,7 +183,7 @@ CREATE TABLE pacchetti_lezioni (
 
 ## 🎨 UI Components
 
-### 1. Calendario Pubblico (Frontend Allievi)
+### 1. Calendario Pubblico (Frontend Soci)
 
 **Pagina:** `prenotazioni_pubblico.php`
 
@@ -234,7 +234,7 @@ CREATE TABLE pacchetti_lezioni (
 │  ○ Lezione Singola - 35€            │
 │  ● Usa Pacchetto (hai 8 lezioni)   │
 │                                      │
-│  Dati Allievo:                       │
+│  Dati Socio:                       │
 │  Nome: [____________]                │
 │  Email: [____________]               │
 │  Telefono: [____________]            │
@@ -289,7 +289,7 @@ CREATE TABLE pacchetti_lezioni (
 
 ```php
 // GET - Lista prenotazioni
-?action=list&stato=pending&allievo_id=5
+?action=list&stato=pending&socio_id=5
 
 // GET - Dettaglio prenotazione
 ?action=get&id=123
@@ -297,7 +297,7 @@ CREATE TABLE pacchetti_lezioni (
 // POST - Nuova prenotazione (da portale pubblico)
 {
     "evento_id": 45,
-    "allievo": {
+    "socio": {
         "nome": "Marco",
         "cognome": "Rossi",
         "email": "marco@example.com"
@@ -339,7 +339,7 @@ CREATE TABLE pacchetti_lezioni (
 
 ### Template Email
 
-#### 1. Conferma Prenotazione (Admin → Allievo)
+#### 1. Conferma Prenotazione (Admin → Socio)
 ```
 Oggetto: ✅ Prenotazione Confermata - Lezione Piano
 
@@ -459,7 +459,7 @@ async function pagaPrenotazione(prenotazioneId) {
 - Sconto su prezzo singola
 
 ### 4. Priorità Conferma
-1. Allievi esistenti con storico
+1. Soci esistenti con storico
 2. Pagamento anticipato
 3. Ordine cronologico prenotazione
 
@@ -489,7 +489,7 @@ async function pagaPrenotazione(prenotazioneId) {
 ### Fase 4.2 - Portale Pubblico (3 giorni)
 - [ ] Calendario pubblico eventi
 - [ ] Modal prenotazione
-- [ ] Form dati allievo
+- [ ] Form dati socio
 - [ ] Conferma email base
 
 ### Fase 4.3 - Pagamenti (4-5 giorni)
@@ -519,7 +519,7 @@ async function pagaPrenotazione(prenotazioneId) {
 
 ## 🎯 Metriche Successo
 
-- **Tasso adozione**: 70% allievi usano sistema prenotazioni
+- **Tasso adozione**: 70% soci usano sistema prenotazioni
 - **Riduzione no-show**: Da 15% a 5%
 - **Tempo gestione**: Da 2h/giorno a 30min/giorno
 - **Soddisfazione utenti**: >4.5/5 stelle

@@ -47,7 +47,7 @@ Completare documentazione tecnica completa per MusicAll v3.0 e avviare Fase 1 im
 #### SCHEMA_ER_DATABASE.md (1,800 linee)
 - 12 tabelle con SQL completo
 - ER diagram con relazioni
-- Migration strategy (allievi → soci)
+- Migration strategy (soci → soci)
 - 10 indici di performance
 - Design decisions documented
 
@@ -65,7 +65,7 @@ Completare documentazione tecnica completa per MusicAll v3.0 e avviare Fase 1 im
 
 #### database/migrations/001_fase1_setup.sql
 - 400 linee di SQL puro
-- Rinomina allievi → soci con 5 nuove colonne
+- Rinomina soci → soci con 5 nuove colonne
 - Crea 12 tabelle nuove
 - Inserisce dati iniziali
 - Crea indici di performance
@@ -175,12 +175,12 @@ Completare documentazione tecnica completa per MusicAll v3.0 e avviare Fase 1 im
    - Validare con smoke test provided
    - Commit "Fase 1 complete: database migrato"
 
-2. **Aggiornare Codebase per Referenze allievi → soci**
-   - Cercare tutti i file con "allievi" in queryies
-   - Rinominare variabili PHP: `$allievi` → `$soci`
+2. **Aggiornare Codebase per Referenze soci → soci**
+   - Cercare tutti i file con "soci" in queryies
+   - Rinominare variabili PHP: `$soci` → `$soci`
    - Aggiornare SQL queries
    - Aggiornare view labels UI
-   - Commit "Refactor: allievi → soci rename in codebase"
+   - Commit "Refactor: soci → soci rename in codebase"
 
 3. **Creare Admin Page: Dati Associazione**
    - Nuova pagina: `admin/associazione.php`
@@ -251,7 +251,7 @@ pg_dump -U postgres musicall_db > database/backup_musicall_2026-11-15.sql
 
 ### Vincoli
 - Nessun breaking change per v2.x (backward compatibility Fase 1-2)
-- Migrazione allievi → soci reversibile (backup tabella generato)
+- Migrazione soci → soci reversibile (backup tabella generato)
 - Indici creati per performance (100k+ record)
 
 ---
@@ -273,7 +273,7 @@ pg_dump -U postgres musicall_db > database/backup_musicall_2026-11-15.sql
 
 **Fase 1 Implementazione**
 - ⏳ Esecuzione SQL migration
-- ⏳ Refactor codebase (allievi → soci)
+- ⏳ Refactor codebase (soci → soci)
 - ⏳ Admin page dati associazione
 - ⏳ Testing CRUD
 - ⏳ Deploy su staging

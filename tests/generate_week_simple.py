@@ -138,7 +138,7 @@ def process_giorno(sheet_name, giorno_it):
                 else:
                     mat = 'CANTO'
                 
-                sql = f"""INSERT INTO lezioni (giorno_settimana, ora_inizio, ora_fine, id_aula, id_allievo, id_docente, id_materia)
+                sql = f"""INSERT INTO lezioni (giorno_settimana, ora_inizio, ora_fine, id_aula, id_socio, id_docente, id_materia)
 SELECT '{giorno_it.upper()}', '{start}', '{end}',
        (SELECT id FROM aule WHERE UPPER(nome) LIKE '%{aula_nome.split()[1]}%' LIMIT 1),
        (SELECT s.id FROM soci s JOIN persone p ON s.persona_id = p.id WHERE UPPER(p.cognome) LIKE '%{cognome}%' LIMIT 1),

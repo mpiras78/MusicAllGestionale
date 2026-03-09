@@ -52,10 +52,10 @@ define('DOCENTE_VIEW_ALL_CALENDAR', false);  // false = solo proprie lezioni, tr
 define('DOCENTE_CAN_EDIT_LESSONS', false);   // false = solo lettura, true = può modificare
 
 // Gestione Assenze
-define('DOCENTE_CAN_VIEW_ABSENCES', true);   // true = può vedere assenze dei propri allievi
+define('DOCENTE_CAN_VIEW_ABSENCES', true);   // true = può vedere assenze dei propri soci
 
-// Gestione Allievi
-define('DOCENTE_CAN_VIEW_STUDENTS', true);   // true = può vedere lista allievi delle proprie lezioni
+// Gestione Soci
+define('DOCENTE_CAN_VIEW_STUDENTS', true);   // true = può vedere lista soci delle proprie lezioni
 
 // SMTP (se necessario per email avanzate)
 define('SMTP_HOST', 'smtp.example.com');

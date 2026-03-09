@@ -25,11 +25,11 @@ try {
     // Determina titolo e descrizione in base al tipo
     $titolo = 'Prenotazione';
     $descrizione = '';
-    $allievo_id = null;
+    $socio_id = null;
     $docente_id = null;
     
     if ($tipologia_id == 6) { // PREN_SALA_SOCI
-        $socio_id = $_POST['socio_id_pren'] ?? $_POST['allievo_id_pren'] ?? null;
+        $socio_id = $_POST['socio_id_pren'] ?? $_POST['socio_id_pren'] ?? null;
         if (!$socio_id) throw new Exception('Socio richiesto per prenotazione sala');
         
         $stmt = $db->prepare("SELECT cognome, nome FROM soci WHERE id = ?");
@@ -62,7 +62,7 @@ try {
     $stmt = $db->prepare("
         INSERT INTO eventi_calendario (
             tipologia_id, data_evento, ora_inizio, ora_fine,
-            aula_id, allievo_id, docente_id,
+            aula_id, socio_id, docente_id,
             titolo, descrizione, note, confermato, attivo
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1)
     ");
@@ -73,7 +73,7 @@ try {
         $ora_inizio,
         $ora_fine,
         $aula_id,
-        $allievo_id,
+        $socio_id,
         $docente_id,
         $titolo,
         $descrizione,

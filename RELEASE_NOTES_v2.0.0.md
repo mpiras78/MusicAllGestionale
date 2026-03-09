@@ -39,7 +39,7 @@ CASE WHEN ass.id IS NOT NULL THEN 0 ELSE l.attiva END as attiva
 #### 3. **Modal Prenotazione Rapida**
 - ✅ Form completo per nuova prenotazione
 - ✅ Auto-popolamento info slot (Aula, Giorno, Data, Ora)
-- ✅ Select per Allievo, Docente, Materia, Durata
+- ✅ Select per Socio, Docente, Materia, Durata
 - ✅ Durate pre-configurate: 30, 45, 60, 90, 120 minuti
 - ✅ Campo note opzionale
 - ✅ Alert informativo per funzionalità avanzate
@@ -136,7 +136,7 @@ CASE WHEN ass.id IS NOT NULL THEN 0 ELSE l.attiva END as attiva
 ## 🎯 Prossimi Step (v2.1.0)
 
 ### API da Implementare
-- [ ] `api_get_allievi.php` - Lista allievi attivi
+- [ ] `api_get_soci.php` - Lista soci attivi
 - [ ] `api_get_docenti.php` - Lista docenti
 - [ ] `api_get_materie.php` - Lista materie
 - [ ] `api_crea_prenotazione.php` - Salvataggio nuova lezione
@@ -145,7 +145,7 @@ CASE WHEN ass.id IS NOT NULL THEN 0 ELSE l.attiva END as attiva
 - [ ] Validazione conflitti orari
 - [ ] Check disponibilità aula
 - [ ] Preview prenotazione prima di conferma
-- [ ] Select2 per ricerca allievi/docenti
+- [ ] Select2 per ricerca soci/docenti
 - [ ] Notifiche email prenotazione
 
 ---

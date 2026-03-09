@@ -38,8 +38,8 @@
             <ul class="navbar-nav me-auto">
                 <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
                         <li class="nav-item">
-                            <a class="nav-link <?= $current_page === 'allievi' ? 'active' : '' ?>" href="<?= BASE_URL ?>/gestione_allievi.php">
-                                <i class="bi bi-people"></i> Allievi
+                            <a class="nav-link <?= $current_page === 'soci' ? 'active' : '' ?>" href="<?= BASE_URL ?>/gestione_soci.php">
+                                <i class="bi bi-people"></i> Soci
                             </a>
                         </li>
                         <li class="nav-item">
@@ -73,8 +73,8 @@
                             <i class="bi bi-gear"></i> Gestione
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item <?= ($current_page ?? '') == 'allievi' ? 'active' : '' ?>" href="<?= BASE_URL ?>/gestione_allievi.php">
-                                <i class="bi bi-people"></i> Allievi
+                            <li><a class="dropdown-item <?= ($current_page ?? '') == 'soci' ? 'active' : '' ?>" href="<?= BASE_URL ?>/gestione_soci.php">
+                                <i class="bi bi-people"></i> Soci
                             </a></li>
                             <li><a class="dropdown-item <?= ($current_page ?? '') == 'docenti' ? 'active' : '' ?>" href="<?= BASE_URL ?>/gestione_docenti.php">
                                 <i class="bi bi-person-badge"></i> Docenti

@@ -33,8 +33,8 @@
 - `app/Models/TipologiaEvento.php` - Model tipologie
 
 **Features Models:**
-- ✅ Relazioni: tipologia, aula, docente, materia, allievo
-- ✅ Scopes: `attivi()`, `confermati()`, `perData()`, `perAula()`, `perDocente()`, `perAllievo()`
+- ✅ Relazioni: tipologia, aula, docente, materia, socio
+- ✅ Scopes: `attivi()`, `confermati()`, `perData()`, `perAula()`, `perDocente()`, `perSocio()`
 - ✅ Accessors: `getPartecipanteAttribute()`
 - ✅ Cast automatici per boolean e date
 - ✅ Mass assignment sicuro con `$fillable`
@@ -49,7 +49,7 @@
 ```php
 GET  /api_eventi.php?action=list&date=YYYY-MM-DD
      // Lista eventi per data con filtri opzionali
-     // Filtri: aula_id, docente_id, allievo_id
+     // Filtri: aula_id, docente_id, socio_id
 
 GET  /api_eventi.php?action=get&id=X
      // Dettagli singolo evento
@@ -163,7 +163,7 @@ Vai a: `http://localhost/musicall/test_api_eventi_browser.php`
 **Operazioni disponibili:**
 - ✅ Visualizza lista eventi per data
 - ✅ Visualizza dettagli evento singolo
-- ✅ Filtra per aula/docente/allievo
+- ✅ Filtra per aula/docente/socio
 - ✅ Performance monitoring
 
 ### 2. Esempio Chiamata API
@@ -341,7 +341,7 @@ Il **Sistema Eventi Calendario** è ora completamente implementato e pronto per 
 **Cosa puoi fare ora:**
 ✅ Testare API con interfaccia browser  
 ✅ Visualizzare 35 eventi migrati  
-✅ Filtrare per aula/docente/allievo  
+✅ Filtrare per aula/docente/socio  
 ✅ Vedere dettagli eventi con colori tipologia  
 ✅ Monitorare performance  
 

@@ -24,9 +24,9 @@ class GestioneAssenzeWorkflowTest extends TestCase
             // 1. Dati assenza
             $assenza = [
                 'lezione_id' => 1,
-                'allievo_id' => 1,
+                'socio_id' => 1,
                 'data_assenza' => '2026-02-16',
-                'tipo_assenza' => 'allievo',
+                'tipo_assenza' => 'socio',
                 'motivo' => 'Malattia'
             ];
             
@@ -58,14 +58,14 @@ class GestioneAssenzeWorkflowTest extends TestCase
         $workflow = function() {
             // 1. Trova assenze da recuperare
             $assenze_da_recuperare = [
-                ['id' => 1, 'allievo_id' => 1, 'lezione_id' => 10],
-                ['id' => 2, 'allievo_id' => 1, 'lezione_id' => 10],
+                ['id' => 1, 'socio_id' => 1, 'lezione_id' => 10],
+                ['id' => 2, 'socio_id' => 1, 'lezione_id' => 10],
             ];
             
             // 2. Crea lezione custom per recupero
             $recupero = [
                 'tipo' => 'recupero',
-                'allievo_id' => 1,
+                'socio_id' => 1,
                 'docente_id' => 5,
                 'aula_id' => 2,
                 'data' => '2026-02-20',
@@ -96,9 +96,9 @@ class GestioneAssenzeWorkflowTest extends TestCase
     public function testWorkflowFiltroAssenze()
     {
         $assenze = [
-            ['id' => 1, 'da_recuperare' => 1, 'recuperata' => false, 'allievo_id' => 1],
-            ['id' => 2, 'da_recuperare' => 1, 'recuperata' => true, 'allievo_id' => 1],
-            ['id' => 3, 'da_recuperare' => 0, 'recuperata' => false, 'allievo_id' => 2],
+            ['id' => 1, 'da_recuperare' => 1, 'recuperata' => false, 'socio_id' => 1],
+            ['id' => 2, 'da_recuperare' => 1, 'recuperata' => true, 'socio_id' => 1],
+            ['id' => 3, 'da_recuperare' => 0, 'recuperata' => false, 'socio_id' => 2],
         ];
         
         $filtra = function($assenze, $filtro) {

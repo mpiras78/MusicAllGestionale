@@ -10,12 +10,12 @@ Sistema **interno** per gestione iscrizioni mensili e quote associative annuali.
 ## 🎯 Workflow Reale
 
 ### Processo Standard
-1. **Allievo/Genitore contatta scuola** (telefono/email/persona)
+1. **Socio/Genitore contatta scuola** (telefono/email/persona)
 2. **Segreteria registra iscrizione** nel sistema
 3. **Sistema calcola importo**:
    - Quota mensile lezioni
    - + Quota associativa annuale (se prima iscrizione anno accademico)
-4. **Allievo paga** (contanti/bonifico/carta)
+4. **Socio paga** (contanti/bonifico/carta)
 5. **Segreteria registra pagamento** nel sistema
 6. **Sistema traccia stato pagamenti**
 
@@ -34,8 +34,8 @@ Sistema **interno** per gestione iscrizioni mensili e quote associative annuali.
 CREATE TABLE iscrizioni (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     
-    -- Allievo
-    allievo_id INTEGER NOT NULL,
+    -- Socio
+    socio_id INTEGER NOT NULL,
     
     -- Anno Accademico (es: '2025-2026')
     anno_accademico VARCHAR(20) NOT NULL,
@@ -63,16 +63,16 @@ CREATE TABLE iscrizioni (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (allievo_id) REFERENCES allievi(id),
+    FOREIGN KEY (socio_id) REFERENCES soci(id),
     FOREIGN KEY (materia_id) REFERENCES materie(id),
     FOREIGN KEY (docente_id) REFERENCES docenti(id),
     FOREIGN KEY (creato_da) REFERENCES users(id),
     
-    -- Un allievo può avere solo 1 iscrizione attiva per materia/anno
-    UNIQUE(allievo_id, materia_id, anno_accademico)
+    -- Un socio può avere solo 1 iscrizione attiva per materia/anno
+    UNIQUE(socio_id, materia_id, anno_accademico)
 );
 
-CREATE INDEX idx_iscrizioni_allievo ON iscrizioni(allievo_id);
+CREATE INDEX idx_iscrizioni_socio ON iscrizioni(socio_id);
 CREATE INDEX idx_iscrizioni_anno ON iscrizioni(anno_accademico);
 CREATE INDEX idx_iscrizioni_stato ON iscrizioni(stato);
 ```
@@ -84,7 +84,7 @@ CREATE TABLE pagamenti (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     
     -- Relazioni
-    allievo_id INTEGER NOT NULL,
+    socio_id INTEGER NOT NULL,
     iscrizione_id INTEGER, -- NULL se quota associativa standalone
     
     -- Tipo Pagamento
@@ -117,12 +117,12 @@ CREATE TABLE pagamenti (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (allievo_id) REFERENCES allievi(id),
+    FOREIGN KEY (socio_id) REFERENCES soci(id),
     FOREIGN KEY (iscrizione_id) REFERENCES iscrizioni(id),
     FOREIGN KEY (registrato_da) REFERENCES users(id)
 );
 
-CREATE INDEX idx_pagamenti_allievo ON pagamenti(allievo_id);
+CREATE INDEX idx_pagamenti_socio ON pagamenti(socio_id);
 CREATE INDEX idx_pagamenti_tipo ON pagamenti(tipo);
 CREATE INDEX idx_pagamenti_anno ON pagamenti(anno_accademico);
 CREATE INDEX idx_pagamenti_mese ON pagamenti(mese_riferimento);
@@ -184,7 +184,7 @@ CREATE TABLE tariffe_materie (
 │                                                │
 │  Filtri:                                       │
 │  Anno: [2025-2026 ▼] Stato: [Tutte ▼]        │
-│  [Cerca allievo...]                           │
+│  [Cerca socio...]                           │
 │                                                │
 │  ┌──────────────────────────────────────────┐ │
 │  │ Marco Rossi                               │ │
@@ -211,8 +211,8 @@ CREATE TABLE tariffe_materie (
 │  ➕ Nuova Iscrizione                    │
 ├─────────────────────────────────────────┤
 │                                         │
-│  Allievo:                               │
-│  [Seleziona allievo ▼] o [➕ Nuovo]    │
+│  Socio:                               │
+│  [Seleziona socio ▼] o [➕ Nuovo]    │
 │                                         │
 │  Corso:                                 │
 │  Materia: [Piano ▼]                    │
@@ -243,7 +243,7 @@ CREATE TABLE tariffe_materie (
 │  💰 Registra Pagamento                  │
 ├─────────────────────────────────────────┤
 │                                         │
-│  Allievo: Marco Rossi                  │
+│  Socio: Marco Rossi                  │
 │  Corso: Piano - Prof. Bianchi          │
 │                                         │
 │  Tipo Pagamento:                        │
@@ -278,9 +278,9 @@ CREATE TABLE tariffe_materie (
 ### 1. Check Quota Associativa Automatico
 
 ```php
-function verificaQuotaAssociativa($allievoId, $annoAccademico) {
-    // Check SPECIFICO se allievo ha già pagato quota associativa quest'anno
-    $pagamentoQuotaAssociativa = Pagamento::where('allievo_id', $allievoId)
+function verificaQuotaAssociativa($socioId, $annoAccademico) {
+    // Check SPECIFICO se socio ha già pagato quota associativa quest'anno
+    $pagamentoQuotaAssociativa = Pagamento::where('socio_id', $socioId)
         ->where('anno_accademico', $annoAccademico)
         ->where('tipo', 'quota_associativa') // IMPORTANTE: Solo questo tipo
         ->where('stato', 'pagato')
@@ -294,12 +294,12 @@ function verificaQuotaAssociativa($allievoId, $annoAccademico) {
 ### 2. Calcolo Importo Iscrizione
 
 ```php
-function calcolaImportoIscrizione($allievoId, $materiaId, $tipoCorso, $annoAccademico) {
+function calcolaImportoIscrizione($socioId, $materiaId, $tipoCorso, $annoAccademico) {
     $importo = 0;
     
     // 1. Check SPECIFICO Quota Associativa
     // Cerca solo pagamenti tipo 'quota_associativa' per questo anno
-    $haQuotaAssociativa = Pagamento::where('allievo_id', $allievoId)
+    $haQuotaAssociativa = Pagamento::where('socio_id', $socioId)
         ->where('anno_accademico', $annoAccademico)
         ->where('tipo', 'quota_associativa')
         ->where('stato', 'pagato')
@@ -365,11 +365,11 @@ Metodi Pagamento:
 
 ### 2. Report Morosità
 ```
-Allievi con Pagamenti in Ritardo:
+Soci con Pagamenti in Ritardo:
 
-🔴 Oltre 30 giorni (3 allievi)
-🟡 15-30 giorni (7 allievi)
-🟢 Entro 15 giorni (12 allievi)
+🔴 Oltre 30 giorni (3 soci)
+🟡 15-30 giorni (7 soci)
+🟢 Entro 15 giorni (12 soci)
 
 Importo Totale Non Incassato: 2,640€
 ```
@@ -378,14 +378,14 @@ Importo Totale Non Incassato: 2,640€
 ```
 Anno 2025-2026
 
-Allievi Iscritti:      85
+Soci Iscritti:      85
 Quote Associate Pagate: 82/85 (96%)
 
 Revenue Totale: 102,000€
 • Quote Associative:  4,250€
 • Lezioni Mensili:   97,750€
 
-Media per Allievo: 1,200€/anno
+Media per Socio: 1,200€/anno
 ```
 
 ---

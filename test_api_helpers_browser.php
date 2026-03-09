@@ -1,7 +1,7 @@
 <?php
 /**
  * Test API Helpers nel Browser
- * Verifica che le API carichino correttamente allievi, docenti, materie, aule
+ * Verifica che le API carichino correttamente soci, docenti, materie, aule
  */
 
 require_once 'includes/bootstrap.php';
@@ -26,13 +26,13 @@ include 'includes/header.php';
         <div class="col-md-6 mb-4">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-people"></i> Allievi</h5>
+                    <h5 class="mb-0"><i class="bi bi-people"></i> Soci</h5>
                 </div>
                 <div class="card-body">
-                    <button class="btn btn-primary mb-3" onclick="testAllievi()">
-                        <i class="bi bi-play-fill"></i> Test Allievi
+                    <button class="btn btn-primary mb-3" onclick="testSoci()">
+                        <i class="bi bi-play-fill"></i> Test Soci
                     </button>
-                    <pre id="resultAllievi" class="bg-light p-3" style="max-height: 300px; overflow-y: auto;"></pre>
+                    <pre id="resultSoci" class="bg-light p-3" style="max-height: 300px; overflow-y: auto;"></pre>
                 </div>
             </div>
         </div>
@@ -109,27 +109,27 @@ include 'includes/header.php';
 </div>
 
 <script>
-async function testAllievi() {
-    const result = document.getElementById('resultAllievi');
+async function testSoci() {
+    const result = document.getElementById('resultSoci');
     result.textContent = 'Caricamento...';
     
     try {
-        const response = await fetch('api_get_helpers.php?type=allievi');
+        const response = await fetch('api_get_helpers.php?type=soci');
         const data = await response.json();
         result.textContent = JSON.stringify(data, null, 2);
         
         if (data.success) {
             result.classList.remove('text-danger');
             result.classList.add('text-success');
-            console.log('✅ Allievi caricati:', data.data.length);
+            console.log('✅ Soci caricati:', data.data.length);
         } else {
             result.classList.add('text-danger');
-            console.error('❌ Errore allievi:', data.error);
+            console.error('❌ Errore soci:', data.error);
         }
     } catch (error) {
         result.textContent = 'ERRORE: ' + error.message;
         result.classList.add('text-danger');
-        console.error('❌ Errore fetch allievi:', error);
+        console.error('❌ Errore fetch soci:', error);
     }
 }
 
@@ -231,7 +231,7 @@ async function testTipologie() {
 
 async function testAll() {
     console.log('🚀 Esecuzione tutti i test...');
-    await testAllievi();
+    await testSoci();
     await new Promise(r => setTimeout(r, 500));
     await testDocenti();
     await new Promise(r => setTimeout(r, 500));

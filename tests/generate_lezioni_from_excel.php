@@ -1,7 +1,7 @@
 <?php
 /**
  * Script per generare insert_lezioni.sql dal file Excel
- * Associa automaticamente soci (ex-allievi) a docenti/materie basandosi su:
+ * Associa automaticamente soci (ex-soci) a docenti/materie basandosi su:
  * - Giorno della settimana
  * - Orario
  * - Sala
@@ -221,9 +221,9 @@ foreach ($sheet->getRowIterator(2) as $row) {
     $giorno_ita = strtoupper(trim($data[0]));
     $sala = strtoupper(trim($data[1]));
     $orario = trim($data[2]);
-    $allievo_raw = trim($data[3]);
+    $socio_raw = trim($data[3]);
     
-    if (empty($allievo_raw) || $allievo_raw === '-') continue;
+    if (empty($socio_raw) || $socio_raw === '-') continue;
     
     // Parse orario
     if (preg_match('/(\d{2}:\d{2})-(\d{2}:\d{2})/', $orario, $matches)) {
@@ -233,8 +233,8 @@ foreach ($sheet->getRowIterator(2) as $row) {
         continue;
     }
     
-    // Parse allievo
-    $parts = preg_split('/\s+/', $allievo_raw, 2);
+    // Parse socio
+    $parts = preg_split('/\s+/', $socio_raw, 2);
     $cognome = $parts[0];
     $nome = isset($parts[1]) ? $parts[1] : '';
     
@@ -258,8 +258,8 @@ foreach ($sheet->getRowIterator(2) as $row) {
             'sala' => $sala,
             'ora_inizio' => $ora_inizio,
             'ora_fine' => $ora_fine,
-            'allievo_cognome' => $cognome,
-            'allievo_nome' => $nome,
+            'socio_cognome' => $cognome,
+            'socio_nome' => $nome,
             'docente' => $docente_info['docente'],
             'materia' => $docente_info['materia'],
             'is_lab' => isset($docente_info['lab']),
@@ -267,7 +267,7 @@ foreach ($sheet->getRowIterator(2) as $row) {
         ];
     } else {
         $stats['non_associati']++;
-        echo "⚠️  Non associato: $giorno_ita $sala $orario $allievo_raw\n";
+        echo "⚠️  Non associato: $giorno_ita $sala $orario $socio_raw\n";
     }
 }
 
@@ -291,9 +291,9 @@ foreach ($lezioni as $lez) {
     $tipo = $lez['is_lab'] ? 'laboratorio' : 'regolare';
     $note = $lez['is_lab'] ? "Laboratorio: {$lez['lab_name']}" : '';
     
-    $sql .= "INSERT INTO lezioni (allievo_id, docente_id, materia_id, aula_id, giorno_settimana, ora_inizio, ora_fine, tipo, note, attiva)\n";
+    $sql .= "INSERT INTO lezioni (socio_id, docente_id, materia_id, aula_id, giorno_settimana, ora_inizio, ora_fine, tipo, note, attiva)\n";
     $sql .= "SELECT \n";
-    $sql .= "    (SELECT s.id FROM soci s JOIN persone p ON s.persona_id = p.id WHERE p.cognome='{$lez['allievo_cognome']}' AND p.nome='{$lez['allievo_nome']}' LIMIT 1),\n";
+    $sql .= "    (SELECT s.id FROM soci s JOIN persone p ON s.persona_id = p.id WHERE p.cognome='{$lez['socio_cognome']}' AND p.nome='{$lez['socio_nome']}' LIMIT 1),\n";
     $sql .= "    (SELECT id FROM docenti WHERE cognome='{$lez['docente']}' LIMIT 1),\n";
     $sql .= "    (SELECT id FROM materie WHERE nome='{$lez['materia']}' LIMIT 1),\n";
     $sql .= "    (SELECT id FROM aule WHERE nome='{$lez['sala']}' LIMIT 1),\n";

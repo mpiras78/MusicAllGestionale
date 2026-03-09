@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================
 # MusicAll - Import Completo Database
-# Resetta DB e importa: Schema + Docenti + Allievi
+# Resetta DB e importa: Schema + Docenti + Soci
 # ============================================
 
 # Configurazione
@@ -10,7 +10,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 DB_FILE="$PROJECT_ROOT/database/musicall.sqlite"
 SCHEMA_FILE="$PROJECT_ROOT/database/schema_sqlite.sql"
 DOCENTI_FILE="$PROJECT_ROOT/database/insert_docenti.sql"
-ALLIEVI_FILE="$PROJECT_ROOT/database/insert_allievi.sql"
+SOCI_FILE="$PROJECT_ROOT/database/insert_soci.sql"
 PHP_BIN="/c/portable/php-8.4.5/php.exe"
 
 # Colori
@@ -48,8 +48,8 @@ if [ ! -f "$DOCENTI_FILE" ]; then
     MISSING=1
 fi
 
-if [ ! -f "$ALLIEVI_FILE" ]; then
-    log_error "Script allievi non trovato: $ALLIEVI_FILE"
+if [ ! -f "$SOCI_FILE" ]; then
+    log_error "Script soci non trovato: $SOCI_FILE"
     MISSING=1
 fi
 
@@ -127,25 +127,25 @@ fi
 echo ""
 
 # ====================================
-# STEP 4: Import Allievi
+# STEP 4: Import Soci
 # ====================================
-log_step 4 "Import allievi"
-cat "$ALLIEVI_FILE" | "$PHP_BIN" -r '
+log_step 4 "Import soci"
+cat "$SOCI_FILE" | "$PHP_BIN" -r '
 $db = new PDO("sqlite:" . $argv[1]);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $sql = file_get_contents("php://stdin");
 try {
     $db->exec($sql);
-    $allievi = $db->query("SELECT COUNT(*) FROM allievi")->fetchColumn();
-    echo "✅ $allievi allievi importati\n";
+    $soci = $db->query("SELECT COUNT(*) FROM soci")->fetchColumn();
+    echo "✅ $soci soci importati\n";
 } catch (Exception $e) {
-    echo "❌ Errore allievi: " . $e->getMessage() . "\n";
+    echo "❌ Errore soci: " . $e->getMessage() . "\n";
     exit(1);
 }
 ' "$DB_FILE"
 
 if [ $? -ne 0 ]; then
-    log_error "Errore durante import allievi"
+    log_error "Errore durante import soci"
     exit 1
 fi
 echo ""
@@ -155,7 +155,7 @@ echo ""
 # ====================================
 LEZIONI_FILE="$PROJECT_ROOT/database/insert_lezioni.sql"
 if [ -f "$LEZIONI_FILE" ]; then
-    log_step 5 "Import lezioni (associazioni allievi-docenti-materie)"
+    log_step 5 "Import lezioni (associazioni soci-docenti-materie)"
     cat "$LEZIONI_FILE" | "$PHP_BIN" -r '
 $db = new PDO("sqlite:" . $argv[1]);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -198,7 +198,7 @@ $stats = [
     "users" => $db->query("SELECT COUNT(*) FROM users")->fetchColumn(),
     "docenti" => $db->query("SELECT COUNT(*) FROM docenti")->fetchColumn(),
     "docenti_materie" => $db->query("SELECT COUNT(*) FROM docenti_materie")->fetchColumn(),
-    "allievi" => $db->query("SELECT COUNT(*) FROM allievi")->fetchColumn(),
+    "soci" => $db->query("SELECT COUNT(*) FROM soci")->fetchColumn(),
     "aule" => $db->query("SELECT COUNT(*) FROM aule")->fetchColumn(),
     "materie" => $db->query("SELECT COUNT(*) FROM materie")->fetchColumn(),
     "slot_orari" => $db->query("SELECT COUNT(*) FROM slot_orari")->fetchColumn(),
@@ -208,7 +208,7 @@ echo "📊 Statistiche Database:\n\n";
 echo "  👥 Utenti:              " . $stats["users"] . " (admin pronto)\n";
 echo "  👨‍🏫 Docenti:             " . $stats["docenti"] . "\n";
 echo "  🔗 Relazioni D-M:       " . $stats["docenti_materie"] . "\n";
-echo "  🎓 Allievi:             " . $stats["allievi"] . "\n";
+echo "  🎓 Soci:             " . $stats["soci"] . "\n";
 echo "  🏫 Aule:                " . $stats["aule"] . "\n";
 echo "  📚 Materie:             " . $stats["materie"] . "\n";
 echo "  ⏰ Slot Orari:          " . $stats["slot_orari"] . "\n";

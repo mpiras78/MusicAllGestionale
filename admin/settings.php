@@ -202,17 +202,17 @@ require_once __DIR__ . '/../includes/header.php';
                                             </label>
                                         </div>
                                         <small class="text-muted d-block mt-2">
-                                            <strong>✅ Attivo:</strong> Il docente vede assenze dei propri allievi<br>
+                                            <strong>✅ Attivo:</strong> Il docente vede assenze dei propri soci<br>
                                             <strong>❌ Disattivo:</strong> Il docente non vede la sezione assenze
                                         </small>
                                     </div>
                                 </div>
                                 
-                                <!-- Visualizzazione Allievi -->
+                                <!-- Visualizzazione Soci -->
                                 <div class="card mb-3">
                                     <div class="card-body">
                                         <h6 class="card-title">
-                                            <i class="bi bi-people text-success"></i> Visualizzazione Allievi
+                                            <i class="bi bi-people text-success"></i> Visualizzazione Soci
                                         </h6>
                                         <div class="form-check form-switch">
                                             <input 
@@ -222,12 +222,12 @@ require_once __DIR__ . '/../includes/header.php';
                                                 id="viewStudents"
                                                 <?= $currentSettings['docente_can_view_students'] ? 'checked' : '' ?>>
                                             <label class="form-check-label" for="viewStudents">
-                                                <strong>Può vedere allievi</strong>
+                                                <strong>Può vedere soci</strong>
                                             </label>
                                         </div>
                                         <small class="text-muted d-block mt-2">
-                                            <strong>✅ Attivo:</strong> Il docente vede lista dei propri allievi<br>
-                                            <strong>❌ Disattivo:</strong> Il docente non vede la sezione allievi
+                                            <strong>✅ Attivo:</strong> Il docente vede lista dei propri soci<br>
+                                            <strong>❌ Disattivo:</strong> Il docente non vede la sezione soci
                                         </small>
                                     </div>
                                 </div>

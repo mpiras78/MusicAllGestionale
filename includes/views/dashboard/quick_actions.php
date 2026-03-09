@@ -21,8 +21,8 @@
     <div class="card-body">
         <div class="row g-2">
             <div class="col-md-3">
-                <a href="<?= BASE_URL ?>/gestione_allievi.php" class="btn btn-outline-primary w-100">
-                    <i class="bi bi-person-plus"></i> Aggiungi Nuovo Allievo
+                <a href="<?= BASE_URL ?>/gestione_soci.php" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-person-plus"></i> Aggiungi Nuovo Socio
                 </a>
             </div>
             <div class="col-md-3">

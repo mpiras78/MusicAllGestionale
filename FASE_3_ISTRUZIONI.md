@@ -4,7 +4,7 @@
 
 ### 1. Backend Completato ✅
 - `api_get_tipologie.php` - API lista tipologie eventi
-- `api_get_helpers.php` - API unificata per allievi/docenti/materie/aule
+- `api_get_helpers.php` - API unificata per soci/docenti/materie/aule
 - `assets/js/eventi.js` - JavaScript completo per CRUD eventi
 
 ### 2. Funzionalità JavaScript Pronte ✅
@@ -128,10 +128,10 @@ Inserire prima del tag `</div>` finale (prima dell' `include footer.php`):
                         </div>
                     </div>
                     
-                    <!-- Allievo -->
+                    <!-- Socio -->
                     <div class="mb-3">
-                        <label class="form-label">Allievo</label>
-                        <select class="form-select" id="eventoAllievo">
+                        <label class="form-label">Socio</label>
+                        <select class="form-select" id="eventoSocio">
                             <option value="">-- Nessuno --</option>
                         </select>
                     </div>

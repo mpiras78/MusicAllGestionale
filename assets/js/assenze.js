@@ -49,19 +49,19 @@ const giorniSettimana = {
 // Variabile globale per tracciare giorno lezione selezionata
 let giornoLezioneSelezionata = null;
 
-// Carica lezioni quando si seleziona un allievo
-document.getElementById('allievoSelectHelper').addEventListener('change', function() {
-    const allievoId = this.value;
+// Carica lezioni quando si seleziona un socio
+document.getElementById('socioSelectHelper').addEventListener('change', function() {
+    const socioId = this.value;
     const lezioniContainer = document.getElementById('lezioniContainer');
     const lezioneSelect = document.getElementById('lezioneSelectFinal');
     
-    if (allievoId) {
+    if (socioId) {
         lezioniContainer.style.display = 'block';
         lezioneSelect.innerHTML = '<option value="">Caricamento...</option>';
         lezioneSelect.disabled = true;
         
         // Chiamata API
-        fetch(`${BASE_URL}/api_get_lezioni_allievo.php?allievo_id=${allievoId}`)
+        fetch(`${BASE_URL}/api_get_lezioni_socio.php?socio_id=${socioId}`)
             .then(r => r.json())
             .then(response => {
                 lezioneSelect.innerHTML = '<option value="">Seleziona lezione...</option>';
@@ -83,9 +83,9 @@ document.getElementById('allievoSelectHelper').addEventListener('change', functi
                     });
                     lezioneSelect.disabled = false;
                 } else {
-                    lezioneSelect.innerHTML = '<option value="">Nessuna lezione trovata per questo allievo</option>';
+                    lezioneSelect.innerHTML = '<option value="">Nessuna lezione trovata per questo socio</option>';
                     lezioneSelect.disabled = true;
-                    showLezioniAlert('Questo allievo non ha lezioni programmate nel calendario settimanale.', 'info');
+                    showLezioniAlert('Questo socio non ha lezioni programmate nel calendario settimanale.', 'info');
                 }
             })
             .catch((err) => {
@@ -96,7 +96,7 @@ document.getElementById('allievoSelectHelper').addEventListener('change', functi
             });
     } else {
         lezioniContainer.style.display = 'none';
-        lezioneSelect.innerHTML = '<option value="">Prima seleziona un allievo</option>';
+        lezioneSelect.innerHTML = '<option value="">Prima seleziona un socio</option>';
         hideLezioniAlert();
     }
 });
@@ -106,7 +106,7 @@ document.getElementById('lezioneSelectFinal').addEventListener('change', functio
     const selectedOption = this.options[this.selectedIndex];
     const dataInput = document.getElementById('dataAssenza');
     const lezioneId = selectedOption.value;
-    const allievoId = document.getElementById('allievoSelectHelper').value;
+    const socioId = document.getElementById('socioSelectHelper').value;
     
     if (lezioneId) {
         // Salva giorno lezione
@@ -120,7 +120,7 @@ document.getElementById('lezioneSelectFinal').addEventListener('change', functio
         showLezioniAlert(`Seleziona una data che cada di ${giornoCapitalized} per questa lezione`, 'info');
         
         // Carica contatori assenze/recuperi
-        fetch(`${BASE_URL}/api_get_contatori_assenze.php?allievo_id=${allievoId}&lezione_id=${lezioneId}`)
+        fetch(`${BASE_URL}/api_get_contatori_assenze.php?socio_id=${socioId}&lezione_id=${lezioneId}`)
             .then(r => r.json())
             .then(response => {
                 if (response.success && response.contatori) {

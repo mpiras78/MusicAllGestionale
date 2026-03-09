@@ -20,12 +20,12 @@ try {
             
             $lezione = $db->queryOne("
                 SELECT l.*, 
-                       al.cognome || ' ' || al.nome as allievo_nome,
+                       al.cognome || ' ' || al.nome as socio_nome,
                        d.cognome || ' ' || d.nome as docente_nome,
                        m.nome as materia_nome,
                        a.nome as aula_nome
                 FROM lezioni l
-                JOIN allievi al ON l.allievo_id = al.id
+                JOIN soci al ON l.socio_id = al.id
                 JOIN docenti d ON l.docente_id = d.id
                 JOIN materie m ON l.materia_id = m.id
                 JOIN aule a ON l.aula_id = a.id
@@ -44,7 +44,7 @@ try {
             }
             
             // Validazione
-            $required = ['allievo_id', 'materia_id', 'docente_id', 'aula_id', 'giorno_settimana', 'ora_inizio', 'ora_fine'];
+            $required = ['socio_id', 'materia_id', 'docente_id', 'aula_id', 'giorno_settimana', 'ora_inizio', 'ora_fine'];
             foreach ($required as $field) {
                 if (empty($input[$field])) {
                     throw new Exception("Campo obbligatorio mancante: $field");
@@ -61,20 +61,20 @@ try {
             );
             
             if ($conflitto) {
-                throw new Exception("Conflitto di orario: l'aula è già occupata da {$conflitto['allievo']} ({$conflitto['ora_inizio']}-{$conflitto['ora_fine']})");
+                throw new Exception("Conflitto di orario: l'aula è già occupata da {$conflitto['socio']} ({$conflitto['ora_inizio']}-{$conflitto['ora_fine']})");
             }
             
-            // Verifica conflitti allievo
-            $conflittoAllievo = verificaConflittoAllievo(
-                $input['allievo_id'],
+            // Verifica conflitti socio
+            $conflittoSocio = verificaConflittoSocio(
+                $input['socio_id'],
                 $input['giorno_settimana'],
                 $input['ora_inizio'],
                 $input['ora_fine'],
                 null
             );
             
-            if ($conflittoAllievo) {
-                throw new Exception("Conflitto: l'allievo ha già una lezione in questo orario");
+            if ($conflittoSocio) {
+                throw new Exception("Conflitto: l'socio ha già una lezione in questo orario");
             }
             
             // Verifica conflitti docente
@@ -93,11 +93,11 @@ try {
             // Inserisci lezione
             $id = $db->insert("
                 INSERT INTO lezioni (
-                    allievo_id, materia_id, docente_id, aula_id,
+                    socio_id, materia_id, docente_id, aula_id,
                     giorno_settimana, ora_inizio, ora_fine, note, attiva
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
             ", [
-                $input['allievo_id'],
+                $input['socio_id'],
                 $input['materia_id'],
                 $input['docente_id'],
                 $input['aula_id'],
@@ -119,7 +119,7 @@ try {
             if (empty($input['id'])) throw new Exception('ID lezione mancante');
             
             // Validazione
-            $required = ['allievo_id', 'materia_id', 'docente_id', 'aula_id', 'giorno_settimana', 'ora_inizio', 'ora_fine'];
+            $required = ['socio_id', 'materia_id', 'docente_id', 'aula_id', 'giorno_settimana', 'ora_inizio', 'ora_fine'];
             foreach ($required as $field) {
                 if (empty($input[$field])) {
                     throw new Exception("Campo obbligatorio mancante: $field");
@@ -136,19 +136,19 @@ try {
             );
             
             if ($conflitto) {
-                throw new Exception("Conflitto di orario: l'aula è già occupata da {$conflitto['allievo']} ({$conflitto['ora_inizio']}-{$conflitto['ora_fine']})");
+                throw new Exception("Conflitto di orario: l'aula è già occupata da {$conflitto['socio']} ({$conflitto['ora_inizio']}-{$conflitto['ora_fine']})");
             }
             
-            $conflittoAllievo = verificaConflittoAllievo(
-                $input['allievo_id'],
+            $conflittoSocio = verificaConflittoSocio(
+                $input['socio_id'],
                 $input['giorno_settimana'],
                 $input['ora_inizio'],
                 $input['ora_fine'],
                 $input['id']
             );
             
-            if ($conflittoAllievo) {
-                throw new Exception("Conflitto: l'allievo ha già una lezione in questo orario");
+            if ($conflittoSocio) {
+                throw new Exception("Conflitto: l'socio ha già una lezione in questo orario");
             }
             
             $conflittoDocente = verificaConflittoDocente(
@@ -166,7 +166,7 @@ try {
             // Aggiorna lezione
             $db->execute("
                 UPDATE lezioni SET
-                    allievo_id = ?,
+                    socio_id = ?,
                     materia_id = ?,
                     docente_id = ?,
                     aula_id = ?,
@@ -176,7 +176,7 @@ try {
                     note = ?
                 WHERE id = ?
             ", [
-                $input['allievo_id'],
+                $input['socio_id'],
                 $input['materia_id'],
                 $input['docente_id'],
                 $input['aula_id'],
@@ -224,9 +224,9 @@ function verificaConflittoAula($aula_id, $giorno, $ora_inizio, $ora_fine, $esclu
                           : [$aula_id, $giorno, $ora_inizio, $ora_fine, $ora_inizio, $ora_fine];
     
     $conflitto = $db->queryOne("
-        SELECT l.*, al.cognome || ' ' || al.nome as allievo
+        SELECT l.*, al.cognome || ' ' || al.nome as socio
         FROM lezioni l
-        JOIN allievi al ON l.allievo_id = al.id
+        JOIN soci al ON l.socio_id = al.id
         WHERE l.aula_id = ?
         AND l.giorno_settimana = ?
         AND l.attiva = 1
@@ -242,19 +242,19 @@ function verificaConflittoAula($aula_id, $giorno, $ora_inizio, $ora_fine, $esclu
 }
 
 /**
- * Verifica conflitto di orario per allievo
+ * Verifica conflitto di orario per socio
  */
-function verificaConflittoAllievo($allievo_id, $giorno, $ora_inizio, $ora_fine, $escludi_id = null) {
+function verificaConflittoSocio($socio_id, $giorno, $ora_inizio, $ora_fine, $escludi_id = null) {
     $db = Database::getInstance();
     
     $where_escludi = $escludi_id ? "AND id != ?" : "";
-    $params = $escludi_id ? [$allievo_id, $giorno, $ora_inizio, $ora_fine, $ora_inizio, $ora_fine, $escludi_id] 
-                          : [$allievo_id, $giorno, $ora_inizio, $ora_fine, $ora_inizio, $ora_fine];
+    $params = $escludi_id ? [$socio_id, $giorno, $ora_inizio, $ora_fine, $ora_inizio, $ora_fine, $escludi_id] 
+                          : [$socio_id, $giorno, $ora_inizio, $ora_fine, $ora_inizio, $ora_fine];
     
     $conflitto = $db->queryOne("
         SELECT id
         FROM lezioni
-        WHERE allievo_id = ?
+        WHERE socio_id = ?
         AND giorno_settimana = ?
         AND attiva = 1
         AND (

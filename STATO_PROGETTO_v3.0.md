@@ -7,7 +7,7 @@
 
 ## 🎯 Obiettivo Globale
 
-Trasformare MusicAll da sistema v2.x (gestione base calendario + allievi) a sistema v3.0 enterprise-grade con:
+Trasformare MusicAll da sistema v2.x (gestione base calendario + soci) a sistema v3.0 enterprise-grade con:
 - Sistema pagamenti completo con sconto familiare
 - Gestione iscrizioni annuali con numero tessera
 - Pro-rata automatico per modifiche corso
@@ -66,7 +66,7 @@ Trasformare MusicAll da sistema v2.x (gestione base calendario + allievi) a sist
 | Tabella | Scopo | Stato |
 |---------|-------|-------|
 | `dati_associazione` | Info scuola per ricevute/email | Design: ✅ |
-| `soci` | Rename di `allievi` | Design: ✅ |
+| `soci` | Rename di `soci` | Design: ✅ |
 | `iscrizioni_annuali` | Membership annuale con numero tessera | Design: ✅ |
 | `corsi_soci` | Corsi per socio (modificato) | Design: ✅ |
 | `pagamenti` | Transazioni pagamento | Design: ✅ |
@@ -78,7 +78,7 @@ Trasformare MusicAll da sistema v2.x (gestione base calendario + allievi) a sist
 | `audit_log` | Traccia modifiche | Design: ✅ |
 | `sospensioni_corso` | Sospensioni temporanee/definitive | Design: ✅ |
 
-**Migration Strategy**: Definita in SCHEMA_ER_DATABASE.md (ALTER TABLE per rename allievi → soci)
+**Migration Strategy**: Definita in SCHEMA_ER_DATABASE.md (ALTER TABLE per rename soci → soci)
 
 ---
 
@@ -86,7 +86,7 @@ Trasformare MusicAll da sistema v2.x (gestione base calendario + allievi) a sist
 
 ### Fase 1: Setup e Rinomina (Settimana 1-2) 
 **Status**: 📋 PIANIFICATA
-- [ ] Database migrations (allievi → soci, nuove tabelle)
+- [ ] Database migrations (soci → soci, nuove tabelle)
 - [ ] Rinomina variabili codebase
 - [ ] AuditLogController
 - [ ] Pagina dati associazione
@@ -316,7 +316,7 @@ Trasformare MusicAll da sistema v2.x (gestione base calendario + allievi) a sist
 
 1. **Conferma Cliente**: Revisione roadmap + wireframe
 2. **Setup Ambiente**: Git branch + testing framework
-3. **Inizio Fase 1**: Database migrations + rinomina allievi → soci
+3. **Inizio Fase 1**: Database migrations + rinomina soci → soci
 4. **Settimanale**: Review + commit dopo ogni sottosezione
 
 **Data Target Inizio Implementazione**: 20 Novembre 2026

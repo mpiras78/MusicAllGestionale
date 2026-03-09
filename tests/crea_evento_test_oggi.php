@@ -22,10 +22,10 @@ echo "Data: $oggi ($giorno_it)\n\n";
 
 // Trova una lezione per oggi
 $stmt = $db->prepare("
-    SELECT l.*, au.nome as aula_nome, p.cognome || ' ' || p.nome as allievo_nome
+    SELECT l.*, au.nome as aula_nome, p.cognome || ' ' || p.nome as socio_nome
     FROM lezioni l
     INNER JOIN aule au ON l.aula_id = au.id
-    INNER JOIN soci s ON l.allievo_id = s.id
+    INNER JOIN soci s ON l.socio_id = s.id
     INNER JOIN persone p ON s.persona_id = p.id
     WHERE l.giorno_settimana = ?
     LIMIT 1
@@ -41,7 +41,7 @@ if (!$lezione) {
 
 echo "Lezione trovata:\n";
 echo "- Aula: {$lezione['aula_nome']} (ID: {$lezione['aula_id']})\n";
-echo "- Socio: {$lezione['allievo_nome']} (ID: {$lezione['allievo_id']})\n";
+echo "- Socio: {$lezione['socio_nome']} (ID: {$lezione['socio_id']})\n";
 echo "- Orario: {$lezione['ora_inizio']} - {$lezione['ora_fine']}\n\n";
 
 // Crea prenotazione 15 minuti dopo inizio lezione
@@ -51,13 +51,13 @@ $ora_fine_evento = date('H:i:s', strtotime($ora_inizio_evento) + 45*60);
 echo "Creando prenotazione test:\n";
 echo "- Orario: $ora_inizio_evento - $ora_fine_evento\n";
 echo "- Aula: {$lezione['aula_nome']}\n";
-echo "- Socio: {$lezione['allievo_nome']}\n\n";
+echo "- Socio: {$lezione['socio_nome']}\n\n";
 
 // Inserisci evento
 $stmt = $db->prepare("
     INSERT INTO eventi_calendario (
         tipologia_id, data_evento, ora_inizio, ora_fine,
-        aula_id, allievo_id, docente_id, materia_id,
+        aula_id, socio_id, docente_id, materia_id,
         titolo, note, attivo, confermato, created_at
     ) VALUES (
         6, ?, ?, ?,
@@ -71,7 +71,7 @@ $result = $stmt->execute([
     $ora_inizio_evento,
     $ora_fine_evento,
     $lezione['aula_id'],
-    $lezione['allievo_id'],
+    $lezione['socio_id'],
     $lezione['docente_id'],
     $lezione['materia_id']
 ]);

@@ -21,7 +21,7 @@ if (!isset($stats)) {
                         <i class="bi bi-people"></i>
                     </div>
                 </div>
-                <a href="<?= BASE_URL ?>/gestione_allievi.php" class="btn btn-sm btn-outline-primary mt-2">
+                <a href="<?= BASE_URL ?>/gestione_soci.php" class="btn btn-sm btn-outline-primary mt-2">
                     Visualizza <i class="bi bi-arrow-right"></i>
                 </a>
             </div>

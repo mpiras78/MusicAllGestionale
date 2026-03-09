@@ -42,7 +42,7 @@ try {
     $db->exec("
         CREATE TABLE iscrizioni (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            allievo_id INTEGER NOT NULL,
+            socio_id INTEGER NOT NULL,
             tipo_corso_config_id INTEGER,
             materia_id INTEGER NOT NULL,
             docente_id INTEGER NOT NULL,
@@ -56,7 +56,7 @@ try {
             note TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (allievo_id) REFERENCES allievi(id),
+            FOREIGN KEY (socio_id) REFERENCES soci(id),
             FOREIGN KEY (tipo_corso_config_id) REFERENCES tipi_corso_config(id),
             FOREIGN KEY (materia_id) REFERENCES materie(id),
             FOREIGN KEY (docente_id) REFERENCES docenti(id)
@@ -71,7 +71,7 @@ try {
     // Costruisci query INSERT dinamica
     $selectParts = [
         'id',
-        'allievo_id',
+        'socio_id',
         in_array('tipo_corso_config_id', $backupColNames) ? 'tipo_corso_config_id' : 
             (in_array('tipo_corso_id', $backupColNames) ? 'tipo_corso_id' : 'NULL'),
         'materia_id',
@@ -91,7 +91,7 @@ try {
     ];
     
     $sql = "INSERT INTO iscrizioni (
-        id, allievo_id, tipo_corso_config_id, materia_id, docente_id,
+        id, socio_id, tipo_corso_config_id, materia_id, docente_id,
         anno_accademico, data_inizio, data_fine, stato,
         quota_iscrizione, sconto_fratelli, sconto_meta_anno, note, created_at
     ) SELECT " . implode(', ', $selectParts) . " FROM iscrizioni_backup";
@@ -100,7 +100,7 @@ try {
     echo "  ✓ Dati ripristinati\n";
     
     // Ricrea indici
-    $db->exec("CREATE INDEX idx_iscrizioni_allievo ON iscrizioni(allievo_id, stato)");
+    $db->exec("CREATE INDEX idx_iscrizioni_socio ON iscrizioni(socio_id, stato)");
     $db->exec("CREATE INDEX idx_iscrizioni_anno ON iscrizioni(anno_accademico, stato)");
     $db->exec("CREATE INDEX idx_iscrizioni_docente ON iscrizioni(docente_id, stato)");
     $db->exec("CREATE INDEX idx_iscrizioni_stato ON iscrizioni(stato, data_inizio)");

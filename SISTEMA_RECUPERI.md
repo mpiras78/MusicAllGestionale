@@ -25,8 +25,8 @@ Sistema completo per la gestione dei recuperi delle lezioni annullate, con workf
 
 #### 2. **Gestione Assenze da Recuperare**
 - ✅ Lista completa assenze senza recupero
-- ✅ Visualizza causata da: Allievo/Docente
-- ✅ **Alert limite 3 assenze** per allievo
+- ✅ Visualizza causata da: Socio/Docente
+- ✅ **Alert limite 3 assenze** per socio
 - ✅ Proponi recupero con:
   - Data/ora/aula
   - Note per docente
@@ -75,7 +75,7 @@ Sistema completo per la gestione dei recuperi delle lezioni annullate, con workf
 - id (PK)
 - assenza_id (FK → assenze)
 - lezione_originale_id (FK → lezioni)
-- allievo_id, docente_id, materia_id
+- socio_id, docente_id, materia_id
 - data_recupero, ora_inizio, ora_fine
 - aula_id (FK → aule)
 - confermata_da_docente (boolean)
@@ -88,7 +88,7 @@ Sistema completo per la gestione dei recuperi delle lezioni annullate, con workf
 
 ### **Colonne Aggiunte a `assenze`**
 ```sql
-- causata_da ('allievo' | 'docente')
+- causata_da ('socio' | 'docente')
 - necessita_recupero (boolean, default 1)
 - note_annullamento (text)
 ```
@@ -100,7 +100,7 @@ Sistema completo per la gestione dei recuperi delle lezioni annullate, con workf
 ### **Indici Ottimizzati**
 - `idx_recuperi_data` (data_recupero)
 - `idx_recuperi_docente` (docente_id)
-- `idx_recuperi_allievo` (allievo_id)
+- `idx_recuperi_socio` (socio_id)
 - `idx_recuperi_stato` (confermata_da_docente, annullato, data_recupero)
 
 ---
@@ -173,13 +173,13 @@ Sistema completo per la gestione dei recuperi delle lezioni annullate, con workf
 
 ## 📊 REGOLE BUSINESS
 
-### **Limite Assenze Allievo**
+### **Limite Assenze Socio**
 - ✅ **3 assenze garantite** per recupero
 - ⚠️ **Oltre 3**: A discrezione segreteria/docente
 - 🔴 **Alert visivo** se limite superato
 
 ### **Causato Da**
-- **Allievo**: Conta nel limite 3
+- **Socio**: Conta nel limite 3
 - **Docente**: Sempre recuperabile
 
 ### **Conferma Recupero**
@@ -243,13 +243,13 @@ print_r($tables);"
 
 ### **Notifiche**
 - [ ] Email automatica a docente su nuova proposta
-- [ ] Email a allievo su conferma recupero
+- [ ] Email a socio su conferma recupero
 - [ ] Reminder 24h prima del recupero
 
 ### **Report**
 - [ ] Statistiche recuperi per docente
 - [ ] Tasso di conferma/rifiuto
-- [ ] Report assenze per allievo
+- [ ] Report assenze per socio
 
 ### **Calendario**
 - [ ] Integrazione recuperi nel calendario generale

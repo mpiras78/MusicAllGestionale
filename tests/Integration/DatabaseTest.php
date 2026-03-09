@@ -41,16 +41,16 @@ class DatabaseTest extends TestCase
     {
         $pdo = new \PDO('sqlite::memory:');
         
-        $pdo->exec('CREATE TABLE test_allievi (
+        $pdo->exec('CREATE TABLE test_soci (
             id INTEGER PRIMARY KEY,
             nome TEXT NOT NULL,
             cognome TEXT NOT NULL
         )');
         
-        $stmt = $pdo->prepare('INSERT INTO test_allievi (nome, cognome) VALUES (?, ?)');
+        $stmt = $pdo->prepare('INSERT INTO test_soci (nome, cognome) VALUES (?, ?)');
         $stmt->execute(['Mario', 'Rossi']);
         
-        $result = $pdo->query('SELECT COUNT(*) as count FROM test_allievi')->fetch();
+        $result = $pdo->query('SELECT COUNT(*) as count FROM test_soci')->fetch();
         
         $this->assertEquals(1, $result['count']);
     }
@@ -97,7 +97,7 @@ class DatabaseTest extends TestCase
     {
         $pdo = new \PDO('sqlite::memory:');
         
-        // Updated to use `soci` and `socio_id` (migration allievi -> soci)
+        // Updated to use `soci` and `socio_id` (migration soci -> soci)
         $pdo->exec('CREATE TABLE soci (id INTEGER PRIMARY KEY, nome TEXT)');
         $pdo->exec('CREATE TABLE lezioni (id INTEGER PRIMARY KEY, socio_id INTEGER, materia TEXT)');
 

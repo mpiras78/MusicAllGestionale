@@ -38,10 +38,10 @@ try {
             $date = $_GET['date'] ?? date('Y-m-d');
             $aula_id = $_GET['aula_id'] ?? null;
             $docente_id = $_GET['docente_id'] ?? null;
-            $allievo_id = $_GET['allievo_id'] ?? null;
+            $socio_id = $_GET['socio_id'] ?? null;
             
             // Query base
-            $query = EventoCalendario::with(['tipologia', 'aula', 'docente', 'allievo', 'materia'])
+            $query = EventoCalendario::with(['tipologia', 'aula', 'docente', 'socio', 'materia'])
                 ->attivi()
                 ->perData($date);
             
@@ -52,8 +52,8 @@ try {
             if ($docente_id) {
                 $query->perDocente($docente_id);
             }
-            if ($allievo_id) {
-                $query->perAllievo($allievo_id);
+            if ($socio_id) {
+                $query->perSocio($socio_id);
             }
             
             $eventi = $query->orderBy('ora_inizio')->get();
@@ -77,7 +77,7 @@ try {
                     'aula_nome' => $evento->aula->nome ?? '',
                     'docente_id' => $evento->docente_id,
                     'docente_nome' => $evento->docente ? ($evento->docente->cognome . ' ' . $evento->docente->nome) : '',
-                    'allievo_id' => $evento->allievo_id,
+                    'socio_id' => $evento->socio_id,
                     'partecipante_nome' => $evento->partecipante,
                     'materia_id' => $evento->materia_id,
                     'materia_nome' => $evento->materia->nome ?? '',
@@ -198,7 +198,7 @@ try {
             $id = $_GET['id'] ?? null;
             if (!$id) throw new Exception('ID evento mancante');
             
-            $evento = EventoCalendario::with(['tipologia', 'aula', 'docente', 'allievo', 'materia'])
+            $evento = EventoCalendario::with(['tipologia', 'aula', 'docente', 'socio', 'materia'])
                 ->find($id);
             
             if (!$evento) throw new Exception('Evento non trovato');
@@ -213,13 +213,13 @@ try {
                     INNER JOIN assenze a ON r.assenza_id = a.id
                     WHERE r.data_recupero = ? 
                     AND r.ora_inizio = ?
-                    AND r.allievo_id = ?
+                    AND r.socio_id = ?
                     LIMIT 1
                 ");
                 $stmt->execute([
                     $evento->data_evento ? $evento->data_evento->format('Y-m-d') : null,
                     $evento->ora_inizio,
-                    $evento->allievo_id
+                    $evento->socio_id
                 ]);
                 $assenza_originale = $stmt->fetch(PDO::FETCH_ASSOC);
             }
@@ -244,7 +244,7 @@ try {
                 'aula_nome' => $evento->aula->nome ?? '',
                 'docente_id' => $evento->docente_id,
                 'docente_nome' => $evento->docente ? ($evento->docente->cognome . ' ' . $evento->docente->nome) : '',
-                'allievo_id' => $evento->allievo_id,
+                'socio_id' => $evento->socio_id,
                 'partecipante_nome' => $evento->partecipante,
                 'materia_id' => $evento->materia_id,
                 'materia_nome' => $evento->materia->nome ?? '',

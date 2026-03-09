@@ -379,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function caricaLezioniDocenti() {
-    fetch('<?= BASE_URL ?>/api_get_helpers.php?type=docenti_con_lezioni')
+    fetch('<?= BASE_URL ?>/api/api_get_helpers.php?type=docenti_con_lezioni')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -467,7 +467,7 @@ function salvaDocente() {
     const materieSelect = document.getElementById('materieSelect');
     data.materie = Array.from(materieSelect.selectedOptions).map(opt => opt.value);
     
-    fetch('<?= BASE_URL ?>/api_docenti.php', {
+    fetch('<?= BASE_URL ?>/api/api_docenti.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({action: 'create', ...data})
@@ -485,7 +485,7 @@ function salvaDocente() {
 }
 
 function modificaDocente(id) {
-    fetch(`<?= BASE_URL ?>/api_docenti.php?action=get&id=${id}`)
+    fetch(`<?= BASE_URL ?>/api/api_docenti.php?action=get&id=${id}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -498,7 +498,7 @@ function modificaDocente(id) {
                 document.getElementById('editNote').value = d.note || '';
                 
                 // Carica materie docente e selezionale
-                fetch(`<?= BASE_URL ?>/api_docenti.php?action=get_materie&id=${id}`)
+                fetch(`<?= BASE_URL ?>/api/api_docenti.php?action=get_materie&id=${id}`)
                     .then(r => r.json())
                     .then(materieData => {
                         const editSelect = document.getElementById('editMaterieSelect');
@@ -530,7 +530,7 @@ function aggiornaDocente() {
     const materieSelect = document.getElementById('editMaterieSelect');
     data.materie = Array.from(materieSelect.selectedOptions).map(opt => opt.value);
     
-    fetch('<?= BASE_URL ?>/api_docenti.php', {
+    fetch('<?= BASE_URL ?>/api/api_docenti.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({action: 'update', ...data})
@@ -570,7 +570,7 @@ function visualizzaDettagli(id) {
     const modal = new bootstrap.Modal(document.getElementById('viewDocenteModal'));
     modal.show();
     
-    fetch(`<?= BASE_URL ?>/api_get_info_docente.php?docente_id=${id}`)
+    fetch(`<?= BASE_URL ?>/api/api_get_info_docente.php?docente_id=${id}`)
         .then(response => response.json())
         .then(data => {
             if (data.error) throw new Error(data.error);
@@ -652,7 +652,7 @@ function visualizzaDettagli(id) {
                                         <div class="d-flex w-100 justify-content-between">
                                             <h6 class="mb-1">
                                                 <i class="bi bi-music-note"></i> ${l.materia || 'N/D'} - 
-                                                <span class="text-muted">${l.allievo}</span>
+                                                <span class="text-muted">${l.socio}</span>
                                             </h6>
                                             <small class="text-capitalize">${l.giorno_settimana}</small>
                                         </div>
@@ -682,7 +682,7 @@ function visualizzaDettagli(id) {
 function disattivaDocente() {
     const id = document.getElementById('idDocenteDaDisattivare').value;
     
-    fetch('<?= BASE_URL ?>/api_docenti.php', {
+    fetch('<?= BASE_URL ?>/api/api_docenti.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({action: 'delete', id: id})

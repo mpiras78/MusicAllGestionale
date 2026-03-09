@@ -26,8 +26,8 @@ foreach ($prenotazioni as $p) {
 echo "\n2. Inversione icone...\n";
 
 // Icona attuale prenotazione soci
-$icona_allievi = $db->queryOne("
-    SELECT icona FROM tipologie_evento WHERE codice = 'PREN_SALA_ALLIEVI'
+$icona_soci = $db->queryOne("
+    SELECT icona FROM tipologie_evento WHERE codice = 'PREN_SALA_SOCI'
 ")['icona'];
 
 // Icona attuale prenotazione docente
@@ -35,12 +35,12 @@ $icona_docente = $db->queryOne("
     SELECT icona FROM tipologie_evento WHERE codice = 'PREN_DOCENTE'
 ")['icona'];
 
-echo "   Prenotazione Soci aveva: $icona_allievi\n";
+echo "   Prenotazione Soci aveva: $icona_soci\n";
 echo "   Prenotazione Docente aveva: $icona_docente\n\n";
 
 // Swap
-$db->execute("UPDATE tipologie_evento SET icona = ? WHERE codice = 'PREN_SALA_ALLIEVI'", [$icona_docente]);
-$db->execute("UPDATE tipologie_evento SET icona = ? WHERE codice = 'PREN_DOCENTE'", [$icona_allievi]);
+$db->execute("UPDATE tipologie_evento SET icona = ? WHERE codice = 'PREN_SALA_SOCI'", [$icona_docente]);
+$db->execute("UPDATE tipologie_evento SET icona = ? WHERE codice = 'PREN_DOCENTE'", [$icona_soci]);
 
 echo "   ✓ Icone invertite!\n";
 

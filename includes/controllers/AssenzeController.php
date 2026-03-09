@@ -19,11 +19,11 @@ class AssenzeController {
         $params = $limit ? [$limit] : [];
         
         return $this->db->query("
-            SELECT a.*, 
-                   al.cognome || ' ' || al.nome as allievo,
+                 SELECT a.*, 
+                     al.cognome || ' ' || al.nome as socio,
                    d.cognome || ' ' || d.nome as docente
-            FROM assenze a
-            JOIN allievi al ON a.allievo_id = al.id
+                 FROM assenze a
+                 JOIN soci al ON a.socio_id = al.id
             JOIN docenti d ON a.docente_id = d.id
             WHERE a.recuperata = 0 
             AND a.da_recuperare = 1
@@ -44,11 +44,11 @@ class AssenzeController {
     }
     
     /**
-     * Ottiene assenze per allievo
+    * Ottiene assenze per socio
      */
-    public function getAssenzeAllievo($allievo_id, $limit = null) {
+    public function getAssenzeSocio($socio_id, $limit = null) {
         $limit_clause = $limit ? "LIMIT ?" : "";
-        $params = $limit ? [$allievo_id, $limit] : [$allievo_id];
+        $params = $limit ? [$socio_id, $limit] : [$socio_id];
         
         return $this->db->query("
             SELECT a.*, 
@@ -57,7 +57,7 @@ class AssenzeController {
             FROM assenze a
             JOIN docenti d ON a.docente_id = d.id
             LEFT JOIN materie m ON a.materia_id = m.id
-            WHERE a.allievo_id = ?
+            WHERE a.socio_id = ?
             ORDER BY a.data_assenza DESC
             $limit_clause
         ", $params);
@@ -71,11 +71,11 @@ class AssenzeController {
         $params = $limit ? [$docente_id, $limit] : [$docente_id];
         
         return $this->db->query("
-            SELECT a.*, 
-                   al.cognome || ' ' || al.nome as allievo,
+                 SELECT a.*, 
+                     al.cognome || ' ' || al.nome as socio,
                    m.nome as materia
-            FROM assenze a
-            JOIN allievi al ON a.allievo_id = al.id
+                 FROM assenze a
+                 JOIN soci al ON a.socio_id = al.id
             LEFT JOIN materie m ON a.materia_id = m.id
             WHERE a.docente_id = ?
             ORDER BY a.data_assenza DESC
@@ -95,9 +95,9 @@ class AssenzeController {
             $params[] = $filters['docente_id'];
         }
         
-        if (!empty($filters['allievo_id'])) {
-            $where[] = "a.allievo_id = ?";
-            $params[] = $filters['allievo_id'];
+        if (!empty($filters['socio_id'])) {
+            $where[] = "a.socio_id = ?";
+            $params[] = $filters['socio_id'];
         }
         
         if (!empty($filters['search'])) {
@@ -155,7 +155,7 @@ class AssenzeController {
                    a.tipo as causata_da,
                    a.motivo as note_annullamento,
                    a.da_recuperare as necessita_recupero,
-                   al.cognome || ' ' || al.nome as allievo,
+                   al.cognome || ' ' || al.nome as socio,
                    d.cognome || ' ' || d.nome as docente,
                    m.nome as materia,
                    l.giorno_settimana,
@@ -175,7 +175,7 @@ class AssenzeController {
                     AND r.annullato = 0
                     ORDER BY r.data_recupero) as date_recuperi
             FROM assenze a
-            JOIN allievi al ON a.allievo_id = al.id
+            JOIN soci al ON a.socio_id = al.id
             JOIN docenti d ON a.docente_id = d.id
             LEFT JOIN lezioni l ON a.lezione_id = l.id
             LEFT JOIN materie m ON l.materia_id = m.id
@@ -234,7 +234,7 @@ class AssenzeController {
         // Inserisci assenza - schema corretto
         $sql = "
             INSERT INTO assenze (
-                lezione_id, allievo_id, docente_id,
+                lezione_id, socio_id, docente_id,
                 data_assenza, tipo, da_recuperare, 
                 motivo, created_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
@@ -244,7 +244,7 @@ class AssenzeController {
         
         $this->db->execute($sql, [
             $data['lezione_id'],
-            $lezione['allievo_id'],
+            $lezione['socio_id'],
             $lezione['docente_id'],
             $data['data'],
             $data['causata_da'],
@@ -338,18 +338,13 @@ class AssenzeController {
         ") ?: [];
     }
     
-    /**
-     * Alias di compatibilità (retrocompatibilità)
-     */
-    public function getAllievi() {
-        return $this->getSoci();
-    }
+    // Retrocompatibilità rimossa: usare `getSoci()` direttamente
     
     /**
      * Ottiene contatori assenze/recuperi per anno scolastico corrente
      * Anno scolastico: settembre anno precedente - giugno anno corrente
      */
-    public function getContatoriAnnoScolastico($allievo_id, $lezione_id) {
+    public function getContatoriAnnoScolastico($socio_id, $lezione_id) {
         // Determina anno scolastico corrente
         $oggi = new DateTime();
         $mese = (int)$oggi->format('m');
@@ -370,24 +365,18 @@ class AssenzeController {
         $data_fine = "$anno_fine-06-30";
         
         // Conta assenze per questa lezione nell'anno scolastico
-        $assenze = $this->db->queryOne("
-            SELECT COUNT(*) as totale
-            FROM assenze
-            WHERE allievo_id = ?
-            AND lezione_id = ?
-            AND data_assenza BETWEEN ? AND ?
-        ", [$allievo_id, $lezione_id, $data_inizio, $data_fine]);
+        $assenze = $this->db->queryOne("\n            SELECT COUNT(*) as totale\n            FROM assenze\n            WHERE socio_id = ?\n            AND lezione_id = ?\n            AND data_assenza BETWEEN ? AND ?\n        ", [$socio_id, $lezione_id, $data_inizio, $data_fine]);
         
         // Conta recuperi per queste assenze
         $recuperi = $this->db->queryOne("
             SELECT COUNT(DISTINCT r.id) as totale
             FROM recuperi r
             JOIN assenze a ON r.assenza_id = a.id
-            WHERE a.allievo_id = ?
+            WHERE a.socio_id = ?
             AND a.lezione_id = ?
             AND a.data_assenza BETWEEN ? AND ?
             AND r.annullato = 0
-        ", [$allievo_id, $lezione_id, $data_inizio, $data_fine]);
+        ", [$socio_id, $lezione_id, $data_inizio, $data_fine]);
         
         return [
             'assenze' => $assenze['totale'] ?? 0,
@@ -403,7 +392,7 @@ class AssenzeController {
         $result = $this->db->queryOne("
             SELECT 
                 COUNT(*) as totale,
-                SUM(CASE WHEN tipo = 'allievo' THEN 1 ELSE 0 END) as da_allievo,
+                SUM(CASE WHEN tipo = 'socio' THEN 1 ELSE 0 END) as da_socio,
                 SUM(CASE WHEN tipo = 'docente' THEN 1 ELSE 0 END) as da_docente,
                 SUM(CASE WHEN da_recuperare = 1 THEN 1 ELSE 0 END) as da_recuperare,
                 SUM(CASE WHEN (SELECT COUNT(*) FROM recuperi WHERE assenza_id = assenze.id AND annullato = 0) > 0 THEN 1 ELSE 0 END) as con_recupero
@@ -412,7 +401,7 @@ class AssenzeController {
         
         return $result ?: [
             'totale' => 0,
-            'da_allievo' => 0,
+            'da_socio' => 0,
             'da_docente' => 0,
             'da_recuperare' => 0,
             'con_recupero' => 0

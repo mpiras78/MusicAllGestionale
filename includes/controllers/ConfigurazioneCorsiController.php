@@ -166,9 +166,9 @@ class ConfigurazioneCorsiController {
     }
     
     public function getPartecipantiLaboratorio($laboratorio_id) {
-        $sql = "SELECT lp.*, CONCAT(a.cognome, ' ', a.nome) as allievo_nome
+        $sql = "SELECT lp.*, CONCAT(a.cognome, ' ', a.nome) as socio_nome
                 FROM laboratorio_partecipanti lp
-                JOIN allievi a ON lp.allievo_id = a.id
+                JOIN soci a ON lp.socio_id = a.id
                 WHERE lp.tipo_laboratorio_id = ? AND lp.attivo = 1
                 ORDER BY a.cognome, a.nome";
         

@@ -3,7 +3,7 @@
     "description": "Sistema di gestione per scuole di musica con calendario settimanale",
     "type": "project",
     "license": "proprietary",
-    "version": "2.4.1",
+    "version": "2.5.0",
     "require": {
         "php": ">=7.4",
         "illuminate/database": "^9.0|^10.0",

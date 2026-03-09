@@ -81,7 +81,7 @@ if ($isDocente) {
     $filters['docente_id'] = $docente_id;
 } else {
     if (!empty($_GET['docente_id'])) $filters['docente_id'] = $_GET['docente_id'];
-    if (!empty($_GET['allievo_id'])) $filters['allievo_id'] = $_GET['allievo_id'];
+    if (!empty($_GET['socio_id'])) $filters['socio_id'] = $_GET['socio_id'];
     if (!empty($_GET['search'])) $filters['search'] = $_GET['search'];
     if (!empty($_GET['causata_da'])) $filters['causata_da'] = $_GET['causata_da'];
     if (!empty($_GET['stato_recupero'])) $filters['stato_recupero'] = $_GET['stato_recupero'];

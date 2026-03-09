@@ -2,13 +2,13 @@
 
 **Versione:** 2.2.1 (6 Marzo 2026)
 
-Sistema completo per la gestione di scuole di musica con calendario settimanale, gestione allievi, docenti, lezioni, assenze e iscrizioni accademiche.
+Sistema completo per la gestione di scuole di musica con calendario settimanale, gestione soci, docenti, lezioni, assenze e iscrizioni accademiche.
 
 ## 🎵 Caratteristiche Principali
 
 - **Calendario Settimanale Visuale**: Interfaccia simile a un foglio Excel con visualizzazione per aule e orari
 - **Gestione Iscrizioni**: Filtro per mese accademico (Settembre-Luglio) con gestione automatica delle date
-- **Gestione Completa**: Allievi, Docenti, Lezioni, Aule, Materie, Iscrizioni
+- **Gestione Completa**: Soci, Docenti, Lezioni, Aule, Materie, Iscrizioni
 - **Sistema Assenze/Recuperi**: Tracciamento assenze e programmazione recuperi
 - **Report e Statistiche**: Dashboard con statistiche in tempo reale
 - **Autenticazione Sicura**: Sistema di login con ruoli utente
@@ -139,7 +139,7 @@ musicall/
 │   ├── footer.php              # Footer template
 │   ├── header.php              # Header template
 │   └── helpers.php             # Funzioni helper
-├── allievi/                    # Gestione allievi (da implementare)
+├── soci/                    # Gestione soci (da implementare)
 ├── docenti/                    # Gestione docenti (da implementare)
 ├── lezioni/                    # Gestione lezioni (da implementare)
 ├── assenze/                    # Gestione assenze (da implementare)
@@ -159,10 +159,10 @@ musicall/
 ### Dashboard
 
 La dashboard mostra:
-- Statistiche generali (allievi, docenti, lezioni, assenze)
+- Statistiche generali (soci, docenti, lezioni, assenze)
 - Prossime lezioni della giornata
 - Assenze da recuperare
-- Ultimi allievi aggiunti
+- Ultimi soci aggiunti
 - Azioni rapide
 
 ### Calendario Settimanale
@@ -193,14 +193,14 @@ Il sistema supporta 3 ruoli:
 
 1. **Admin**: Accesso completo a tutte le funzionalità
 2. **Docente**: Visualizzazione propri orari e lezioni
-3. **Segreteria**: Gestione operativa (allievi, lezioni, assenze)
+3. **Segreteria**: Gestione operativa (soci, lezioni, assenze)
 
 ## 📊 Database
 
 ### Tabelle Principali
 
 - `users`: Utenti e autenticazione
-- `allievi`: Anagrafica allievi
+- `soci`: Anagrafica soci
 - `docenti`: Anagrafica docenti
 - `aule`: Sale/aule disponibili
 - `materie`: Materie/corsi offerti
@@ -213,7 +213,7 @@ Il sistema supporta 3 ruoli:
 ### Viste Preconfigurate
 
 - `v_calendario_settimanale`: Vista calendario completo
-- `v_statistiche_assenze`: Statistiche assenze per allievo
+- `v_statistiche_assenze`: Statistiche assenze per socio
 - `v_statistiche_docenti`: Statistiche per docente
 
 ## 🛠️ Personalizzazione
@@ -353,11 +353,11 @@ Modifica `config/database.php` per cambiare database:
 Eloquent ORM fornisce un'API elegante per interagire con il database:
 
 ```php
-use MusicAll\Models\Allievo;
+use MusicAll\Models\Socio;
 use MusicAll\Models\Lezione;
 
 // Creare
-$allievo = Allievo::create([
+$socio = Socio::create([
     'cognome' => 'Rossi',
     'nome' => 'Mario',
     'email' => 'mario@example.com',
@@ -365,32 +365,32 @@ $allievo = Allievo::create([
 ]);
 
 // Leggere
-$allievi = Allievo::all();
-$allievo = Allievo::find(1);
-$attivi = Allievo::attivi()->get();
+$soci = Socio::all();
+$socio = Socio::find(1);
+$attivi = Socio::attivi()->get();
 
 // Aggiornare
-$allievo->email = 'nuovo@email.com';
-$allievo->save();
+$socio->email = 'nuovo@email.com';
+$socio->save();
 
 // Eliminare
-$allievo->delete();
+$socio->delete();
 
 // Query complesse
-$allievi = Allievo::where('attivo', true)
+$soci = Socio::where('attivo', true)
     ->orderBy('cognome')
     ->limit(10)
     ->get();
 
 // Relazioni
-$lezioni = $allievo->lezioni;  // Tutte le lezioni dell'allievo
-$assenze = $allievo->assenze()->daRecuperare()->get();
+$lezioni = $socio->lezioni;  // Tutte le lezioni dell'socio
+$assenze = $socio->assenze()->daRecuperare()->get();
 ```
 
 ### Models Disponibili
 
 ```php
-use MusicAll\Models\Allievo;
+use MusicAll\Models\Socio;
 use MusicAll\Models\Docente;
 use MusicAll\Models\Lezione;
 use MusicAll\Models\Aula;
@@ -417,10 +417,10 @@ Test SQLite In-Memory con Eloquent ORM
 ✅ Database: :memory:
 ✅ Driver: sqlite
 
-Test 1: Creazione Allievi
-✅ Creati 3 allievi
+Test 1: Creazione Soci
+✅ Creati 3 soci
 
-Test 2: Query Allievi Attivi
+Test 2: Query Soci Attivi
 - Rossi Mario (mario.rossi@email.com)
 - Bianchi Laura (laura.bianchi@email.com)
 
@@ -464,8 +464,8 @@ composer install
 #    (backward compatibility garantita)
 
 # 3. Inizia ad usare i Models gradualmente
-use MusicAll\Models\Allievo;
-$allievi = Allievo::all();
+use MusicAll\Models\Socio;
+$soci = Socio::all();
 ```
 
 ---

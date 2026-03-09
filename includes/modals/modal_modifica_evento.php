@@ -45,7 +45,7 @@
 
 <script>
 function apriModalModificaEvento(eventoId) {
-    fetch(`<?= BASE_URL ?>/api_eventi.php?id=${eventoId}`)
+    fetch(`<?= BASE_URL ?>/api/api_eventi.php?id=${eventoId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success && data.data) {
@@ -55,7 +55,7 @@ function apriModalModificaEvento(eventoId) {
                 document.getElementById('modEvento_oraFine').value = evt.ora_fine.substr(0, 5);
                 
                 // Carica aule
-                fetch('<?= BASE_URL ?>/api_aule.php')
+                fetch('<?= BASE_URL ?>/api/api_aule.php')
                     .then(r => r.json())
                     .then(d => {
                         if (d.success) {
@@ -90,7 +90,7 @@ function salvaModificaEvento() {
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Salvataggio...';
     
-    fetch('<?= BASE_URL ?>/api_modifica_evento.php', {
+    fetch('<?= BASE_URL ?>/api/api_modifica_evento.php', {
         method: 'POST',
         body: formData
     })

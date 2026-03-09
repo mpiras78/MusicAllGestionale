@@ -4,7 +4,7 @@ use MusicAll\Models\Pagamento;
 use MusicAll\Models\Iscrizione;
 use MusicAll\Models\TipoPagamento;
 use MusicAll\Models\MetodoPagamento;
-use MusicAll\Models\Allievo;
+use MusicAll\Models\Socio;
 
 /**
  * Controller per gestione pagamenti
@@ -13,11 +13,11 @@ class PagamentiController
 {
     private $db;
     private $userId;
+    private $fk_col;
 
     public function __construct()
     {
-        $this->db = Database::getInstance()->getConnection();
-        $this->userId = $_SESSION['user_id'] ?? null;
+        $this->fk_col = 'socio_id';
     }
 
     /**
@@ -30,16 +30,18 @@ class PagamentiController
     {
         try {
             $query = Pagamento::query()
-                ->with(['allievo', 'iscrizione', 'tipoPagamento', 'metodoPagamento']);
+                ->with(['socio', 'iscrizione', 'tipoPagamento', 'metodoPagamento']);
 
             // Filtro anno accademico
             if (!empty($filters['anno_accademico'])) {
                 $query->perAnno($filters['anno_accademico']);
             }
 
-            // Filtro allievo
-            if (!empty($filters['allievo_id'])) {
-                $query->perAllievo($filters['allievo_id']);
+            // Filtro socio/socio
+            if (!empty($filters['socio_id'])) {
+                $query->perSocio($filters['socio_id']);
+            } elseif (!empty($filters['socio_id'])) {
+                $query->perSocio($filters['socio_id']);
             }
 
             // Filtro tipo pagamento
@@ -97,7 +99,7 @@ class PagamentiController
     {
         try {
             $pagamento = Pagamento::with([
-                'allievo',
+                'socio',
                 'iscrizione.materia',
                 'iscrizione.docente',
                 'tipoPagamento',
@@ -159,8 +161,9 @@ class PagamentiController
             $importoQuota = $includeQuota ? (float) ($data['importo_quota_associativa'] ?? 0) : 0;
 
             // Crea pagamento
+            $pagSocioId = $data['socio_id'] ?? $data['socio_id'] ?? null;
             $pagamento = Pagamento::create([
-                'allievo_id' => $data['allievo_id'],
+                $this->fk_col => $pagSocioId,
                 'iscrizione_id' => $data['iscrizione_id'] ?? null,
                 'tipo_pagamento_id' => $data['tipo_pagamento_id'],
                 'anno_accademico' => $data['anno_accademico'],
@@ -184,12 +187,13 @@ class PagamentiController
             $breakdown = $pagamento->getBreakdown();
 
             // Log attività
+            $pagamentoNome = $pagamento->socio_nome ?? $pagamento->socio_nome ?? '';
             SecurityHelper::logActivity(
                 $this->userId,
                 'pagamento_registrato',
                 'pagamento',
                 $pagamento->id,
-                "Registrato pagamento di €{$importoNetto} per {$pagamento->allievo_nome}"
+                "Registrato pagamento di €{$importoNetto} per {$pagamentoNome}"
             );
 
             return [
@@ -246,12 +250,13 @@ class PagamentiController
             $pagamento->save();
 
             // Log attività
+            $pagamentoNome = $pagamento->socio_nome ?? $pagamento->socio_nome ?? '';
             SecurityHelper::logActivity(
                 $this->userId,
                 'pagamento_aggiornato',
                 'pagamento',
                 $pagamento->id,
-                "Aggiornato pagamento per {$pagamento->allievo_nome}"
+                "Aggiornato pagamento per {$pagamentoNome}"
             );
 
             return [
@@ -286,7 +291,7 @@ class PagamentiController
                 ];
             }
 
-            $allievoNome = $pagamento->allievo_nome;
+            $socioNome = $pagamento->socio_nome ?? $pagamento->socio_nome ?? '';
             $importo = $pagamento->importo_netto;
             
             $pagamento->delete();
@@ -297,7 +302,7 @@ class PagamentiController
                 'pagamento_eliminato',
                 'pagamento',
                 $id,
-                "Eliminato pagamento di €{$importo} per {$allievoNome}"
+                "Eliminato pagamento di €{$importo} per {$socioNome}"
             );
 
             return [
@@ -393,7 +398,7 @@ class PagamentiController
             $pagamenti = Pagamento::where('stato', '!=', 'pagato')
                 ->whereNotNull('data_scadenza')
                 ->where('data_scadenza', '<=', $dataLimite)
-                ->with(['allievo', 'tipoPagamento'])
+                ->with(['socio', 'tipoPagamento'])
                 ->orderBy('data_scadenza', 'asc')
                 ->get();
 
@@ -424,7 +429,7 @@ class PagamentiController
             $pagamenti = Pagamento::where('stato', '!=', 'pagato')
                 ->whereNotNull('data_scadenza')
                 ->where('data_scadenza', '<', $oggi)
-                ->with(['allievo', 'tipoPagamento'])
+                ->with(['socio', 'tipoPagamento'])
                 ->orderBy('data_scadenza', 'asc')
                 ->get();
 
@@ -457,8 +462,8 @@ class PagamentiController
     {
         $errors = [];
 
-        if (empty($data['allievo_id'])) {
-            $errors[] = 'Allievo richiesto';
+        if (empty($data['socio_id']) && empty($data['socio_id'])) {
+            $errors[] = 'Socio richiesto';
         }
         if (empty($data['tipo_pagamento_id'])) {
             $errors[] = 'Tipo pagamento richiesto';

@@ -29,18 +29,18 @@ if (!$auth->hasRole(['admin', 'segreteria'])) {
 }
 
 // Ottieni parametri
-$allievo_id = $_GET['allievo_id'] ?? null;
+$socio_id = $_GET['socio_id'] ?? null;
 $lezione_id = $_GET['lezione_id'] ?? null;
 
-if (!$allievo_id || !$lezione_id) {
+if (!$socio_id || !$lezione_id) {
     http_response_code(400);
-    echo json_encode(['error' => 'Parametri allievo_id e lezione_id richiesti']);
+    echo json_encode(['error' => 'Parametri socio_id e lezione_id richiesti']);
     exit;
 }
 
 try {
     $assenzeCtrl = new AssenzeController();
-    $contatori = $assenzeCtrl->getContatoriAnnoScolastico($allievo_id, $lezione_id);
+    $contatori = $assenzeCtrl->getContatoriAnnoScolastico($socio_id, $lezione_id);
     
     echo json_encode([
         'success' => true,

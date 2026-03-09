@@ -40,10 +40,10 @@
 ### Logica Business Critica
 ```
 ✅ Assenze Docente:              100% (sempre da recuperare)
-✅ Assenze Allievo (1-3):        100% (obbligatorie)
-✅ Assenze Allievo (4+):         100% (a discrezione)
+✅ Assenze Socio (1-3):        100% (obbligatorie)
+✅ Assenze Socio (4+):         100% (a discrezione)
 ✅ Anno Scolastico:              100% (settembre-giugno)
-✅ Conteggio Assenze:            100% (per coppia allievo-lezione)
+✅ Conteggio Assenze:            100% (per coppia socio-lezione)
 ```
 
 ### Funzioni Calendario
@@ -108,11 +108,11 @@ vendor\bin\phpunit --coverage-html coverage/
 ### AssenzeRecuperiTest (CRITICO) ⭐⭐⭐
 ```
 ✔ Assenza docente sempre da recuperare
-✔ Prime 3 assenze allievo obbligatorie
-✔ Quarta assenza allievo non obbligatoria
+✔ Prime 3 assenze socio obbligatorie
+✔ Quarta assenza socio non obbligatoria
 ✔ Logica completa determinazione da recuperare
 ✔ Anno scolastico settembre giugno
-✔ Conteggio assenze per coppia allievo-lezione
+✔ Conteggio assenze per coppia socio-lezione
 ```
 
 ### CalendarioTest ⭐⭐⭐
@@ -144,8 +144,8 @@ vendor\bin\phpunit --coverage-html coverage/
 
 ### ValidationTest ⭐⭐
 ```
-✔ Validazione dati allievo completi
-✔ Validazione dati allievo incompleti
+✔ Validazione dati socio completi
+✔ Validazione dati socio incompleti
 ✔ Validazione orario lezione
 ✔ Validazione data assenza
 ✔ Validazione durata lezione standard

@@ -23,7 +23,7 @@
 ❌ tests/test_api_garau.php
 ❌ tests/test_sqlite.php
 ❌ tests/update_diaconita_lezioni.php
-❌ tests/trova_allievo_con_lezioni.php
+❌ tests/trova_socio_con_lezioni.php
 ❌ tests/test_api_lezioni.php
 ❌ tests/run_migration_anagrafica.php
 ❌ tests/Integration/DatabaseTest.php
@@ -58,20 +58,20 @@
 #### Step 1: Aggiornare Test Files
 ```bash
 # Per ogni file test:
-# 1. Sostituisci: FROM allievi → FROM soci
-# 2. Sostituisci: allievo_id → socio_id
-# 3. Sostituisci: getAllievi() → getSoci()
-# 4. Verifica query SQL: SELECT * FROM allievi WHERE...
+# 1. Sostituisci: FROM soci → FROM soci
+# 2. Sostituisci: socio_id → socio_id
+# 3. Sostituisci: getSoci() → getSoci()
+# 4. Verifica query SQL: SELECT * FROM soci WHERE...
 #    → SELECT * FROM soci WHERE...
 ```
 
 #### Step 2: Aggiornare Python Scripts
 ```python
 # Pattern di sostituzione:
-# 1. (SELECT id FROM allievi WHERE UPPER(cognome)...)
+# 1. (SELECT id FROM soci WHERE UPPER(cognome)...)
 #    → (SELECT id FROM soci WHERE UPPER(cognome)...)
-# 2. UPDATE allievi SET... → UPDATE soci SET...
-# 3. INSERT INTO allievi → INSERT INTO soci
+# 2. UPDATE soci SET... → UPDATE soci SET...
+# 3. INSERT INTO soci → INSERT INTO soci
 ```
 
 #### Step 3: Validazione Database
@@ -79,7 +79,7 @@
 # Verifica integrità
 sqlite3 database/musicall.sqlite << EOF
   SELECT COUNT(*) as totale_soci FROM soci;
-  SELECT COUNT(*) as backup_allievi FROM allievi_v2_backup;
+  SELECT COUNT(*) as backup_soci FROM soci_v2_backup;
   SELECT COUNT(*) as nuove_tabelle FROM sqlite_master 
     WHERE type='table' AND name LIKE '%iscrizioni%';
 EOF
@@ -132,8 +132,8 @@ git merge feature/fase2-test-suite
 ### Retrocompatibilità
 
 **Nota**: Fase 2 manterrà retrocompatibilità:
-- `api_allievi.php` continuerà a funzionare
-- `AllieviController` avrà alias `getAllievi()`
+- `api_soci.php` continuerà a funzionare
+- `SociController` avrà alias `getSoci()`
 - Test vecchi potranno essere aggiornati gradualmente
 
 ### Metriche di Successo Fase 2
@@ -174,7 +174,7 @@ Se necessario rollback:
 git revert HEAD~5..HEAD
 
 # 2. Ripristina backup
-# File backup: allievi_v2_backup.sql (generabile da allievi_v2_backup table)
+# File backup: soci_v2_backup.sql (generabile da soci_v2_backup table)
 
 # 3. Ripristina codebase
 git checkout <commit-pre-fase1>
@@ -197,7 +197,7 @@ git log --oneline -5  # Verifica Fase 1 completata
 
 ```
 ✅ Database Migration: COMPLETATO
-   - 245 record migrati allievi → soci
+   - 245 record migrati soci → soci
    - 12 nuove tabelle create
    - 9 viste ricreate
    - 5 nuove colonne aggiunte

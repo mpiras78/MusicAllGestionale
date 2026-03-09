@@ -9,7 +9,7 @@ echo "=== RECUPERI per 18 febbraio 2026 ===\n\n";
 $stmt = $db->query(
 "SELECT r.*, a.cognome, a.nome, au.nome as aula_nome
     FROM recuperi r
-    LEFT JOIN soci s ON r.allievo_id = s.id
+    LEFT JOIN soci s ON r.socio_id = s.id
     LEFT JOIN persone a ON s.persona_id = a.id
     LEFT JOIN aule au ON r.aula_id = au.id
     WHERE r.data_recupero = '2026-02-18'
@@ -20,7 +20,7 @@ $recuperi_table = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 echo "Trovati " . count($recuperi_table) . " recuperi in tabella 'recuperi':\n";
 foreach ($recuperi_table as $rec) {
-    echo "- ID: {$rec['id']}, Allievo: {$rec['cognome']} {$rec['nome']}, ";
+    echo "- ID: {$rec['id']}, Socio: {$rec['cognome']} {$rec['nome']}, ";
     echo "Orario: {$rec['ora_inizio']}-{$rec['ora_fine']}, ";
     echo "Aula: {$rec['aula_nome']}, Stato: {$rec['stato']}\n";
 }
@@ -33,7 +33,7 @@ $stmt = $db->query("
             a.cognome, a.nome, au.nome as aula_nome
         FROM eventi_calendario e
         INNER JOIN tipologie_evento t ON e.tipologia_id = t.id
-        LEFT JOIN soci s ON e.allievo_id = s.id
+        LEFT JOIN soci s ON e.socio_id = s.id
         LEFT JOIN persone a ON s.persona_id = a.id
         LEFT JOIN aule au ON e.aula_id = au.id
         WHERE e.data_evento = '2026-02-18'
@@ -46,7 +46,7 @@ $eventi = $stmt->fetchAll(PDO::FETCH_ASSOC);
 echo "Trovati " . count($eventi) . " eventi in 'eventi_calendario':\n";
 foreach ($eventi as $evt) {
     echo "- ID: {$evt['id']}, Tipo: {$evt['tipologia_nome']} ({$evt['categoria']}), ";
-    echo "Allievo: {$evt['cognome']} {$evt['nome']}, ";
+    echo "Socio: {$evt['cognome']} {$evt['nome']}, ";
     echo "Orario: {$evt['ora_inizio']}-{$evt['ora_fine']}, ";
     echo "Aula: {$evt['aula_nome']}\n";
 }

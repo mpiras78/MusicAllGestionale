@@ -14,8 +14,8 @@ if (!$auth->isLoggedIn()) {
     exit;
 }
 
-// Ottieni socio_id (accetta anche allievo_id per retrocompatibilità)
-$socio_id = $_GET['socio_id'] ?? $_GET['allievo_id'] ?? null;
+// Ottieni socio_id (accetta anche socio_id per retrocompatibilità)
+$socio_id = $_GET['socio_id'] ?? $_GET['socio_id'] ?? null;
 
 if (!$socio_id) {
     http_response_code(400);
@@ -51,15 +51,35 @@ try {
         WHERE socio_id = ?
     ", [$socio_id]);
     
-    // Recuperi
+    // Recuperi - conta per stato usando colonne reali
     $recuperi = $db->queryOne("
         SELECT 
             COUNT(*) as totale,
-            SUM(CASE WHEN completato = 1 THEN 1 ELSE 0 END) as completati,
-            SUM(CASE WHEN completato = 0 THEN 1 ELSE 0 END) as da_completare,
-            SUM(CASE WHEN programmato = 1 THEN 1 ELSE 0 END) as programmati
+            SUM(CASE WHEN annullato = 1 THEN 1 ELSE 0 END) as annullati,
+            SUM(CASE WHEN annullato = 0 AND data_recupero < DATE('now') THEN 1 ELSE 0 END) as completati,
+            SUM(CASE WHEN annullato = 0 AND data_recupero >= DATE('now') THEN 1 ELSE 0 END) as programmati
         FROM recuperi
         WHERE socio_id = ?
+    ", [$socio_id]);
+
+    // Prossimi recuperi (futuri, non annullati)
+    $prossimi_recuperi = $db->query("
+        SELECT
+            r.data_recupero,
+            r.ora_inizio,
+            r.ora_fine,
+            m.nome as materia,
+            d.cognome || ' ' || d.nome as docente,
+            au.nome as aula
+        FROM recuperi r
+        LEFT JOIN materie m ON r.materia_id = m.id
+        LEFT JOIN docenti d ON r.docente_id = d.id
+        LEFT JOIN aule au ON r.aula_id = au.id
+        WHERE r.socio_id = ?
+        AND r.annullato = 0
+        AND r.data_recupero >= DATE('now')
+        ORDER BY r.data_recupero, r.ora_inizio
+        LIMIT 5
     ", [$socio_id]);
     
     // Corsi frequentati
@@ -71,10 +91,11 @@ try {
             l.giorno_settimana,
             l.ora_inizio,
             l.ora_fine,
-            l.aula
+            a.nome as aula
         FROM lezioni l
         JOIN materie m ON l.materia_id = m.id
         JOIN docenti d ON l.docente_id = d.id
+        JOIN aule a on a.id=l.aula_id 
         WHERE l.socio_id = ?
         AND l.attiva = 1
         ORDER BY l.giorno_settimana, l.ora_inizio
@@ -87,7 +108,7 @@ try {
             ia.anno_accademico,
             ia.numero_tessera,
             ia.data_iscrizione,
-            ia.stato
+            ia.stato_pagamento as stato
         FROM iscrizioni_annuali ia
         WHERE ia.socio_id = ?
         ORDER BY ia.anno_accademico DESC
@@ -98,11 +119,12 @@ try {
         'success' => true,
         'socio' => $socio,
         'statistiche' => [
-            'assenze' => $assenze ?: ['totale' => 0, 'da_recuperare' => 0],
-            'recuperi' => $recuperi ?: ['totale' => 0, 'completati' => 0, 'programmati' => 0]
+            'assenze' => $assenze ?: ['totale' => 0, 'da_recuperare' => 0, 'causate_da_socio' => 0, 'causate_da_docente' => 0],
+            'recuperi' => $recuperi ?: ['totale' => 0, 'completati' => 0, 'programmati' => 0, 'annullati' => 0]
         ],
         'corsi' => $corsi ?: [],
-        'iscrizioni' => $iscrizioni ?: []
+        'iscrizioni' => $iscrizioni ?: [],
+        'prossimi_recuperi' => $prossimi_recuperi ?: []
     ]);
     
 } catch (Exception $e) {

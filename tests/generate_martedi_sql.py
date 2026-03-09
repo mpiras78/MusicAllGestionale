@@ -51,7 +51,7 @@ try:
         docente_mattina = docenti_map[col_letter][0] if docenti_map.get(col_letter) else None
         docente_pomeriggio = docenti_map[col_letter][1] if len(docenti_map.get(col_letter, [])) > 1 else docente_mattina
         
-        # Scansiona le righe per trovare orari e allievi
+        # Scansiona le righe per trovare orari e soci
         current_orario = None
         
         for row in range(8, 45):
@@ -60,7 +60,7 @@ try:
             # Controlla se è un orario nella colonna B
             cell_b = ws.cell(row=row, column=2).value
             if cell_b and isinstance(cell_b, str) and ('-' in cell_b or '/' in cell_b):
-                # Non fare nulla, l'orario è nella cella dell'allievo
+                # Non fare nulla, l'orario è nella cella dell'socio
                 pass
             
             if cell_value:
@@ -76,28 +76,28 @@ try:
                     
                     # Estrai orario
                     orario_part = None
-                    allievo_part = None
+                    socio_part = None
                     
                     for part in parts:
                         if '/' in part or '-' in part:
                             orario_part = part.replace('/', '-')
                             break
                     
-                    # Il resto è l'allievo
-                    allievo_part = value_str.replace(orario_part, '').strip() if orario_part else value_str
+                    # Il resto è l'socio
+                    socio_part = value_str.replace(orario_part, '').strip() if orario_part else value_str
                     
-                    # Pulisci nome allievo
-                    allievo_part = allievo_part.replace('(', '').replace(')', '').strip()
-                    allievo_parts = allievo_part.split()
+                    # Pulisci nome socio
+                    socio_part = socio_part.replace('(', '').replace(')', '').strip()
+                    socio_parts = socio_part.split()
                     
                     # Prendi solo il cognome (prima parola in maiuscolo)
-                    allievo = None
-                    for word in allievo_parts:
+                    socio = None
+                    for word in socio_parts:
                         if word.isupper() and len(word) > 2:
-                            allievo = word
+                            socio = word
                             break
                     
-                    if not allievo:
+                    if not socio:
                         continue
                     
                     # Salta prove
@@ -120,12 +120,12 @@ try:
                         lezioni.append({
                             'aula': aula_nome,
                             'orario': orario_part,
-                            'allievo': allievo,
+                            'socio': socio,
                             'docente': docente,
                             'materia': materia
                         })
                         
-                        print(f"  ✓ {orario_part} - {allievo} ({docente}) - {materia}")
+                        print(f"  ✓ {orario_part} - {socio} ({docente}) - {materia}")
     
     # Genera SQL
     for lez in lezioni:
@@ -139,10 +139,10 @@ try:
         if len(ora_fine.split(':')[0]) == 1:
             ora_fine = '0' + ora_fine
             
-        sql = f"""INSERT INTO lezioni (giorno_settimana, ora_inizio, ora_fine, id_aula, id_allievo, id_docente, id_materia)
+        sql = f"""INSERT INTO lezioni (giorno_settimana, ora_inizio, ora_fine, id_aula, id_socio, id_docente, id_materia)
     SELECT 'MARTEDÌ', '{ora_inizio}', '{ora_fine}',
            (SELECT id FROM aule WHERE UPPER(nome) LIKE '%{lez['aula']}%' LIMIT 1),
-           (SELECT s.id FROM soci s JOIN persone p ON s.persona_id = p.id WHERE UPPER(p.cognome) LIKE '%{lez['allievo']}%' LIMIT 1),
+           (SELECT s.id FROM soci s JOIN persone p ON s.persona_id = p.id WHERE UPPER(p.cognome) LIKE '%{lez['socio']}%' LIMIT 1),
            (SELECT id FROM docenti WHERE UPPER(cognome) LIKE '%{lez['docente']}%' LIMIT 1),
            (SELECT id FROM materie WHERE UPPER(nome) LIKE '%{lez['materia'].split()[0]}%' LIMIT 1);"""
         

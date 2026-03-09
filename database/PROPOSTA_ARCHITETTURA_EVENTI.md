@@ -7,7 +7,7 @@
 CREATE TABLE tipologie_evento (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     categoria TEXT NOT NULL CHECK(categoria IN ('lezione', 'prenotazione')),
-    codice TEXT UNIQUE NOT NULL,  -- es: 'LEZ_REGOLARE', 'PREN_SALA_ALLIEVI'
+    codice TEXT UNIQUE NOT NULL,  -- es: 'LEZ_REGOLARE', 'PREN_SALA_SOCI'
     nome TEXT NOT NULL,
     descrizione TEXT,
     colore_bg TEXT DEFAULT '#ffffff',
@@ -31,7 +31,7 @@ INSERT INTO tipologie_evento (categoria, codice, nome, descrizione, colore_bg, c
 ('lezione', 'LEZ_RECUPERO', 'Recupero', 'Lezione di recupero', '#e8f5e9', '#4caf50', 'bi-arrow-repeat', 4),
 
 -- PRENOTAZIONI
-('prenotazione', 'PREN_SALA_ALLIEVI', 'Prenotazione Sala Allievi', 'Prenotazione sala per allievi iscritti (gratuita)', '#e8f5e9', '#4caf50', 'bi-door-open', 11),
+('prenotazione', 'PREN_SALA_SOCI', 'Prenotazione Sala Soci', 'Prenotazione sala per soci iscritti (gratuita)', '#e8f5e9', '#4caf50', 'bi-door-open', 11),
 ('prenotazione', 'PREN_DOCENTE', 'Prenotazione Docente', 'Prenotazione sala da parte di docenti', '#fff9c4', '#fdd835', 'bi-person-badge', 12),
 ('prenotazione', 'PREN_ESTERNO', 'Prenotazione Esterno', 'Prenotazione sala da soci occasionali/esterni', '#ffebee', '#ef5350', 'bi-calendar-event', 13);
 ```
@@ -66,7 +66,7 @@ CREATE INDEX idx_soci_occasionali_nome ON soci_ocasionali(cognome, nome);
 ```sql
 CREATE TABLE iscrizioni (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    allievo_id INTEGER NOT NULL,
+    socio_id INTEGER NOT NULL,
     mese INTEGER NOT NULL CHECK(mese BETWEEN 1 AND 12),
     anno INTEGER NOT NULL,
     data_inizio DATE NOT NULL,  -- Primo giorno del mese
@@ -76,13 +76,13 @@ CREATE TABLE iscrizioni (
     created_at DATETIME DEFAULT (datetime('now','localtime')),
     created_by INTEGER,
     
-    FOREIGN KEY (allievo_id) REFERENCES allievi(id) ON DELETE CASCADE,
+    FOREIGN KEY (socio_id) REFERENCES soci(id) ON DELETE CASCADE,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
     
-    UNIQUE(allievo_id, mese, anno)
+    UNIQUE(socio_id, mese, anno)
 );
 
-CREATE INDEX idx_iscrizioni_allievo ON iscrizioni(allievo_id);
+CREATE INDEX idx_iscrizioni_socio ON iscrizioni(socio_id);
 CREATE INDEX idx_iscrizioni_periodo ON iscrizioni(anno, mese);
 CREATE INDEX idx_iscrizioni_stato ON iscrizioni(stato);
 ```
@@ -118,7 +118,7 @@ CREATE TABLE eventi_calendario (
     materia_id INTEGER,
     
     -- Partecipanti (mutually exclusive)
-    allievo_id INTEGER,            -- Per lezioni allievi
+    socio_id INTEGER,            -- Per lezioni soci
     socio_occasionale_id INTEGER,  -- Per prenotazioni esterni
     
     -- Relazione con iscrizione (per lezioni ricorrenti)
@@ -141,7 +141,7 @@ CREATE TABLE eventi_calendario (
     FOREIGN KEY (aula_id) REFERENCES aule(id) ON DELETE CASCADE,
     FOREIGN KEY (docente_id) REFERENCES docenti(id) ON DELETE SET NULL,
     FOREIGN KEY (materia_id) REFERENCES materie(id) ON DELETE SET NULL,
-    FOREIGN KEY (allievo_id) REFERENCES allievi(id) ON DELETE CASCADE,
+    FOREIGN KEY (socio_id) REFERENCES soci(id) ON DELETE CASCADE,
     FOREIGN KEY (socio_occasionale_id) REFERENCES soci_ocasionali(id) ON DELETE SET NULL,
     FOREIGN KEY (iscrizione_id) REFERENCES iscrizioni(id) ON DELETE CASCADE,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
@@ -155,10 +155,10 @@ CREATE TABLE eventi_calendario (
         (ricorrente = 1 AND data_evento IS NULL AND giorno_settimana IS NOT NULL)
     ),
     CHECK (
-        -- Solo uno tra allievo_id e socio_occasionale_id può essere valorizzato
-        (allievo_id IS NOT NULL AND socio_occasionale_id IS NULL) OR
-        (allievo_id IS NULL AND socio_occasionale_id IS NOT NULL) OR
-        (allievo_id IS NULL AND socio_occasionale_id IS NULL)
+        -- Solo uno tra socio_id e socio_occasionale_id può essere valorizzato
+        (socio_id IS NOT NULL AND socio_occasionale_id IS NULL) OR
+        (socio_id IS NULL AND socio_occasionale_id IS NOT NULL) OR
+        (socio_id IS NULL AND socio_occasionale_id IS NULL)
     )
 );
 
@@ -168,7 +168,7 @@ CREATE INDEX idx_eventi_data ON eventi_calendario(data_evento);
 CREATE INDEX idx_eventi_giorno ON eventi_calendario(giorno_settimana, ricorrente);
 CREATE INDEX idx_eventi_aula ON eventi_calendario(aula_id);
 CREATE INDEX idx_eventi_docente ON eventi_calendario(docente_id);
-CREATE INDEX idx_eventi_allievo ON eventi_calendario(allievo_id);
+CREATE INDEX idx_eventi_socio ON eventi_calendario(socio_id);
 CREATE INDEX idx_eventi_socio ON eventi_calendario(socio_occasionale_id);
 CREATE INDEX idx_eventi_iscrizione ON eventi_calendario(iscrizione_id);
 CREATE INDEX idx_eventi_periodo ON eventi_calendario(data_inizio, data_fine);
@@ -184,7 +184,7 @@ CREATE TABLE listini_prezzi (
     
     -- Destinatario
     destinatario TEXT NOT NULL CHECK(destinatario IN (
-        'allievo_iscritto',  -- Allievi con iscrizione attiva
+        'socio_iscritto',  -- Soci con iscrizione attiva
         'docente',           -- Docenti interni
         'socio_occasionale', -- Esterni/soci occasionali
         'altro'
@@ -212,8 +212,8 @@ CREATE INDEX idx_listini_validita ON listini_prezzi(data_inizio_validita, data_f
 
 -- Dati iniziali
 INSERT INTO listini_prezzi (tipologia_id, destinatario, prezzo_orario, data_inizio_validita) VALUES
--- Prenotazioni sale allievi: GRATUITO
-((SELECT id FROM tipologie_evento WHERE codice='PREN_SALA_ALLIEVI'), 'allievo_iscritto', 0.00, '2026-01-01'),
+-- Prenotazioni sale soci: GRATUITO
+((SELECT id FROM tipologie_evento WHERE codice='PREN_SALA_SOCI'), 'socio_iscritto', 0.00, '2026-01-01'),
 
 -- Prenotazioni docenti: €15/ora
 ((SELECT id FROM tipologie_evento WHERE codice='PREN_DOCENTE'), 'docente', 15.00, '2026-01-01'),
@@ -235,7 +235,7 @@ CREATE TABLE pagamenti (
     -- Riferimenti
     iscrizione_id INTEGER,         -- Per iscrizioni mensili
     evento_id INTEGER,             -- Per prenotazioni singole
-    allievo_id INTEGER,
+    socio_id INTEGER,
     socio_occasionale_id INTEGER,
     
     -- Importi
@@ -270,7 +270,7 @@ CREATE TABLE pagamenti (
     
     FOREIGN KEY (iscrizione_id) REFERENCES iscrizioni(id) ON DELETE SET NULL,
     FOREIGN KEY (evento_id) REFERENCES eventi_calendario(id) ON DELETE SET NULL,
-    FOREIGN KEY (allievo_id) REFERENCES allievi(id) ON DELETE SET NULL,
+    FOREIGN KEY (socio_id) REFERENCES soci(id) ON DELETE SET NULL,
     FOREIGN KEY (socio_occasionale_id) REFERENCES soci_ocasionali(id) ON DELETE SET NULL,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
     
@@ -279,16 +279,16 @@ CREATE TABLE pagamenti (
         iscrizione_id IS NOT NULL OR evento_id IS NOT NULL
     ),
     CHECK (
-        -- Solo uno tra allievo e socio occasionale
-        (allievo_id IS NOT NULL AND socio_occasionale_id IS NULL) OR
-        (allievo_id IS NULL AND socio_occasionale_id IS NOT NULL)
+        -- Solo uno tra socio e socio occasionale
+        (socio_id IS NOT NULL AND socio_occasionale_id IS NULL) OR
+        (socio_id IS NULL AND socio_occasionale_id IS NOT NULL)
     )
 );
 
 CREATE INDEX idx_pagamenti_tipo ON pagamenti(tipo, stato);
 CREATE INDEX idx_pagamenti_iscrizione ON pagamenti(iscrizione_id);
 CREATE INDEX idx_pagamenti_evento ON pagamenti(evento_id);
-CREATE INDEX idx_pagamenti_allievo ON pagamenti(allievo_id);
+CREATE INDEX idx_pagamenti_socio ON pagamenti(socio_id);
 CREATE INDEX idx_pagamenti_socio ON pagamenti(socio_ocasionale_id);
 CREATE INDEX idx_pagamenti_scadenza ON pagamenti(data_scadenza, stato);
 ```
@@ -325,11 +325,11 @@ CREATE INDEX idx_iscrizioni_dettagli_evento ON iscrizioni_dettagli(evento_id);
 
 ## 🎯 ESEMPI PRATICI
 
-### **Scenario 1: Allievo iscritto a 2 corsi per Febbraio 2026**
+### **Scenario 1: Socio iscritto a 2 corsi per Febbraio 2026**
 
 ```sql
 -- 1. Creo iscrizione mensile
-INSERT INTO iscrizioni (allievo_id, mese, anno, data_inizio, data_fine, stato) 
+INSERT INTO iscrizioni (socio_id, mese, anno, data_inizio, data_fine, stato) 
 VALUES (25, 2, 2026, '2026-02-01', '2026-02-28', 'attiva');
 
 SET @iscrizione_id = last_insert_rowid();
@@ -338,7 +338,7 @@ SET @iscrizione_id = last_insert_rowid();
 INSERT INTO eventi_calendario (
     tipologia_id, ricorrente, giorno_settimana,
     data_inizio, data_fine, ora_inizio, ora_fine,
-    aula_id, docente_id, materia_id, allievo_id,
+    aula_id, docente_id, materia_id, socio_id,
     iscrizione_id
 ) VALUES (
     (SELECT id FROM tipologie_evento WHERE codice='LEZ_REGOLARE'),
@@ -354,7 +354,7 @@ SET @evento_chitarra_id = last_insert_rowid();
 INSERT INTO eventi_calendario (
     tipologia_id, ricorrente, giorno_settimana,
     data_inizio, data_fine, ora_inizio, ora_fine,
-    aula_id, docente_id, materia_id, allievo_id,
+    aula_id, docente_id, materia_id, socio_id,
     iscrizione_id
 ) VALUES (
     (SELECT id FROM tipologie_evento WHERE codice='LEZ_REGOLARE'),
@@ -374,7 +374,7 @@ VALUES
 
 -- 5. Genero pagamento mensile (totale 170€)
 INSERT INTO pagamenti (
-    tipo, iscrizione_id, allievo_id,
+    tipo, iscrizione_id, socio_id,
     importo_totale, importo_residuo,
     stato, data_emissione, data_scadenza
 ) VALUES (
@@ -449,14 +449,14 @@ SELECT
     -- Docente
     d.cognome || ' ' || d.nome as docente,
     
-    -- Partecipante (allievo O socio esterno)
+    -- Partecipante (socio O socio esterno)
     COALESCE(
         al.cognome || ' ' || al.nome,
         so.cognome || ' ' || so.nome
     ) as partecipante,
     
     CASE 
-        WHEN e.allievo_id IS NOT NULL THEN 'allievo'
+        WHEN e.socio_id IS NOT NULL THEN 'socio'
         WHEN e.socio_occasionale_id IS NOT NULL THEN 'esterno'
         ELSE NULL
     END as tipo_partecipante,
@@ -483,7 +483,7 @@ FROM eventi_calendario e
 INNER JOIN tipologie_evento t ON e.tipologia_id = t.id
 LEFT JOIN aule a ON e.aula_id = a.id
 LEFT JOIN docenti d ON e.docente_id = d.id
-LEFT JOIN allievi al ON e.allievo_id = al.id
+LEFT JOIN soci al ON e.socio_id = al.id
 LEFT JOIN soci_occasionali so ON e.socio_occasionale_id = so.id
 LEFT JOIN materie m ON e.materia_id = m.id
 LEFT JOIN iscrizioni i ON e.iscrizione_id = i.id

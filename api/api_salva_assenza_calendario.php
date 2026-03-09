@@ -46,7 +46,7 @@ try {
     // Valida parametri richiesti
     $lezione_id = $data['lezione_id'] ?? null;
     $data_lezione = $data['data_lezione'] ?? null;
-    $causale = $data['causale'] ?? 'allievo';
+    $causale = $data['causale'] ?? 'socio';
     $note = $data['note'] ?? '';
     
     if (!$lezione_id || !$data_lezione) {
@@ -92,12 +92,12 @@ try {
     
     // Determina se necessita recupero secondo la policy:
     // - Assenze docente: sempre da recuperare
-    // - Assenze allievo: prime 3 assenze da recuperare, dalla 4a in poi a discrezione
+    // - Assenze socio: prime 3 assenze da recuperare, dalla 4a in poi a discrezione
     $necessita_recupero = 1; // Default: sempre da recuperare
     
-    if ($causale === 'allievo') {
-        // Conta assenze precedenti dell'allievo per questa lezione nell'anno scolastico corrente
-        $contatori = $assenzeCtrl->getContatoriAnnoScolastico($lezione['allievo_id'], $lezione_id);
+    if ($causale === 'socio') {
+        // Conta assenze precedenti dell'socio per questa lezione nell'anno scolastico corrente
+        $contatori = $assenzeCtrl->getContatoriAnnoScolastico($lezione['socio_id'], $lezione_id);
         $num_assenze_precedenti = $contatori['assenze'];
         
         // Se ha già 3+ assenze, dalla quarta in poi è a discrezione

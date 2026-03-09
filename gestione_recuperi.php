@@ -151,7 +151,7 @@ require_once 'includes/header.php';
                             <tr>
                                 <th>Data Recupero</th>
                                 <th>Orario</th>
-                                <th>Allievo</th>
+                                <th>Socio</th>
                                 <th>Docente</th>
                                 <th>Materia</th>
                                 <th>Aula</th>
@@ -182,7 +182,7 @@ require_once 'includes/header.php';
                                         <?php endif; ?>
                                     </td>
                                     <td><?= formatTime($rec['ora_inizio']) ?> - <?= formatTime($rec['ora_fine']) ?></td>
-                                    <td><strong><?= e($rec['allievo']) ?></strong></td>
+                                    <td><strong><?= e($rec['socio']) ?></strong></td>
                                     <td><?= e($rec['docente']) ?></td>
                                     <td><?= e($rec['materia']) ?></td>
                                     <td><?= e($rec['aula'] ?? 'Da definire') ?></td>
@@ -223,7 +223,7 @@ require_once 'includes/header.php';
                                                     <input type="hidden" name="action" value="annulla">
                                                     <input type="hidden" name="recupero_id" value="<?= $rec['id'] ?>">
                                                     
-                                                    <p>Stai annullando il recupero per <strong><?= e($rec['allievo']) ?></strong></p>
+                                                    <p>Stai annullando il recupero per <strong><?= e($rec['socio']) ?></strong></p>
                                                     <p class="text-muted">
                                                         <?= formatDate($rec['data_recupero']) ?> - 
                                                         <?= formatTime($rec['ora_inizio']) ?>-<?= formatTime($rec['ora_fine']) ?>

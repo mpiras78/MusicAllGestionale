@@ -12,9 +12,9 @@ class Assenza extends Model
         'recuperata' => 'boolean',
     ];
     
-    public function allievo()
+    public function socio()
     {
-        return $this->belongsTo(Allievo::class, 'allievo_id');
+        return $this->belongsTo(Socio::class, 'socio_id');
     }
     
     public function lezione()

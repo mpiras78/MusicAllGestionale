@@ -10,7 +10,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Container\Container;
-use MusicAll\Models\Allievo;
+use MusicAll\Models\Socio;
 use MusicAll\Models\Docente;
 use MusicAll\Models\Aula;
 
@@ -37,7 +37,7 @@ echo "✅ Database: SQLite in-memory\n\n";
 
 // Carica Models
 require_once __DIR__ . '/../app/Models/Model.php';
-require_once __DIR__ . '/../app/Models/Allievo.php';
+require_once __DIR__ . '/../app/Models/Socio.php';
 require_once __DIR__ . '/../app/Models/Docente.php';
 require_once __DIR__ . '/../app/Models/Aula.php';
 
@@ -45,7 +45,7 @@ try {
     // Crea tabelle
     echo "Creazione tabelle...\n";
     
-    // Usare la tabella `soci` (model Allievo punta a 'soci')
+    // Usare la tabella `soci` (model Socio punta a 'soci')
     Capsule::schema()->create('soci', function ($table) {
         $table->id();
         $table->string('cognome');
@@ -82,10 +82,10 @@ try {
     echo "✅ Tabelle create\n\n";
     
     // Test CRUD
-    echo "Test 1: Creazione Soci (ex Allievi)\n";
+    echo "Test 1: Creazione Soci (ex Soci)\n";
     echo "-------------------------\n";
     
-    Allievo::create([
+    Socio::create([
         'cognome' => 'Rossi',
         'nome' => 'Mario',
         'email' => 'mario.rossi@email.com',
@@ -93,19 +93,19 @@ try {
         'attivo' => true
     ]);
     
-    Allievo::create([
+    Socio::create([
         'cognome' => 'Bianchi',
         'nome' => 'Laura',
         'email' => 'laura.bianchi@email.com',
         'attivo' => true
     ]);
     
-    echo "✅ Creati " . Allievo::count() . " soci\n\n";
+    echo "✅ Creati " . Socio::count() . " soci\n\n";
     
     echo "Test 2: Query con Scopes\n";
     echo "------------------------\n";
     
-    $sociAttivi = Allievo::attivi()->get();
+    $sociAttivi = Socio::attivi()->get();
     foreach ($sociAttivi as $socio) {
         echo "- {$socio->nome_completo} ({$socio->email})\n";
     }
@@ -135,7 +135,7 @@ try {
     echo "========================================\n";
     echo "STATISTICHE FINALI\n";
     echo "========================================\n";
-    echo "Soci: " . Allievo::count() . "\n";
+    echo "Soci: " . Socio::count() . "\n";
     echo "Docenti: " . Docente::count() . "\n";
     echo "Aule: " . Aula::count() . "\n\n";
     

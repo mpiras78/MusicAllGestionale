@@ -1,13 +1,13 @@
 <?php
 /**
- * Analizza file Excel e estrae allievi e docenti
+ * Analizza file Excel e estrae soci e docenti
  */
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
-$excelFile = __DIR__ . '/../template/Orario Allievi MusicAll.xlsx';
+$excelFile = __DIR__ . '/../template/Orario Soci MusicAll.xlsx';
 
 if (!file_exists($excelFile)) {
     echo "❌ File non trovato: $excelFile\n";
@@ -24,7 +24,7 @@ try {
     $sheet = $spreadsheet->getActiveSheet();
     
     // Array per raccogliere dati
-    $allievi = [];
+    $soci = [];
     $docenti = [];
     $lezioni = [];
     
@@ -64,20 +64,21 @@ try {
             continue;
         }
         
-        // Estrai nome allievo (di solito prima colonna significativa)
-        $nomeAllievo = null;
+        // Estrai nome socio (di solito prima colonna significativa)
+        $nomeSocio = null;
         $nomeDocente = null;
         
         // Cerca colonne con nomi comuni
         foreach ($rowData as $key => $value) {
             $keyLower = strtolower($key);
             
-            // Cerca allievo
-            if (stripos($keyLower, 'allievo') !== false || 
+            // Cerca socio
+            if (stripos($keyLower, 'socio') !== false || 
+                stripos($keyLower, 'socio') !== false ||
                 stripos($keyLower, 'nome') !== false ||
                 stripos($keyLower, 'studente') !== false) {
-                if ($value && !$nomeAllievo) {
-                    $nomeAllievo = trim($value);
+                if ($value && !$nomeSocio) {
+                    $nomeSocio = trim($value);
                 }
             }
             
@@ -92,9 +93,9 @@ try {
             }
         }
         
-        // Aggiungi allievo
-        if ($nomeAllievo && !in_array($nomeAllievo, $allievi)) {
-            $allievi[] = $nomeAllievo;
+        // Aggiungi socio
+        if ($nomeSocio && !in_array($nomeSocio, $soci)) {
+            $soci[] = $nomeSocio;
         }
         
         // Aggiungi docente
@@ -106,17 +107,17 @@ try {
     }
     
     // Ordina per nome
-    sort($allievi);
+    sort($soci);
     sort($docenti);
     
     echo "========================================\n";
     echo "RISULTATI ESTRAZIONE\n";
     echo "========================================\n\n";
     
-    echo "ALLIEVI TROVATI: " . count($allievi) . "\n";
+    echo "SOCI TROVATI: " . count($soci) . "\n";
     echo "----------------------------------------\n";
-    foreach ($allievi as $i => $allievo) {
-        echo ($i + 1) . ". $allievo\n";
+    foreach ($soci as $i => $socio) {
+        echo ($i + 1) . ". $socio\n";
     }
     
     echo "\n========================================\n\n";
@@ -133,7 +134,7 @@ try {
     
     // Salva i dati in JSON per step successivi
     $output = [
-        'allievi' => $allievi,
+        'soci' => $soci,
         'docenti' => $docenti,
         'lezioni' => $lezioni,
         'headers' => array_values($headers)

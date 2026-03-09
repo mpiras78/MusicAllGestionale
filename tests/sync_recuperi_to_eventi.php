@@ -32,7 +32,7 @@ $stmt = $db->query("
         WHERE e.tipologia_id = {$tipologia_id}
         AND e.data_evento = r.data_recupero
         AND e.ora_inizio = r.ora_inizio
-        AND e.allievo_id = r.allievo_id
+        AND e.socio_id = r.socio_id
     )
     ORDER BY r.data_recupero, r.ora_inizio
 ");
@@ -60,7 +60,7 @@ try {
             ora_fine,
             aula_id,
             docente_id,
-            allievo_id,
+            socio_id,
             materia_id,
             titolo,
             note,
@@ -76,7 +76,7 @@ try {
             :ora_fine,
             :aula_id,
             :docente_id,
-            :allievo_id,
+            :socio_id,
             :materia_id,
             'Recupero',
             :note,
@@ -103,7 +103,7 @@ try {
             ':ora_fine' => $rec['ora_fine'],
             ':aula_id' => $rec['aula_id'],
             ':docente_id' => $rec['docente_id'],
-            ':allievo_id' => $rec['allievo_id'],
+            ':socio_id' => $rec['socio_id'],
             ':materia_id' => $rec['materia_id'],
             ':note' => $note_recupero
         ]);

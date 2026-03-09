@@ -1,7 +1,7 @@
 <?php
 /**
- * Script: Ricrea le viste dopo la migrazione da allievi a soci
- * Aggiorna tutte le viste per usare la tabella "soci" al posto di "allievi"
+ * Script: Ricrea le viste dopo la migrazione da soci a soci
+ * Aggiorna tutte le viste per usare la tabella "soci" al posto di "soci"
  */
 
 try {
@@ -16,7 +16,7 @@ try {
     echo "🔧 Ricreazione viste per schema soci...\n\n";
     
     // DROP viste vecchie se esistono (per sicurezza)
-    $viste_vecchie = ['v_allievi', 'v_assenze_da_recuperare', 'v_recuperi_con_stato', 
+    $viste_vecchie = ['v_soci', 'v_assenze_da_recuperare', 'v_recuperi_con_stato', 
                       'v_calendario_unificato', 'v_pagamenti_dettagliati', 
                       'v_docenti', 'v_soci_occasionali', 'v_persone_multirolo', 
                       'v_calendario_completo'];

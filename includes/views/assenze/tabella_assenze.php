@@ -22,7 +22,7 @@ if (!isset($assenze) || !isset($canCreate) || !isset($isDocente)) {
                 <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
                 <h5 class="mt-3">Nessuna assenza registrata</h5>
                 <p class="text-muted">
-                    <?= $isDocente ? 'Non ci sono assenze per i tuoi allievi' : 'Non ci sono assenze corrispondenti ai filtri selezionati' ?>
+                    <?= $isDocente ? 'Non ci sono assenze per i tuoi soci' : 'Non ci sono assenze corrispondenti ai filtri selezionati' ?>
                 </p>
             </div>
         <?php else: ?>
@@ -30,7 +30,7 @@ if (!isset($assenze) || !isset($canCreate) || !isset($isDocente)) {
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Allievo</th>
+                            <th>Socio</th>
                             <th>Data Assenza</th>
                             <th>Orario Orig.</th>
                             <th>Docente</th>
@@ -53,7 +53,7 @@ if (!isset($assenze) || !isset($canCreate) || !isset($isDocente)) {
                             $recupero_parziale = ($minuti_da_recuperare > 0 && $minuti_recuperati > 0 && $minuti_recuperati < $minuti_da_recuperare);
                             ?>
                             <tr>
-                                <td><strong><?= e($ass['allievo']) ?></strong></td>
+                                <td><strong><?= e($ass['socio']) ?></strong></td>
                                 <td><?= formatDate($ass['data']) ?></td>
                                 <td class="small">
                                     <?php if ($ass['giorno_settimana']): ?>
@@ -66,9 +66,9 @@ if (!isset($assenze) || !isset($canCreate) || !isset($isDocente)) {
                                 <td><?= e($ass['docente']) ?></td>
                                 <td><?= e($ass['materia']) ?></td>
                                 <td>
-                                    <?php if ($ass['causata_da'] == 'allievo'): ?>
+                                    <?php if ($ass['causata_da'] == 'socio'): ?>
                                         <span class="badge bg-warning text-dark">
-                                            <i class="bi bi-person"></i> Allievo
+                                            <i class="bi bi-person"></i> Socio
                                         </span>
                                     <?php else: ?>
                                         <span class="badge bg-info">
@@ -96,7 +96,11 @@ if (!isset($assenze) || !isset($canCreate) || !isset($isDocente)) {
                                             <i class="bi bi-hourglass-split"></i> <?= e($ass['date_recuperi']) ?>
                                         </span>
                                     <?php else: ?>
-                                        <span class="badge bg-success">
+                                        <span class="badge bg-success" 
+                                              <?php if (!empty($ass['date_recuperi'])): ?>
+                                              data-bs-toggle="tooltip" data-bs-placement="top"
+                                              title="Recupero programmato: <?= e($ass['date_recuperi']) ?>"
+                                              <?php endif; ?>>
                                             <i class="bi bi-check-circle"></i> Programmato
                                         </span>
                                     <?php endif; ?>
@@ -184,7 +188,7 @@ if (!isset($assenze) || !isset($canCreate) || !isset($isDocente)) {
                             <input type="hidden" name="assenza_id" value="<?= $ass['id'] ?>">
                             
                             <div class="alert alert-info">
-                                <strong>Allievo:</strong> <?= e($ass['allievo']) ?><br>
+                                <strong>Socio:</strong> <?= e($ass['socio']) ?><br>
                                 <strong>Docente:</strong> <?= e($ass['docente']) ?><br>
                                 <strong>Materia:</strong> <?= e($ass['materia']) ?>
                             </div>
@@ -225,7 +229,7 @@ if (!isset($assenze) || !isset($canCreate) || !isset($isDocente)) {
                             
                             <div class="alert alert-info">
                                 <strong>Assenza da recuperare:</strong><br>
-                                <?= e($ass['allievo']) ?> - <?= e($ass['materia']) ?><br>
+                                <?= e($ass['socio']) ?> - <?= e($ass['materia']) ?><br>
                                 <?= formatDate($ass['data']) ?>, <?= e($ass['giorno_settimana']) ?> 
                                 <?= formatTime($ass['ora_inizio']) ?>-<?= formatTime($ass['ora_fine']) ?>
                                 <?php if ($minuti_da_recuperare > 0 && $minuti_recuperati > 0): ?>

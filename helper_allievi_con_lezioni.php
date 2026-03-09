@@ -21,9 +21,9 @@ require_once 'includes/header.php';
     <div class="row mb-4">
         <div class="col">
             <h1 class="h3 mb-0">
-                <i class="bi bi-info-circle"></i> Helper - Allievi con Lezioni
+                <i class="bi bi-info-circle"></i> Helper - Soci con Lezioni
             </h1>
-            <p class="text-muted mb-0">Lista allievi che hanno lezioni programmate (utilizzabili per creare assenze)</p>
+            <p class="text-muted mb-0">Lista soci che hanno lezioni programmate (utilizzabili per creare assenze)</p>
         </div>
     </div>
 
@@ -34,7 +34,7 @@ require_once 'includes/header.php';
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <p class="stat-label mb-1">Totale Allievi</p>
+                            <p class="stat-label mb-1">Totale Soci</p>
                             <h3 class="stat-value"><?= $stats['totale'] ?></h3>
                         </div>
                         <i class="bi bi-people stat-icon text-primary"></i>
@@ -73,30 +73,30 @@ require_once 'includes/header.php';
     <?php if ($stats['con_lezioni'] == 0): ?>
         <div class="alert alert-warning">
             <i class="bi bi-exclamation-triangle"></i>
-            <strong>Attenzione!</strong> Nessun allievo ha lezioni programmate nel calendario.
+            <strong>Attenzione!</strong> Nessun socio ha lezioni programmate nel calendario.
             È necessario aggiungere lezioni prima di poter registrare assenze.
         </div>
     <?php else: ?>
         <div class="alert alert-info">
             <i class="bi bi-info-circle"></i>
-            <strong>Info:</strong> Solo gli allievi in questa lista possono avere assenze registrate, 
+            <strong>Info:</strong> Solo gli soci in questa lista possono avere assenze registrate, 
             poiché le assenze sono legate alle lezioni programmate nel calendario settimanale.
         </div>
     <?php endif; ?>
 
-    <!-- Tabella Allievi con Lezioni -->
+    <!-- Tabella Soci con Lezioni -->
     <div class="card">
         <div class="card-header">
             <h6 class="mb-0">
-                <i class="bi bi-list-check"></i> Allievi con Lezioni Programmate
+                <i class="bi bi-list-check"></i> Soci con Lezioni Programmate
                 <span class="badge bg-primary ms-2"><?= $stats['con_lezioni'] ?></span>
             </h6>
         </div>
         <div class="card-body">
-            <?php if (empty($allievi_con_lezioni)): ?>
+            <?php if (empty($soci_con_lezioni)): ?>
                 <div class="text-center py-5">
                     <i class="bi bi-calendar-x text-muted" style="font-size: 3rem;"></i>
-                    <h5 class="mt-3">Nessun allievo con lezioni</h5>
+                    <h5 class="mt-3">Nessun socio con lezioni</h5>
                     <p class="text-muted">Aggiungi lezioni al calendario per poter registrare assenze</p>
                 </div>
             <?php else: ?>
@@ -112,7 +112,7 @@ require_once 'includes/header.php';
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($allievi_con_lezioni as $all): ?>
+                            <?php foreach ($soci_con_lezioni as $all): ?>
                                 <tr>
                                     <td><span class="badge bg-secondary"><?= $all['id'] ?></span></td>
                                     <td><strong><?= e($all['nome_completo']) ?></strong></td>
@@ -122,7 +122,7 @@ require_once 'includes/header.php';
                                     <td class="small text-muted"><?= e($all['materie']) ?></td>
                                     <td class="text-center">
                                         <a href="gestione_assenze.php" class="btn btn-sm btn-outline-primary" 
-                                           title="Crea assenza per questo allievo">
+                                           title="Crea assenza per questo socio">
                                             <i class="bi bi-plus-circle"></i> Crea Assenza
                                         </a>
                                     </td>

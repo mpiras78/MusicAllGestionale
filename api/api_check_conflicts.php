@@ -27,11 +27,11 @@ $oraFine = date('H:i', strtotime($oraInizio) + ($durata * 60));
 // Cerca conflitti nella stessa aula, stesso giorno
 $stmt = $db->prepare("
     SELECT l.*, 
-    CONCAT(a.cognome, ' ', a.nome) as allievo,
+    CONCAT(a.cognome, ' ', a.nome) as socio,
     CONCAT(d.cognome, ' ', d.nome) as docente,
     m.nome as materia
     FROM lezioni l
-    LEFT JOIN allievi a ON l.allievo_id = a.id
+    LEFT JOIN soci a ON l.socio_id = a.id
     LEFT JOIN docenti d ON l.docente_id = d.id
     LEFT JOIN materie m ON l.materia_id = m.id
     WHERE l.giorno_settimana = ?

@@ -31,9 +31,9 @@ if (!isset($soci)) {
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Allievo *</label>
-                            <select name="allievo_id_helper" id="allievoSelectHelper" class="form-select" required>
-                                <option value="">Seleziona allievo...</option>
+                            <label class="form-label">Socio *</label>
+                            <select name="socio_id_helper" id="socioSelectHelper" class="form-select" required>
+                                <option value="">Seleziona socio...</option>
                                 <?php foreach ($soci as $all): ?>
                                     <option value="<?= $all['id'] ?>"><?= e($all['nome_completo']) ?></option>
                                 <?php endforeach; ?>
@@ -51,7 +51,7 @@ if (!isset($soci)) {
                         <select name="lezione_id" id="lezioneSelectFinal" class="form-select" required>
                             <option value="">Caricamento...</option>
                         </select>
-                        <small class="text-muted">Lezioni settimanali dell'allievo selezionato</small>
+                        <small class="text-muted">Lezioni settimanali del socio selezionato</small>
                     </div>
                     
                     <!-- Contatori Anno Scolastico -->
@@ -60,7 +60,7 @@ if (!isset($soci)) {
                     <div class="mb-3">
                         <label class="form-label">Causata da *</label>
                         <select name="causata_da" class="form-select" required>
-                            <option value="allievo">Allievo</option>
+                            <option value="socio">Socio</option>
                             <option value="docente">Docente</option>
                         </select>
                     </div>
@@ -68,7 +68,7 @@ if (!isset($soci)) {
                     <div class="mb-3">
                         <label class="form-label">Note (opzionale)</label>
                         <textarea name="note_annullamento" class="form-control" rows="2" 
-                                  placeholder="Es: Allievo malato, Docente impegnato, etc."></textarea>
+                                  placeholder="Es: Socio malato, Docente impegnato, etc."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

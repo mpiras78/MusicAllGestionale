@@ -71,8 +71,8 @@ SHOW TABLES;  -- MySQL/PostgreSQL
 .tables       -- SQLite
 
 -- Tabelle attese:
--- - soci (rinominato da allievi)
--- - allievi_v2_backup (backup vecchio)
+-- - soci (rinominato da soci)
+-- - soci_v2_backup (backup vecchio)
 -- - dati_associazione (NEW)
 -- - iscrizioni_annuali (NEW)
 -- - modalita_pagamento (NEW)
@@ -91,7 +91,7 @@ SHOW TABLES;  -- MySQL/PostgreSQL
 SELECT COUNT(*) as numero_soci FROM soci;
 
 -- Contare righe in backup
-SELECT COUNT(*) as numero_backup FROM allievi_v2_backup;
+SELECT COUNT(*) as numero_backup FROM soci_v2_backup;
 
 -- Dovrebbero essere uguali
 ```
@@ -145,14 +145,14 @@ SHOW INDEX FROM audit_log;
 
 ## ⚠️ Troubleshooting
 
-### Errore: "Table 'allievi' already renamed"
-**Soluzione**: Lo script è stato eseguito due volte. Controllare se esiste `allievi_v2_backup`.
+### Errore: "Table 'soci' already renamed"
+**Soluzione**: Lo script è stato eseguito due volte. Controllare se esiste `soci_v2_backup`.
 ```sql
 -- Verificare
-SHOW TABLES LIKE 'allievi%';
+SHOW TABLES LIKE 'soci%';
 
--- Se allievi_v2_backup esiste, è tutto ok
--- Se allievi non esiste, lo script ha già funzionato
+-- Se soci_v2_backup esiste, è tutto ok
+-- Se soci non esiste, lo script ha già funzionato
 ```
 
 ### Errore: "Duplicate column 'created_at'"
@@ -215,13 +215,13 @@ SELECT * FROM audit_log WHERE tabella = 'soci' ORDER BY created_at DESC LIMIT 1;
 Se la migrazione non va bene, rollback:
 
 ```sql
--- ATTENZIONE: Ripristina da backup (allievi_v2_backup)
+-- ATTENZIONE: Ripristina da backup (soci_v2_backup)
 
 -- 1. Rinominare soci di nuovo (o delete)
 DROP TABLE soci;
 
 -- 2. Ripristinare da backup
-ALTER TABLE allievi_v2_backup RENAME TO allievi;
+ALTER TABLE soci_v2_backup RENAME TO soci;
 
 -- 3. Eliminare tutte le nuove tabelle
 DROP TABLE iscrizioni_annuali;
@@ -244,8 +244,8 @@ DROP TABLE chiusure_attivita;
 
 - [ ] Script eseguito senza errori
 - [ ] Tutte le 12 tabelle nuove create ✓
-- [ ] `soci` contiene gli stessi record di `allievi` ✓
-- [ ] `allievi_v2_backup` esiste come backup
+- [ ] `soci` contiene gli stessi record di `soci` ✓
+- [ ] `soci_v2_backup` esiste come backup
 - [ ] Indici creati ✓
 - [ ] Dati iniziali (dati_associazione, modalita_pagamento) presenti ✓
 - [ ] Test CRUD passati ✓

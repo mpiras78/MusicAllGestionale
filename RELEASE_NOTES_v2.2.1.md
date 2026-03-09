@@ -39,9 +39,9 @@
 
 ### Query Filtro Iscrizioni
 ```sql
-SELECT i.id, CONCAT(a.cognome, ' ', a.nome) as allievo, ...
+SELECT i.id, CONCAT(a.cognome, ' ', a.nome) as socio, ...
 FROM iscrizioni i
-INNER JOIN allievi a ON i.allievo_id = a.id
+INNER JOIN soci a ON i.socio_id = a.id
 LEFT JOIN tipi_corso_config tcc ON i.tipo_corso_config_id = tcc.id
 LEFT JOIN materie m ON i.materia_id = m.id
 LEFT JOIN docenti d ON i.docente_id = d.id

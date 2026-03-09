@@ -20,7 +20,7 @@ try {
             $stmt = $db->prepare("
                 SELECT 
                     i.id,
-                    CONCAT(a.cognome, ' ', a.nome) as allievo,
+                    CONCAT(a.cognome, ' ', a.nome) as socio,
                     tcc.nome as tipo_corso,
                     tcc.nome as materia,
                     CONCAT(d.cognome, ' ', d.nome) as docente,
@@ -29,7 +29,7 @@ try {
                     tcc.costo_mensile as importo_totale,
                     0 as importo_pagato
                 FROM iscrizioni i
-                INNER JOIN allievi a ON i.allievo_id = a.id
+                INNER JOIN soci a ON i.socio_id = a.id
                 INNER JOIN tipi_corso_config tcc ON i.tipo_corso_config_id = tcc.id
                 INNER JOIN docenti d ON i.docente_id = d.id
                 WHERE i.anno_accademico = ?

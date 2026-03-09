@@ -45,7 +45,7 @@ File: `database/insert_lezioni_MARTEDI.sql`
 1. **REVISIONE MARTEDÌ**
    - [ ] Aprire `database/insert_lezioni_MARTEDI.sql`
    - [ ] Verificare ogni lezione (41 totali)
-   - [ ] Correggere nomi allievi se necessario (es. "MUS. INSIEME")
+   - [ ] Correggere nomi soci se necessario (es. "MUS. INSIEME")
    - [ ] Verificare orari corretti
    - [ ] Verificare docenti corretti
    - [ ] Confermare materie corrette
@@ -108,16 +108,16 @@ File: `database/insert_lezioni_MARTEDI.sql`
    - [ ] Gestione assenze
    - [ ] Organizzazione recuperi
    - [ ] Notifiche email per recupero schedulato
-   - [ ] Aggiunta nuovo Allievo
+   - [ ] Aggiunta nuovo Socio
    - [ ] Aggiunta nuovo Insegnante
    - [ ] Aggiunta tabella metodologia pagamento ( contanti, PI, Cooperativa) da associare poi agli insegnanti
    - [ ] Definizione regole di pagamento
    - [ ] Conteggio ore per ciascun insegnante ( solo se ruolo admin o segreteria vedere anche totale compenso mensile)
    - [ ] Definizione ruoli e utenze con restrizioni di visualizzazione di voci di menù \ pagine \ informazioni
    - [ ] Utenze federate : Registrazione utenza federata con accesso condizionato a  approvazione admin e attribuzione ruolo
-   - [ ] Pagina gestione Allievi
+   - [ ] Pagina gestione Soci
    - [ ] Pagina gestione Docenti
-   - [ ] Report statistiche : Allievi per materia | Allievi per insegnante | Distribuzione annuale allievi
+   - [ ] Report statistiche : Soci per materia | Soci per insegnante | Distribuzione annuale soci
    - [ ] Report docenti : Lezioni totali | Numero recuperi | Assenze | Compenso mensile 
 
 ---
@@ -184,7 +184,7 @@ tests/
 ├── calendario.php                  ✅ Calendario con rowspan
 ├── assets/css/style.css           ✅ Stili aggiornati
 ├── includes/controllers/LezioniController.php  ✅ Controller
-└── template/Orario Allievi MusicAll.xlsx  📋 Fonte dati
+└── template/Orario Soci MusicAll.xlsx  📋 Fonte dati
 ```
 
 ---
@@ -193,10 +193,10 @@ tests/
 
 ### Formato INSERT SQL Standard
 ```sql
-INSERT INTO lezioni (giorno_settimana, ora_inizio, ora_fine, id_aula, id_allievo, id_docente, id_materia)
+INSERT INTO lezioni (giorno_settimana, ora_inizio, ora_fine, id_aula, id_socio, id_docente, id_materia)
 SELECT 'GIORNO', 'HH:MM', 'HH:MM',
        (SELECT id FROM aule WHERE UPPER(nome) LIKE '%AULA%' LIMIT 1),
-       (SELECT id FROM allievi WHERE UPPER(cognome) LIKE '%COGNOME%' LIMIT 1),
+       (SELECT id FROM soci WHERE UPPER(cognome) LIKE '%COGNOME%' LIMIT 1),
        (SELECT id FROM docenti WHERE UPPER(cognome) LIKE '%DOCENTE%' LIMIT 1),
        (SELECT id FROM materie WHERE UPPER(nome) LIKE '%MATERIA%' LIMIT 1);
 ```
@@ -219,7 +219,7 @@ SELECT 'GIORNO', 'HH:MM', 'HH:MM',
 - ✅ Calendario visivo funzionante con rowspan
 - ✅ Icone strumenti e design professionale
 - ⏳ Tutte le lezioni importate correttamente
-- ⏳ 100% matching allievi-docenti-aule
+- ⏳ 100% matching soci-docenti-aule
 - ⏳ Zero errori import
 - ⏳ Test completo su tutti i giorni
 

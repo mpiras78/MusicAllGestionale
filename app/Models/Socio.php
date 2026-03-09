@@ -3,7 +3,7 @@
 namespace MusicAll\Models;
 
 /**
- * Allievo Model
+ * Socio Model
  * 
  * @property int $id
  * @property string $cognome
@@ -16,10 +16,10 @@ namespace MusicAll\Models;
  * @property bool $attivo
  * @property \Carbon\Carbon $created_at
  */
-class Allievo extends Model
+class Socio extends Model
 {
     /**
-     * Nome della tabella (ora `soci`, mantiene il model `Allievo` per retrocompatibilità)
+     * Nome della tabella (ora `soci`, mantiene il model `Socio` per retrocompatibilità)
      */
     protected $table = 'soci';
     
@@ -32,7 +32,7 @@ class Allievo extends Model
     ];
     
     /**
-     * Relazione: Lezioni dell'allievo
+     * Relazione: Lezioni dell'socio
      */
     public function lezioni()
     {
@@ -40,7 +40,7 @@ class Allievo extends Model
     }
     
     /**
-     * Relazione: Assenze dell'allievo
+     * Relazione: Assenze dell'socio
      */
     public function assenze()
     {
@@ -56,7 +56,7 @@ class Allievo extends Model
     }
     
     /**
-     * Scope: Solo allievi attivi
+     * Scope: Solo soci attivi
      */
     public function scopeAttivi($query)
     {

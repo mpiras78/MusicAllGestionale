@@ -126,7 +126,7 @@ require_once 'includes/header.php';
                                     </h6>
                                 </div>
                                 <div class="card-body">
-                                    <h5 class="card-title"><?= e($rec['allievo']) ?></h5>
+                                    <h5 class="card-title"><?= e($rec['socio']) ?></h5>
                                     <p class="card-text">
                                         <i class="bi bi-music-note"></i> <?= e($rec['materia']) ?><br>
                                         <i class="bi bi-calendar3"></i> <strong><?= formatDate($rec['data_recupero']) ?></strong><br>
@@ -171,7 +171,7 @@ require_once 'includes/header.php';
                             <tr>
                                 <th>Data Recupero</th>
                                 <th>Orario</th>
-                                <th>Allievo</th>
+                                <th>Socio</th>
                                 <th>Materia</th>
                                 <th>Aula</th>
                                 <th>Lezione Originale</th>
@@ -182,7 +182,7 @@ require_once 'includes/header.php';
                                 <tr>
                                     <td><?= formatDate($rec['data_recupero']) ?></td>
                                     <td><?= formatTime($rec['ora_inizio']) ?> - <?= formatTime($rec['ora_fine']) ?></td>
-                                    <td><?= e($rec['allievo']) ?></td>
+                                    <td><?= e($rec['socio']) ?></td>
                                     <td><?= e($rec['materia']) ?></td>
                                     <td><?= e($rec['aula'] ?? '-') ?></td>
                                     <td class="text-muted small"><?= formatDate($rec['data_assenza_originale']) ?></td>
@@ -204,7 +204,7 @@ require_once 'includes/header.php';
             <ul class="mb-0">
                 <li>I recuperi vengono programmati dalla segreteria dopo accordi telefonici/whatsapp</li>
                 <li>Riceverai notifica dei nuovi recuperi via email (se configurato)</li>
-                <li>Le assenze dei tuoi allievi sono visualizzabili nel menu <strong>Assenze</strong></li>
+                <li>Le assenze dei tuoi soci sono visualizzabili nel menu <strong>Assenze</strong></li>
                 <li>Per modifiche ai recuperi programmati, contatta la segreteria</li>
             </ul>
         </div>

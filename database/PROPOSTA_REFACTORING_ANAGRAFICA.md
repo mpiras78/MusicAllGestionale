@@ -2,15 +2,15 @@
 
 ## Problema Attuale
 Lo schema attuale ha 3 tabelle anagrafiche separate:
-- `allievi` - anagrafica allievi
+- `soci` - anagrafica soci
 - `docenti` - anagrafica docenti  
 - `soci_occasionali` - anagrafica esterni
 
 **Limitazioni:**
 - ❌ Duplicazione dati se una persona ha più ruoli
-- ❌ Docente che segue lezioni come allievo = 2 anagrafiche
-- ❌ Allievo che diventa docente = migrazione dati complessa
-- ❌ Esterno che diventa allievo = duplicazione
+- ❌ Docente che segue lezioni come socio = 2 anagrafiche
+- ❌ Socio che diventa docente = migrazione dati complessa
+- ❌ Esterno che diventa socio = duplicazione
 - ❌ Modifiche anagrafiche su più tabelle
 
 ---
@@ -56,7 +56,7 @@ Definisce i **ruoli** di ogni persona nella scuola
 CREATE TABLE soci (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     persona_id INTEGER NOT NULL,
-    tipo_socio TEXT NOT NULL CHECK(tipo_socio IN ('allievo', 'docente', 'esterno', 'admin')),
+    tipo_socio TEXT NOT NULL CHECK(tipo_socio IN ('socio', 'docente', 'esterno', 'admin')),
     data_inizio DATE NOT NULL,
     data_fine DATE,
     stato TEXT DEFAULT 'attivo' CHECK(stato IN ('attivo', 'sospeso', 'cessato')),
@@ -75,22 +75,22 @@ CREATE UNIQUE INDEX idx_soci_persona_tipo_attivo ON soci(persona_id, tipo_socio,
 ```
 persona_id | tipo_socio | data_inizio | data_fine | stato
 -----------|------------|-------------|-----------|--------
-1          | allievo    | 2024-09-01  | NULL      | attivo
+1          | socio    | 2024-09-01  | NULL      | attivo
 1          | docente    | 2025-01-01  | NULL      | attivo  
 2          | docente    | 2023-01-01  | NULL      | attivo
 3          | esterno    | 2025-02-01  | NULL      | attivo
 ```
-👆 La persona_id=1 è sia allievo che docente!
+👆 La persona_id=1 è sia socio che docente!
 
 ---
 
 ### 3. Tabelle Specializzate (Dati Ruolo-Specifici)
 
-#### 3a. `soci_allievo_dettagli`
-Dati specifici per ruolo ALLIEVO
+#### 3a. `soci_socio_dettagli`
+Dati specifici per ruolo SOCIO
 
 ```sql
-CREATE TABLE soci_allievo_dettagli (
+CREATE TABLE soci_socio_dettagli (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     socio_id INTEGER NOT NULL UNIQUE,
     tutore_nome TEXT,
@@ -148,33 +148,33 @@ CREATE TABLE soci_esterno_dettagli (
 #### Tabella `lezioni`
 ```sql
 -- PRIMA (riferimenti separati)
-allievo_id → allievi(id)
+socio_id → soci(id)
 docente_id → docenti(id)
 
 -- DOPO (riferimento unificato a soci)
-allievo_socio_id → soci(id) WHERE tipo_socio='allievo'
+socio_socio_id → soci(id) WHERE tipo_socio='socio'
 docente_socio_id → soci(id) WHERE tipo_socio='docente'
 ```
 
 #### Tabella `eventi_calendario`
 ```sql
 -- PRIMA
-allievo_id → allievi(id)
+socio_id → soci(id)
 docente_id → docenti(id)
 socio_occasionale_id → soci_occasionali(id)
 
 -- DOPO (riferimento unico a soci)
-socio_id → soci(id)  -- Può essere allievo, docente o esterno
+socio_id → soci(id)  -- Può essere socio, docente o esterno
 ```
 
 #### Tabella `assenze`
 ```sql
 -- PRIMA
-allievo_id → allievi(id)
+socio_id → soci(id)
 docente_id → docenti(id)
 
 -- DOPO
-allievo_socio_id → soci(id) WHERE tipo_socio='allievo'
+socio_socio_id → soci(id) WHERE tipo_socio='socio'
 docente_socio_id → soci(id) WHERE tipo_socio='docente'
 ```
 
@@ -184,14 +184,14 @@ docente_socio_id → soci(id) WHERE tipo_socio='docente'
 
 ### ✅ 1. Flessibilità Totale
 ```sql
--- Docente che segue lezioni come allievo
-INSERT INTO soci (persona_id, tipo_socio, data_inizio) VALUES (1, 'allievo', '2024-09-01');
+-- Docente che segue lezioni come socio
+INSERT INTO soci (persona_id, tipo_socio, data_inizio) VALUES (1, 'socio', '2024-09-01');
 INSERT INTO soci (persona_id, tipo_socio, data_inizio) VALUES (1, 'docente', '2023-01-01');
 
--- Lezione dove docente ID=1 insegna all'allievo ID=1 (stessa persona!)
-INSERT INTO lezioni (allievo_socio_id, docente_socio_id, ...) 
+-- Lezione dove docente ID=1 insegna all'socio ID=1 (stessa persona!)
+INSERT INTO lezioni (socio_socio_id, docente_socio_id, ...) 
 VALUES (
-    (SELECT id FROM soci WHERE persona_id=1 AND tipo_socio='allievo'),
+    (SELECT id FROM soci WHERE persona_id=1 AND tipo_socio='socio'),
     (SELECT id FROM soci WHERE persona_id=1 AND tipo_socio='docente'),
     ...
 );
@@ -199,10 +199,10 @@ VALUES (
 
 ### ✅ 2. Storicizzazione Ruoli
 ```sql
--- Persona passa da allievo a docente
--- Il vecchio ruolo allievo viene cessato, non cancellato
+-- Persona passa da socio a docente
+-- Il vecchio ruolo socio viene cessato, non cancellato
 UPDATE soci SET stato='cessato', data_fine='2025-06-30' 
-WHERE persona_id=5 AND tipo_socio='allievo';
+WHERE persona_id=5 AND tipo_socio='socio';
 
 INSERT INTO soci (persona_id, tipo_socio, data_inizio, stato) 
 VALUES (5, 'docente', '2025-09-01', 'attivo');
@@ -222,7 +222,7 @@ WHERE p.id=1;
 
 ### ✅ 4. Query Semplificate
 ```sql
--- Tutte le persone che sono sia allievi che docenti
+-- Tutte le persone che sono sia soci che docenti
 SELECT p.*, 
     GROUP_CONCAT(s.tipo_socio) as ruoli
 FROM persone p
@@ -247,8 +247,8 @@ SELECT DISTINCT email, telefono FROM persone WHERE attiva=1;
 Per facilitare la migrazione e mantenere compatibilità con codice esistente:
 
 ```sql
--- Vista che emula tabella allievi
-CREATE VIEW v_allievi AS
+-- Vista che emula tabella soci
+CREATE VIEW v_soci AS
 SELECT 
     s.id as id,
     p.cognome,
@@ -264,8 +264,8 @@ SELECT
     ad.tutore_telefono
 FROM persone p
 JOIN soci s ON p.id = s.persona_id
-LEFT JOIN soci_allievo_dettagli ad ON s.id = ad.socio_id
-WHERE s.tipo_socio = 'allievo';
+LEFT JOIN soci_socio_dettagli ad ON s.id = ad.socio_id
+WHERE s.tipo_socio = 'socio';
 
 -- Vista che emula tabella docenti
 CREATE VIEW v_docenti AS
@@ -316,14 +316,14 @@ WHERE s.tipo_socio = 'esterno';
 
 ### Fase 2: Migrazione Dati
 ```sql
--- Migra allievi
+-- Migra soci
 INSERT INTO persone (cognome, nome, email, telefono, data_nascita, indirizzo, note_anagrafiche, attiva, created_at)
 SELECT cognome, nome, email, telefono, data_nascita, indirizzo, note, attivo, created_at
-FROM allievi;
+FROM soci;
 
 INSERT INTO soci (persona_id, tipo_socio, data_inizio, stato)
-SELECT p.id, 'allievo', a.created_at, CASE WHEN a.attivo=1 THEN 'attivo' ELSE 'cessato' END
-FROM allievi a
+SELECT p.id, 'socio', a.created_at, CASE WHEN a.attivo=1 THEN 'attivo' ELSE 'cessato' END
+FROM soci a
 JOIN persone p ON a.cognome=p.cognome AND a.nome=p.nome AND a.email=p.email;
 
 -- Migra docenti
@@ -337,12 +337,12 @@ JOIN persone p ON a.cognome=p.cognome AND a.nome=p.nome AND a.email=p.email;
 - Test completo
 
 ### Fase 4: Creazione Viste Compatibilità
-- Creare viste `v_allievi`, `v_docenti`, `v_soci_occasionali`
+- Creare viste `v_soci`, `v_docenti`, `v_soci_occasionali`
 - Test codice esistente con viste
 
 ### Fase 5: Drop Vecchie Tabelle
 - Solo dopo test completi
-- Drop `allievi`, `docenti`, `soci_occasionali`
+- Drop `soci`, `docenti`, `soci_occasionali`
 
 ---
 
@@ -363,7 +363,7 @@ JOIN persone p ON a.cognome=p.cognome AND a.nome=p.nome AND a.email=p.email;
 
 ### Quando Fare il Refactoring?
 - ✅ **ADESSO**: Prima di crescere troppo
-- ✅ Se ci sono già casi di docenti-allievi
+- ✅ Se ci sono già casi di docenti-soci
 - ✅ Per facilitare gestione multi-ruolo futura
 - ❌ NON ADESSO: Se sistema già in produzione con molti dati
 

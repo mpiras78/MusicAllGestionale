@@ -13,25 +13,25 @@
                     <i class="bi bi-info-circle"></i> Le lezioni di prova sono lezioni singole non legate a iscrizioni
                 </div>
                 <form id="formLezioneProva">
-                    <h6 class="mb-3">Dati Allievo</h6>
+                    <h6 class="mb-3">Dati Socio</h6>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Nome *</label>
-                            <input type="text" class="form-control" name="nome_allievo" required>
+                            <input type="text" class="form-control" name="nome_socio" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Cognome *</label>
-                            <input type="text" class="form-control" name="cognome_allievo" required>
+                            <input type="text" class="form-control" name="cognome_socio" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Email</label>
-                            <input type="email" class="form-control" name="email_allievo">
+                            <input type="email" class="form-control" name="email_socio">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Telefono</label>
-                            <input type="tel" class="form-control" name="telefono_allievo">
+                            <input type="tel" class="form-control" name="telefono_socio">
                         </div>
                     </div>
                     
@@ -117,7 +117,7 @@ function salvaLezioneProva() {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData);
     
-    fetch('<?= BASE_URL ?>/api_lezioni_prova.php', {
+    fetch('<?= BASE_URL ?>/api/api_lezioni_prova.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({action: 'create', data: data})

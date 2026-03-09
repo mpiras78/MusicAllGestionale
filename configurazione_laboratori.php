@@ -217,7 +217,7 @@ function salvaLaboratorio() {
     const formData = new FormData(form);
     const id = document.getElementById('laboratorio_id').value;
     
-    fetch('api_configurazione_corsi.php', {
+    fetch('<?= BASE_URL ?>/api/api_configurazione_corsi.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
@@ -238,7 +238,7 @@ function salvaLaboratorio() {
 }
 
 function modificaLaboratorio(id) {
-    fetch(`api_configurazione_corsi.php?action=get&tipo=laboratorio&id=${id}`)
+    fetch(`<?= BASE_URL ?>/api/api_configurazione_corsi.php?action=get&tipo=laboratorio&id=${id}`)
     .then(r => r.json())
     .then(data => {
         if (data.success) {
@@ -262,7 +262,7 @@ function modificaLaboratorio(id) {
 function eliminaLaboratorio(id) {
     if (!confirm('Sei sicuro di voler eliminare questo laboratorio?')) return;
     
-    fetch('api_configurazione_corsi.php', {
+    fetch('<?= BASE_URL ?>/api/api_configurazione_corsi.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({action: 'delete', tipo: 'laboratorio', id: id})
@@ -278,7 +278,7 @@ function eliminaLaboratorio(id) {
 }
 
 function vediPartecipanti(id) {
-    fetch(`api_configurazione_corsi.php?action=partecipanti&id=${id}`)
+    fetch(`<?= BASE_URL ?>/api/api_configurazione_corsi.php?action=partecipanti&id=${id}`)
     .then(r => r.json())
     .then(data => {
         if (data.success) {
@@ -287,7 +287,7 @@ function vediPartecipanti(id) {
                 lista.innerHTML = '<p class="text-muted">Nessun partecipante iscritto</p>';
             } else {
                 lista.innerHTML = '<ul class="list-group">' + 
-                    data.data.map(p => `<li class="list-group-item">${p.allievo_nome}</li>`).join('') +
+                    data.data.map(p => `<li class="list-group-item">${p.socio_nome}</li>`).join('') +
                     '</ul>';
             }
             new bootstrap.Modal(document.getElementById('modalPartecipanti')).show();

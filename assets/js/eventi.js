@@ -7,7 +7,7 @@
 let currentEventData = null;
 let currentDettaglioPrenotazione = null;
 let tipologieEventi = [];
-let allieviList = [];
+let sociList = [];
 let docentiList = [];
 let materieList = [];
 let auleList = [];
@@ -54,7 +54,7 @@ async function apriModalDettaglioPrenotazione(eventoId) {
         document.getElementById('dettaglioSala').textContent = eventoData.aula_nome || '-';
         document.getElementById('dettaglioDocente').textContent = eventoData.docente_nome || '-';
         document.getElementById('dettaglioMateria').textContent = eventoData.materia_nome || '-';
-        document.getElementById('dettaglioAllievo').textContent = eventoData.partecipante_nome || '-';
+        document.getElementById('dettaglioSocio').textContent = eventoData.partecipante_nome || '-';
         document.getElementById('dettaglioTitolo').textContent = eventoData.titolo || '-';
         document.getElementById('dettaglioDescrizione').textContent = eventoData.descrizione || '-';
         document.getElementById('dettaglioNote').textContent = eventoData.note || '-';
@@ -129,11 +129,11 @@ async function loadFormData() {
             tipologieEventi = tipData.data;
         }
         
-        // Carica allievi
-        const allResponse = await fetch('api_get_helpers.php?type=allievi');
+        // Carica soci
+        const allResponse = await fetch('api_get_helpers.php?type=soci');
         const allData = await allResponse.json();
         if (allData.success) {
-            allieviList = allData.data;
+            sociList = allData.data;
         }
         
         // Carica docenti
@@ -174,7 +174,7 @@ async function apriModalCreaEvento(dataPreselezionata = null, aulaId = null, ora
     };
     
     // Ricarica dati se necessario
-    if (tipologieEventi.length === 0 || allieviList.length === 0 || docentiList.length === 0) {
+    if (tipologieEventi.length === 0 || sociList.length === 0 || docentiList.length === 0) {
         await loadFormData();
     }
     
@@ -240,14 +240,14 @@ function popolaFormCreaEvento() {
         selectTipologia.appendChild(option);
     });
     
-    // Popola select allievi
-    const selectAllievo = document.getElementById('eventoAllievo');
-    selectAllievo.innerHTML = '<option value="">-- Nessun Allievo --</option>';
-    allieviList.forEach(all => {
+    // Popola select soci
+    const selectSocio = document.getElementById('eventoSocio');
+    selectSocio.innerHTML = '<option value="">-- Nessun Socio --</option>';
+    sociList.forEach(all => {
         const option = document.createElement('option');
         option.value = all.id;
         option.textContent = `${all.cognome} ${all.nome}`;
-        selectAllievo.appendChild(option);
+        selectSocio.appendChild(option);
     });
     
     // Popola select docenti
@@ -328,7 +328,7 @@ function popolaFormModificaEvento() {
     document.getElementById('eventoAula').value = currentEventData.aula_id || '';
     document.getElementById('eventoDocente').value = currentEventData.docente_id || '';
     document.getElementById('eventoMateria').value = currentEventData.materia_id || '';
-    document.getElementById('eventoAllievo').value = currentEventData.allievo_id || '';
+    document.getElementById('eventoSocio').value = currentEventData.socio_id || '';
     document.getElementById('eventoTitolo').value = currentEventData.titolo || '';
     document.getElementById('eventoDescrizione').value = currentEventData.descrizione || '';
     document.getElementById('eventoNote').value = currentEventData.note || '';
@@ -430,7 +430,7 @@ async function salvaEvento() {
         aula_id: parseInt(document.getElementById('eventoAula').value),
         docente_id: document.getElementById('eventoDocente').value ? parseInt(document.getElementById('eventoDocente').value) : null,
         materia_id: document.getElementById('eventoMateria').value ? parseInt(document.getElementById('eventoMateria').value) : null,
-        allievo_id: document.getElementById('eventoAllievo').value ? parseInt(document.getElementById('eventoAllievo').value) : null,
+        socio_id: document.getElementById('eventoSocio').value ? parseInt(document.getElementById('eventoSocio').value) : null,
         titolo: document.getElementById('eventoTitolo').value || null,
         descrizione: document.getElementById('eventoDescrizione').value || null,
         note: document.getElementById('eventoNote').value || null,

@@ -32,7 +32,7 @@ $stmt = $db->prepare("
         ec.ora_fine,
         ec.aula_id,
         a.nome as aula_nome,
-        ec.allievo_id,
+        ec.socio_id,
         ec.confermato
     FROM eventi_calendario ec
     LEFT JOIN tipologie_evento t ON ec.tipologia_id = t.id
@@ -53,7 +53,7 @@ if (count($eventi) > 0) {
         echo "Data: {$evt['data_evento']}\n";
         echo "Orario: {$evt['ora_inizio']} - {$evt['ora_fine']}\n";
         echo "Aula: {$evt['aula_nome']} (ID: {$evt['aula_id']})\n";
-        echo "Allievo ID: " . ($evt['allievo_id'] ?: 'NULL') . "\n";
+        echo "Socio ID: " . ($evt['socio_id'] ?: 'NULL') . "\n";
         echo "Confermato: " . ($evt['confermato'] ? 'Sì' : 'No') . "\n";
         echo str_repeat('-', 50) . "\n\n";
     }

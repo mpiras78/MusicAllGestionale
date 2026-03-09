@@ -8,7 +8,7 @@
 #### 1.1 - Database Setup
 - [ ] Creare tabella `dati_associazione`
 - [ ] Creare tabella `audit_log`
-- [ ] Rinominare tabella `allievi` → `soci`
+- [ ] Rinominare tabella `soci` → `soci`
 - [ ] Aggiungere colonne a `soci`: `telefono_2`, `cap`, `citta`, `updated_at`
 - [ ] Aggiungere `created_at`, `updated_at` a tutte le tabelle principali
 - [ ] Creare tabelle di supporto: `chiusure_attivita`, `modalita_pagamento`
@@ -16,9 +16,9 @@
 - **File**: `database/migrations/001_fase1_setup.sql`
 
 #### 1.2 - Rinomina Variabili Codebase
-- [ ] Rinominare tutte le occorrenze di `allievi` → `soci` in PHP
-- [ ] Aggiornare label UI: "Allievo" → "Socio"
-- [ ] Aggiornare label menu: "Gestione → Allievi" → "Gestione → Elenco Soci"
+- [ ] Rinominare tutte le occorrenze di `soci` → `soci` in PHP
+- [ ] Aggiornare label UI: "Socio" → "Socio"
+- [ ] Aggiornare label menu: "Gestione → Soci" → "Gestione → Elenco Soci"
 - [ ] Aggiornare label menu: "Gestione → Iscrizioni" → "Gestione → Corsi"
 - **Tempo stimato**: 4-5 ore
 - **File**: Tutti i file PHP (grep search + replace)
@@ -47,7 +47,7 @@
 
 **Deliverable Fase 1**: 
 - ✅ Database rinominato e aggiornato
-- ✅ UI rinominata (Allievo → Socio)
+- ✅ UI rinominata (Socio → Socio)
 - ✅ Pagina Dati Associazione funzionante
 - ✅ Sistema Audit Trail implementato
 

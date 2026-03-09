@@ -13,7 +13,7 @@ putenv('DB_DATABASE=:memory:');
 
 require_once __DIR__ . '/../includes/bootstrap.php';
 
-use MusicAll\Models\Allievo;
+use MusicAll\Models\Socio;
 use MusicAll\Models\Docente;
 use MusicAll\Models\Aula;
 use MusicAll\Models\Materia;
@@ -51,7 +51,7 @@ try {
     // Crea tabelle (schema semplificato per test)
     echo "Creazione tabelle...\n";
     
-    // La tabella "allievi" è stata rinominata in "soci" nella migration
+    // La tabella "soci" è stata rinominata in "soci" nella migration
     DB::schema()->create('soci', function ($table) {
         $table->id();
         $table->string('cognome');
@@ -87,11 +87,11 @@ try {
     
     echo "✅ Tabelle create\n\n";
     
-    // Test 1: Crea Soci (ex Allievi)
+    // Test 1: Crea Soci (ex Soci)
     echo "Test 1: Creazione Soci\n";
     echo "-------------------------\n";
     
-    $allievo1 = Allievo::create([
+    $socio1 = Socio::create([
         'cognome' => 'Rossi',
         'nome' => 'Mario',
         'email' => 'mario.rossi@email.com',
@@ -99,26 +99,26 @@ try {
         'attivo' => true
     ]);
     
-    $allievo2 = Allievo::create([
+    $socio2 = Socio::create([
         'cognome' => 'Bianchi',
         'nome' => 'Laura',
         'email' => 'laura.bianchi@email.com',
         'attivo' => true
     ]);
     
-    $allievo3 = Allievo::create([
+    $socio3 = Socio::create([
         'cognome' => 'Verdi',
         'nome' => 'Giuseppe',
         'attivo' => false
     ]);
     
-    echo "✅ Creati " . Allievo::count() . " soci\n\n";
+    echo "✅ Creati " . Socio::count() . " soci\n\n";
     
     // Test 2: Query con Eloquent
     echo "Test 2: Query Soci Attivi\n";
     echo "-------------------------\n";
 
-    $sociAttivi = Allievo::attivi()->get();
+    $sociAttivi = Socio::attivi()->get();
     foreach ($sociAttivi as $socio) {
         echo "- {$socio->nome_completo} ({$socio->email})\n";
     }
@@ -169,20 +169,20 @@ try {
     echo "Test 6: Aggiornamento Record\n";
     echo "----------------------------\n";
     
-    $allievo = Allievo::find(1);
-    $allievo->telefono = '333-9999999';
-    $allievo->save();
+    $socio = Socio::find(1);
+    $socio->telefono = '333-9999999';
+    $socio->save();
     
-    echo "✅ Aggiornato socio: {$allievo->nome_completo}\n";
-    echo "   Nuovo telefono: {$allievo->telefono}\n\n";
+    echo "✅ Aggiornato socio: {$socio->nome_completo}\n";
+    echo "   Nuovo telefono: {$socio->telefono}\n\n";
     
     // Test 7: Eliminazione
     echo "Test 7: Eliminazione Record\n";
     echo "---------------------------\n";
     
-    $count = Allievo::count();
-    Allievo::find(3)->delete();
-    $newCount = Allievo::count();
+    $count = Socio::count();
+    Socio::find(3)->delete();
+    $newCount = Socio::count();
     
     echo "✅ Eliminato 1 socio\n";
     echo "   Prima: {$count} - Dopo: {$newCount}\n\n";
@@ -203,8 +203,8 @@ try {
     echo "========================================\n";
     echo "STATISTICHE FINALI\n";
     echo "========================================\n";
-    echo "Soci totali: " . Allievo::count() . "\n";
-    echo "Soci attivi: " . Allievo::attivi()->count() . "\n";
+    echo "Soci totali: " . Socio::count() . "\n";
+    echo "Soci attivi: " . Socio::attivi()->count() . "\n";
     echo "Docenti: " . Docente::count() . "\n";
     echo "Aule: " . Aula::count() . "\n";
     echo "\n";

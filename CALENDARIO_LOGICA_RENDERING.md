@@ -166,7 +166,7 @@ if ($lezione_slot && !$evento_slot)
 ```
 
 **Rendering**:
-- Card lezione con info allievo/docente/materia
+- Card lezione con info socio/docente/materia
 - Se `attiva = 0` o festività: classe `.lezione-annullata` (grigio) + pulsante `+` per prenotare
 
 **Determinazione Annullamento**:
@@ -183,7 +183,7 @@ elseif ($evento_slot && !$lezione_slot)
 **Rendering**:
 - Card evento con stile diverso in base a `tipo`:
   - `LEZ_RECUPERO` → sfondo verde
-  - `PREN_SALA_ALLIEVI` → sfondo giallo
+  - `PREN_SALA_SOCI` → sfondo giallo
   - `PREN_DOCENTE` → sfondo blu
   - `PREN_ESTERNO` → sfondo viola
 - Onclick: `mostraInfoEvento(evento_id)` per dettagli + annullamento

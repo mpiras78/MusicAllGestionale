@@ -183,8 +183,8 @@ vendor\bin\phpunit --testdox
 ```
 Assenze Recuperi (Tests\Unit\AssenzeRecuperi)
  ✔ Assenza docente sempre da recuperare
- ✔ Prime 3 assenze allievo obbligatorie
- ✔ Quarta assenza allievo non obbligatoria
+ ✔ Prime 3 assenze socio obbligatorie
+ ✔ Quarta assenza socio non obbligatoria
  ...
 ```
 
@@ -277,14 +277,14 @@ Le assenze docente devono sempre essere recuperate per policy scuola.
 
 ---
 
-#### Test 1.2: `testPrime3AssenzeAllievoObbligatorie`
+#### Test 1.2: `testPrime3AssenzeSocioObbligatorie`
 
 **Cosa testa:**
-Verifica che le prime 3 assenze di un allievo per una specifica lezione siano obbligatorie da recuperare.
+Verifica che le prime 3 assenze di un socio per una specifica lezione siano obbligatorie da recuperare.
 
 **Business Rule:**
 ```
-SE tipo_assenza = 'allievo' 
+SE tipo_assenza = 'socio' 
 E conteggio_assenze_precedenti < 3
 ALLORA da_recuperare = 1
 ```
@@ -293,24 +293,24 @@ ALLORA da_recuperare = 1
 ```php
 for ($conteggio = 0; $conteggio < 3; $conteggio++) {
     // Assenza #1, #2, #3 → tutte obbligatorie
-    $da_recuperare = ($tipo_assenza === 'allievo' && $conteggio < 3) ? 1 : 0;
+    $da_recuperare = ($tipo_assenza === 'socio' && $conteggio < 3) ? 1 : 0;
     $this->assertEquals(1, $da_recuperare);
 }
 ```
 
 **Perché è importante:**
-Garantisce che gli allievi recuperino le prime assenze per non perdere continuità didattica.
+Garantisce che gli soci recuperino le prime assenze per non perdere continuità didattica.
 
 ---
 
-#### Test 1.3: `testQuartaAssenzaAllievoNonObbligatoria`
+#### Test 1.3: `testQuartaAssenzaSocioNonObbligatoria`
 
 **Cosa testa:**
 Verifica che dalla 4a assenza in poi il recupero sia a discrezione.
 
 **Business Rule:**
 ```
-SE tipo_assenza = 'allievo' 
+SE tipo_assenza = 'socio' 
 E conteggio_assenze_precedenti >= 3
 ALLORA da_recuperare = 0 (a discrezione)
 ```
@@ -318,7 +318,7 @@ ALLORA da_recuperare = 0 (a discrezione)
 **Scenario testato:**
 ```php
 $conteggio = 3; // 4a assenza (0-indexed)
-$da_recuperare = ($tipo_assenza === 'allievo' && $conteggio < 3) ? 1 : 0;
+$da_recuperare = ($tipo_assenza === 'socio' && $conteggio < 3) ? 1 : 0;
 $this->assertEquals(0, $da_recuperare);
 ```
 
@@ -338,12 +338,12 @@ Verifica l'intera logica di determinazione del flag `da_recuperare`.
 determinaDaRecuperare('docente', 0)  → 1
 determinaDaRecuperare('docente', 10) → 1
 
-// Allievo - prime 3 obbligatorie
-determinaDaRecuperare('allievo', 0)  → 1
-determinaDaRecuperare('allievo', 1)  → 1
-determinaDaRecuperare('allievo', 2)  → 1
-determinaDaRecuperare('allievo', 3)  → 0
-determinaDaRecuperare('allievo', 10) → 0
+// Socio - prime 3 obbligatorie
+determinaDaRecuperare('socio', 0)  → 1
+determinaDaRecuperare('socio', 1)  → 1
+determinaDaRecuperare('socio', 2)  → 1
+determinaDaRecuperare('socio', 3)  → 0
+determinaDaRecuperare('socio', 10) → 0
 ```
 
 ---
@@ -370,17 +370,17 @@ calcolaAnnoScolastico('2025-08-31') → '2024/2025' ✓
 
 ---
 
-#### Test 1.6: `testConteggioAssenzePerCoppiaAllieveLezione`
+#### Test 1.6: `testConteggioAssenzePerCoppiaSocioLezione`
 
 **Cosa testa:**
-Verifica che il conteggio assenze sia per coppia (allievo_id, lezione_id).
+Verifica che il conteggio assenze sia per coppia (socio_id, lezione_id).
 
 **Scenario testato:**
 ```php
 Assenze:
-- Allievo 1, Lezione 10: 3 assenze
-- Allievo 1, Lezione 20: 1 assenza
-- Allievo 2, Lezione 10: 1 assenza
+- Socio 1, Lezione 10: 3 assenze
+- Socio 1, Lezione 20: 1 assenza
+- Socio 2, Lezione 10: 1 assenza
 
 contaAssenze(1, 10) → 3 ✓
 contaAssenze(1, 20) → 1 ✓
@@ -557,8 +557,8 @@ Testa validazione input e business rules.
 
 | Test | Validazione | Regola |
 |------|-------------|--------|
-| 4.1 | Dati allievo completi | Nome + Cognome obbligatori |
-| 4.2 | Dati allievo incompleti | Errori se mancanti |
+| 4.1 | Dati socio completi | Nome + Cognome obbligatori |
+| 4.2 | Dati socio incompleti | Errori se mancanti |
 | 4.3 | Orario lezione | Fine > Inizio, 15min-3h |
 | 4.4 | Data assenza | Non futura, max 1 anno fa |
 | 4.5 | Durata lezione | 30, 45, 60, 90 minuti |

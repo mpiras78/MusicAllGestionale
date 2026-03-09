@@ -5,24 +5,24 @@ EXCEPTION: Token CSRF non valido
 EXCEPTION: Token CSRF non valido
 #0 {main}
 2026-03-07 19:50:54 - Richiesta ricevuta
-Parametri: {"csrf_token":"b00d03f7409498203971dbf4650fbe76644b25a4bc3e210ddfe07dde07a140a8","lezione_id":124,"data_lezione":"2026-03-03","causale":"allievo","note":""}
+Parametri: {"csrf_token":"b00d03f7409498203971dbf4650fbe76644b25a4bc3e210ddfe07dde07a140a8","lezione_id":124,"data_lezione":"2026-03-03","causale":"socio","note":""}
 Inizializzazione controllers...
 AssenzeController OK
 LezioniController OK
 Recupero lezione ID: 124
-Lezione trovata: {"id":124,"allievo_id":4,"docente_id":5,"materia_id":7,"aula_id":2,"giorno_settimana":"martedi","ora_inizio":"18:00","ora_fine":"18:45","tipo":"regolare","attiva":1,"data_inizio":null,"data_fine":null,"note":null,"created_at":"2026-03-03 07:05:13","iscrizione_id":11,"allievo":"AMADDII Edoardo","docente":"BUONO Eleonora","materia":"Canto Pop","aula":"AULA PIANO"}
-Dati assenza: {"lezione_id":124,"data":"2026-03-03","causata_da":"allievo","necessita_recupero":1,"note_annullamento":""}
+Lezione trovata: {"id":124,"socio_id":4,"docente_id":5,"materia_id":7,"aula_id":2,"giorno_settimana":"martedi","ora_inizio":"18:00","ora_fine":"18:45","tipo":"regolare","attiva":1,"data_inizio":null,"data_fine":null,"note":null,"created_at":"2026-03-03 07:05:13","iscrizione_id":11,"socio":"AMADDII Edoardo","docente":"BUONO Eleonora","materia":"Canto Pop","aula":"AULA PIANO"}
+Dati assenza: {"lezione_id":124,"data":"2026-03-03","causata_da":"socio","necessita_recupero":1,"note_annullamento":""}
 Chiamata creaAssenza...
 Assenza creata ID: 1
 ✅ Assenza salvata con successo!
 2026-03-08 12:35:59 - Richiesta ricevuta
-Parametri: {"csrf_token":"8f181e0eaf5c23ee9f5f362359e593d0b58b817b91924421c7e7cc2f2307cc5f","lezione_id":125,"data_lezione":"2026-03-02","causale":"allievo","note":""}
+Parametri: {"csrf_token":"8f181e0eaf5c23ee9f5f362359e593d0b58b817b91924421c7e7cc2f2307cc5f","lezione_id":125,"data_lezione":"2026-03-02","causale":"socio","note":""}
 Inizializzazione controllers...
 AssenzeController OK
 LezioniController OK
 Recupero lezione ID: 125
-Lezione trovata: {"id":125,"allievo_id":1,"docente_id":4,"materia_id":3,"aula_id":4,"giorno_settimana":"lunedi","ora_inizio":"18:00","ora_fine":"19:00","tipo":"regolare","attiva":1,"data_inizio":null,"data_fine":null,"note":null,"created_at":"2026-03-03 08:20:27","iscrizione_id":12,"allievo":"ALBERINI Viola","docente":"BONIOLI Andrea","materia":"Batteria","aula":"SALA JAZZ"}
-Dati assenza: {"lezione_id":125,"data":"2026-03-02","causata_da":"allievo","necessita_recupero":1,"note_annullamento":""}
+Lezione trovata: {"id":125,"socio_id":1,"docente_id":4,"materia_id":3,"aula_id":4,"giorno_settimana":"lunedi","ora_inizio":"18:00","ora_fine":"19:00","tipo":"regolare","attiva":1,"data_inizio":null,"data_fine":null,"note":null,"created_at":"2026-03-03 08:20:27","iscrizione_id":12,"socio":"ALBERINI Viola","docente":"BONIOLI Andrea","materia":"Batteria","aula":"SALA JAZZ"}
+Dati assenza: {"lezione_id":125,"data":"2026-03-02","causata_da":"socio","necessita_recupero":1,"note_annullamento":""}
 Chiamata creaAssenza...
 Assenza creata ID: 1
 ✅ Assenza salvata con successo!

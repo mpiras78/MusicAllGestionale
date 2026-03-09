@@ -8,34 +8,34 @@
 ### AULA MIDI
 | Orario | Docente | Materia | Note |
 |--------|---------|---------|------|
-| 11:00-13:00 | TESSITORE | Chitarra | Tutti gli allievi in questa fascia |
-| 15:00-22:00 | LORITO | Canto | Tutti gli allievi dalle 15:00 in poi |
+| 11:00-13:00 | TESSITORE | Chitarra | Tutti gli soci in questa fascia |
+| 15:00-22:00 | LORITO | Canto | Tutti gli soci dalle 15:00 in poi |
 
 ### AULA PIANO
 | Orario | Docente | Materia | Note |
 |--------|---------|---------|------|
-| 09:15-22:00 | CICCARELLI | Pianoforte | Tutti gli allievi, tutto il giorno |
+| 09:15-22:00 | CICCARELLI | Pianoforte | Tutti gli soci, tutto il giorno |
 
 ### AULA MAGNA
 | Orario | Docente | Materia | Note |
 |--------|---------|---------|------|
-| 09:15-22:00 | BUONO | Canto | Tutti gli allievi, tutto il giorno |
+| 09:15-22:00 | BUONO | Canto | Tutti gli soci, tutto il giorno |
 
 ### SALA JAZZ
 | Orario | Docente | Materia | Note |
 |--------|---------|---------|------|
-| 16:00-18:15 | URSINI | Chitarra | Tutti gli allievi in questa fascia |
-| 18:15-22:00 | PICCININI | Chitarra | Tutti gli allievi dalle 18:15 in poi |
+| 16:00-18:15 | URSINI | Chitarra | Tutti gli soci in questa fascia |
+| 18:15-22:00 | PICCININI | Chitarra | Tutti gli soci dalle 18:15 in poi |
 
 ### SALA POP
 | Orario | Docente | Materia | Note |
 |--------|---------|---------|------|
-| 09:15-22:00 | ALBERINI | Batteria | Tutti gli allievi, tutto il giorno |
+| 09:15-22:00 | ALBERINI | Batteria | Tutti gli soci, tutto il giorno |
 
 ### SALA ROCK
 | Orario | Docente | Materia | Note |
 |--------|---------|---------|------|
-| 14:00-21:00 | SALVUCCI | Canto | Tutti gli allievi in questa fascia |
+| 14:00-21:00 | SALVUCCI | Canto | Tutti gli soci in questa fascia |
 | 21:00-22:00 | PICCININI | Musica d'Insieme | Laboratorio SWAPPING |
 
 ---
@@ -83,7 +83,7 @@
 ### AULA MIDI
 | Orario | Docente | Materia | Note |
 |--------|---------|---------|------|
-| 09:15-22:00 | PITINI | Canto | Tutti gli allievi, tutto il giorno |
+| 09:15-22:00 | PITINI | Canto | Tutti gli soci, tutto il giorno |
 
 ### AULA PIANO
 | Orario | Docente | Materia | Note |
@@ -98,7 +98,7 @@
 ### SALA JAZZ
 | Orario | Docente | Materia | Note |
 |--------|---------|---------|------|
-| 09:15-22:00 | URSINI | Chitarra | Tutti gli allievi, per ora |
+| 09:15-22:00 | URSINI | Chitarra | Tutti gli soci, per ora |
 
 ### SALA POP
 | Orario | Docente | Materia | Note |
@@ -265,10 +265,10 @@
 
 ### Note Operative
 - Gli orari indicano le **fasce di disponibilità docenti**
-- Ogni allievo schedulato sarà automaticamente associato al docente/materia della fascia
+- Ogni socio schedulato sarà automaticamente associato al docente/materia della fascia
 - Orari standard scuola: **Lunedì-Sabato 09:15 - 22:00**
 - **Domenica: CHIUSO**
-- Queste informazioni ricostruiscono le **relazioni attuali** tra allievi, docenti e materie
+- Queste informazioni ricostruiscono le **relazioni attuali** tra soci, docenti e materie
 
 ---
 
@@ -284,10 +284,10 @@
 
 ### Generazione Automatica SQL
 Ora possiamo generare automaticamente:
-- ✅ `database/insert_lezioni.sql` - Script per associare allievi a docenti/materie
+- ✅ `database/insert_lezioni.sql` - Script per associare soci a docenti/materie
 - ✅ Query helper per l'interfaccia web
 - ✅ Validazioni conflitti orari
-- ✅ Logica di assegnazione automatica allievo → docente/materia
+- ✅ Logica di assegnazione automatica socio → docente/materia
 
 ---
 

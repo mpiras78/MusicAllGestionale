@@ -19,7 +19,7 @@ CREATE TABLE dati_associazione (
 );
 ```
 
-### 2. **soci** (Rinominato da allievi)
+### 2. **soci** (Rinominato da soci)
 ```sql
 CREATE TABLE soci (
     id INTEGER PRIMARY KEY,
@@ -259,14 +259,14 @@ CREATE INDEX idx_audit_timestamp ON audit_log(created_at);
 
 ---
 
-## Migrazione da Allievi → Soci
+## Migrazione da Soci → Soci
 
 ```sql
 -- Backup tabella originale
-CREATE TABLE allievi_backup AS SELECT * FROM allievi;
+CREATE TABLE soci_backup AS SELECT * FROM soci;
 
 -- Rinomina tabella
-ALTER TABLE allievi RENAME TO soci;
+ALTER TABLE soci RENAME TO soci;
 
 -- Aggiungi nuove colonne
 ALTER TABLE soci ADD COLUMN telefono_2 VARCHAR(20);

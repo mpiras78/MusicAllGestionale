@@ -56,12 +56,12 @@ Anagrafica docenti della scuola
 
 ---
 
-### 3. **allievi**
-Anagrafica allievi iscritti
+### 3. **soci**
+Anagrafica soci iscritti
 
 | Campo | Tipo | Vincoli | Descrizione |
 |-------|------|---------|-------------|
-| id | INTEGER | PRIMARY KEY AUTOINCREMENT | ID univoco allievo |
+| id | INTEGER | PRIMARY KEY AUTOINCREMENT | ID univoco socio |
 | cognome | TEXT | NOT NULL | Cognome |
 | nome | TEXT | NOT NULL | Nome |
 | email | TEXT | - | Email contatto |
@@ -73,8 +73,8 @@ Anagrafica allievi iscritti
 | created_at | DATETIME | DEFAULT now | Data creazione |
 
 **Indici:**
-- idx_allievi_cognome_nome (cognome, nome)
-- idx_allievi_email (email)
+- idx_soci_cognome_nome (cognome, nome)
+- idx_soci_email (email)
 
 ---
 
@@ -133,7 +133,7 @@ Lezioni regolari programmate (ricorrenti settimanalmente)
 | Campo | Tipo | Vincoli | Descrizione |
 |-------|------|---------|-------------|
 | id | INTEGER | PRIMARY KEY AUTOINCREMENT | ID univoco lezione |
-| allievo_id | INTEGER | FK → allievi(id), NOT NULL | Allievo |
+| socio_id | INTEGER | FK → soci(id), NOT NULL | Socio |
 | docente_id | INTEGER | FK → docenti(id), NOT NULL | Docente |
 | materia_id | INTEGER | FK → materie(id), NOT NULL | Materia |
 | aula_id | INTEGER | FK → aule(id), NOT NULL | Aula |
@@ -151,7 +151,7 @@ Lezioni regolari programmate (ricorrenti settimanalmente)
 - idx_lezioni_giorno (giorno_settimana)
 - idx_lezioni_orario (ora_inizio, ora_fine)
 - idx_lezioni_docente (docente_id)
-- idx_lezioni_allievo (allievo_id)
+- idx_lezioni_socio (socio_id)
 
 ---
 
@@ -162,10 +162,10 @@ Registrazione assenze alle lezioni
 |-------|------|---------|-------------|
 | id | INTEGER | PRIMARY KEY AUTOINCREMENT | ID univoco assenza |
 | lezione_id | INTEGER | FK → lezioni(id) | Lezione regolare di riferimento |
-| allievo_id | INTEGER | FK → allievi(id), NOT NULL | Allievo assente |
+| socio_id | INTEGER | FK → soci(id), NOT NULL | Socio assente |
 | docente_id | INTEGER | FK → docenti(id), NOT NULL | Docente della lezione |
 | data_assenza | DATE | NOT NULL | Data dell'assenza |
-| tipo | TEXT | NOT NULL, CHECK | 'allievo' o 'docente' |
+| tipo | TEXT | NOT NULL, CHECK | 'socio' o 'docente' |
 | motivo | TEXT | - | Motivazione assenza |
 | da_recuperare | INTEGER | DEFAULT 1 | Richiede recupero (1/0) |
 | recuperata | INTEGER | DEFAULT 0 | Già recuperata (1/0) |
@@ -187,7 +187,7 @@ Lezioni una tantum (non ricorrenti)
 | Campo | Tipo | Vincoli | Descrizione |
 |-------|------|---------|-------------|
 | id | INTEGER | PRIMARY KEY AUTOINCREMENT | ID univoco |
-| allievo_id | INTEGER | FK → allievi(id), NOT NULL | Allievo |
+| socio_id | INTEGER | FK → soci(id), NOT NULL | Socio |
 | docente_id | INTEGER | FK → docenti(id), NOT NULL | Docente |
 | materia_id | INTEGER | FK → materie(id), NOT NULL | Materia |
 | data_lezione | DATE | NOT NULL | Data specifica lezione |
@@ -203,7 +203,7 @@ Lezioni una tantum (non ricorrenti)
 
 **Indici:**
 - idx_lezioni_custom_data (data_lezione)
-- idx_lezioni_custom_allievo (allievo_id)
+- idx_lezioni_custom_socio (socio_id)
 - idx_lezioni_custom_docente (docente_id)
 
 ---
@@ -217,7 +217,7 @@ Tipologie di eventi gestiti dal calendario
 |-------|------|---------|-------------|
 | id | INTEGER | PRIMARY KEY AUTOINCREMENT | ID univoco |
 | categoria | TEXT | NOT NULL, CHECK | 'lezione' o 'prenotazione' |
-| codice | TEXT | UNIQUE NOT NULL | Codice univoco (es: PREN_SALA_ALLIEVI) |
+| codice | TEXT | UNIQUE NOT NULL | Codice univoco (es: PREN_SALA_SOCI) |
 | nome | TEXT | NOT NULL | Nome visualizzato |
 | descrizione | TEXT | - | Descrizione tipologia |
 | colore_bg | TEXT | DEFAULT '#ffffff' | Colore sfondo (hex) |
@@ -229,7 +229,7 @@ Tipologie di eventi gestiti dal calendario
 
 **Codici Predefiniti:**
 - **Lezioni:** LEZ_REGOLARE, LEZ_CUSTOM, LEZ_LABORATORIO, LEZ_RECUPERO
-- **Prenotazioni:** PREN_SALA_ALLIEVI, PREN_DOCENTE, PREN_ESTERNO
+- **Prenotazioni:** PREN_SALA_SOCI, PREN_DOCENTE, PREN_ESTERNO
 
 **Indici:**
 - idx_tipologie_categoria (categoria, attiva)
@@ -263,12 +263,12 @@ Soci esterni/occasionali per prenotazioni
 ---
 
 ### 12. **iscrizioni**
-Iscrizioni mensili allievi
+Iscrizioni mensili soci
 
 | Campo | Tipo | Vincoli | Descrizione |
 |-------|------|---------|-------------|
 | id | INTEGER | PRIMARY KEY AUTOINCREMENT | ID univoco |
-| allievo_id | INTEGER | FK → allievi(id), NOT NULL | Allievo iscritto |
+| socio_id | INTEGER | FK → soci(id), NOT NULL | Socio iscritto |
 | mese | INTEGER | NOT NULL, CHECK (1-12) | Mese iscrizione |
 | anno | INTEGER | NOT NULL | Anno iscrizione |
 | data_inizio | DATE | NOT NULL | Data inizio validità |
@@ -278,9 +278,9 @@ Iscrizioni mensili allievi
 | created_at | DATETIME | DEFAULT now | Data creazione |
 | created_by | INTEGER | FK → users(id) | Utente che ha creato |
 
-**Vincoli:** UNIQUE(allievo_id, mese, anno)
+**Vincoli:** UNIQUE(socio_id, mese, anno)
 **Indici:**
-- idx_iscrizioni_allievo (allievo_id)
+- idx_iscrizioni_socio (socio_id)
 - idx_iscrizioni_periodo (anno, mese)
 - idx_iscrizioni_stato (stato)
 
@@ -303,7 +303,7 @@ Tabella unificata per tutti gli eventi (lezioni + prenotazioni)
 | aula_id | INTEGER | FK → aule(id), NOT NULL | Aula |
 | docente_id | INTEGER | FK → docenti(id) | Docente (per lezioni) |
 | materia_id | INTEGER | FK → materie(id) | Materia (per lezioni) |
-| allievo_id | INTEGER | FK → allievi(id) | Allievo (lezioni o prenotazioni) |
+| socio_id | INTEGER | FK → soci(id) | Socio (lezioni o prenotazioni) |
 | socio_occasionale_id | INTEGER | FK → soci_occasionali(id) | Socio esterno (prenotazioni) |
 | iscrizione_id | INTEGER | FK → iscrizioni(id) | Iscrizione associata |
 | titolo | TEXT | - | Titolo evento |
@@ -319,7 +319,7 @@ Tabella unificata per tutti gli eventi (lezioni + prenotazioni)
 **Vincoli CHECK:**
 - Se ricorrente=0: data_evento NOT NULL, giorno_settimana NULL
 - Se ricorrente=1: data_evento NULL, giorno_settimana NOT NULL
-- Uno solo tra allievo_id e socio_occasionale_id può essere valorizzato
+- Uno solo tra socio_id e socio_occasionale_id può essere valorizzato
 
 **Indici:**
 - idx_eventi_tipologia (tipologia_id, attivo)
@@ -327,7 +327,7 @@ Tabella unificata per tutti gli eventi (lezioni + prenotazioni)
 - idx_eventi_giorno (giorno_settimana, ricorrente)
 - idx_eventi_aula (aula_id)
 - idx_eventi_docente (docente_id)
-- idx_eventi_allievo (allievo_id)
+- idx_eventi_socio (socio_id)
 - idx_eventi_socio (socio_occasionale_id)
 - idx_eventi_iscrizione (iscrizione_id)
 - idx_eventi_periodo (data_inizio, data_fine)
@@ -341,7 +341,7 @@ Listini prezzi per tipologie evento
 |-------|------|---------|-------------|
 | id | INTEGER | PRIMARY KEY AUTOINCREMENT | ID univoco |
 | tipologia_id | INTEGER | FK → tipologie_evento(id), NOT NULL | Tipologia evento |
-| destinatario | TEXT | NOT NULL, CHECK | 'allievo_iscritto', 'docente', 'socio_occasionale', 'altro' |
+| destinatario | TEXT | NOT NULL, CHECK | 'socio_iscritto', 'docente', 'socio_occasionale', 'altro' |
 | prezzo_orario | REAL | - | Prezzo per ora (€) |
 | prezzo_forfait | REAL | - | Prezzo forfait (€) |
 | data_inizio_validita | DATE | NOT NULL | Data inizio validità |
@@ -351,7 +351,7 @@ Listini prezzi per tipologie evento
 | created_at | DATETIME | DEFAULT now | Data creazione |
 
 **Tariffe Predefinite 2026:**
-- Allievi iscritti: €0/ora (gratuito)
+- Soci iscritti: €0/ora (gratuito)
 - Docenti: €15/ora
 - Esterni: €30/ora
 
@@ -371,7 +371,7 @@ Gestione pagamenti
 | tipo | TEXT | NOT NULL, CHECK | 'iscrizione_mensile', 'prenotazione_sala', 'altro' |
 | iscrizione_id | INTEGER | FK → iscrizioni(id) | Riferimento iscrizione |
 | evento_id | INTEGER | FK → eventi_calendario(id) | Riferimento evento |
-| allievo_id | INTEGER | FK → allievi(id) | Pagante (se allievo) |
+| socio_id | INTEGER | FK → soci(id) | Pagante (se socio) |
 | socio_occasionale_id | INTEGER | FK → soci_occasionali(id) | Pagante (se esterno) |
 | importo_totale | REAL | NOT NULL | Importo totale (€) |
 | importo_pagato | REAL | DEFAULT 0 | Importo già pagato (€) |
@@ -390,13 +390,13 @@ Gestione pagamenti
 
 **Vincoli CHECK:**
 - Almeno uno tra iscrizione_id ed evento_id deve essere valorizzato
-- Uno solo tra allievo_id e socio_occasionale_id può essere valorizzato
+- Uno solo tra socio_id e socio_occasionale_id può essere valorizzato
 
 **Indici:**
 - idx_pagamenti_tipo (tipo, stato)
 - idx_pagamenti_iscrizione (iscrizione_id)
 - idx_pagamenti_evento (evento_id)
-- idx_pagamenti_allievo (allievo_id)
+- idx_pagamenti_socio (socio_id)
 - idx_pagamenti_socio (socio_occasionale_id)
 - idx_pagamenti_scadenza (data_scadenza, stato)
 
@@ -431,7 +431,7 @@ Vista per visualizzazione completa calendario con tutti i dati join
 - Dati evento (id, date, orari, tipo, tipologia)
 - Dati aula
 - Dati docente
-- Dati partecipante (allievo o esterno)
+- Dati partecipante (socio o esterno)
 - Dati materia
 - Stato iscrizione
 - Stato pagamento
@@ -452,11 +452,11 @@ docenti N──→M materie (via docenti_materie)
 docenti 1──→N lezioni (docente_id)
 docenti 1──→N eventi_calendario (docente_id)
 
-allievi 1──→N lezioni (allievo_id)
-allievi 1──→N assenze (allievo_id)
-allievi 1──→N eventi_calendario (allievo_id)
-allievi 1──→N iscrizioni (allievo_id)
-allievi 1──→N pagamenti (allievo_id)
+soci 1──→N lezioni (socio_id)
+soci 1──→N assenze (socio_id)
+soci 1──→N eventi_calendario (socio_id)
+soci 1──→N iscrizioni (socio_id)
+soci 1──→N pagamenti (socio_id)
 
 aule 1──→N lezioni (aula_id)
 aule 1──→N eventi_calendario (aula_id)

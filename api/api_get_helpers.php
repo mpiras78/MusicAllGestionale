@@ -20,7 +20,7 @@ try {
             echo json_encode(['success' => true, 'data' => $result]);
             break;
             
-        case 'allievi':
+        case 'soci':
             // Retrocompatibilità - reindirizza a soci
             $stmt = $db->query("
                 SELECT id, cognome, nome
@@ -62,7 +62,7 @@ try {
             echo json_encode(['success' => true, 'data' => $result]);
             break;
             
-        case 'allievi_con_lezioni':
+        case 'soci_con_lezioni':
             // Retrocompatibilità - reindirizza a soci_con_lezioni
             $stmt = $db->query("
                 SELECT 

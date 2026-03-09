@@ -17,7 +17,7 @@ namespace MusicAll\Models;
  * @property int $aula_id
  * @property int|null $docente_id
  * @property int|null $materia_id
- * @property int|null $allievo_id
+ * @property int|null $socio_id
  * @property int|null $socio_occasionale_id
  * @property int|null $iscrizione_id
  * @property string|null $titolo
@@ -43,7 +43,7 @@ class EventoCalendario extends Model
     protected $fillable = [
         'tipologia_id', 'ricorrente', 'giorno_settimana', 'data_evento',
         'data_inizio', 'data_fine', 'ora_inizio', 'ora_fine',
-        'aula_id', 'docente_id', 'materia_id', 'allievo_id',
+        'aula_id', 'docente_id', 'materia_id', 'socio_id',
         'socio_occasionale_id', 'iscrizione_id',
         'titolo', 'descrizione', 'note', 'attivo', 'confermato',
         'created_by', 'updated_by'
@@ -94,11 +94,11 @@ class EventoCalendario extends Model
     }
     
     /**
-     * Relazione: Allievo
+     * Relazione: Socio
      */
-    public function allievo()
+    public function socio()
     {
-        return $this->belongsTo(Allievo::class, 'allievo_id');
+        return $this->belongsTo(Socio::class, 'socio_id');
     }
     
     /**
@@ -200,11 +200,11 @@ class EventoCalendario extends Model
     }
     
     /**
-     * Scope: Eventi per allievo
+     * Scope: Eventi per socio
      */
-    public function scopePerAllievo($query, $allieveId)
+    public function scopePerSocio($query, $sociId)
     {
-        return $query->where('allievo_id', $allieveId);
+        return $query->where('socio_id', $sociId);
     }
     
     /**
@@ -212,8 +212,8 @@ class EventoCalendario extends Model
      */
     public function getPartecipanteAttribute()
     {
-        if ($this->allievo) {
-            return $this->allievo->nome_completo;
+        if ($this->socio) {
+            return $this->socio->nome_completo;
         }
         // TODO: Aggiungere socio occasionale quando model sarà creato
         return null;

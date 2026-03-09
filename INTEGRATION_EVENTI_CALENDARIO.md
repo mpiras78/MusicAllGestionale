@@ -36,8 +36,8 @@ $stmt = $db->prepare("
         t.nome as tipologia_nome,
         t.colore_bg,
         t.colore_border,
-        COALESCE(a.cognome || ' ' || a.nome, '') as allievo,
-        COALESCE(a.id, 0) as allievo_id,
+        COALESCE(a.cognome || ' ' || a.nome, '') as socio,
+        COALESCE(a.id, 0) as socio_id,
         COALESCE(d.cognome || ' ' || d.nome, '') as docente,
         COALESCE(m.nome, e.titolo, 'Prenotazione') as materia,
         au.nome as aula,
@@ -46,7 +46,7 @@ $stmt = $db->prepare("
         e.confermato
     FROM eventi_calendario e
     INNER JOIN tipologie_evento t ON e.tipologia_id = t.id
-    LEFT JOIN allievi a ON e.allievo_id = a.id
+    LEFT JOIN soci a ON e.socio_id = a.id
     LEFT JOIN docenti d ON e.docente_id = d.id
     LEFT JOIN materie m ON e.materia_id = m.id
     LEFT JOIN aule au ON e.aula_id = au.id
@@ -66,7 +66,7 @@ $tutte_lezioni = array_merge($lezioni, $eventi);
 Aggiungere supporto per i codici tipologia:
 - LEZ_REGOLARE → tipo 'regolare'
 - LEZ_RECUPERO → tipo 'recupero'
-- PREN_SALA_ALLIEVI → tipo 'prenotazione-allievi'
+- PREN_SALA_SOCI → tipo 'prenotazione-soci'
 - PREN_DOCENTE → tipo 'prenotazione-docente'
 - PREN_ESTERNO → tipo 'prenotazione-esterno'
 
@@ -74,7 +74,7 @@ Aggiungere supporto per i codici tipologia:
 
 ```css
 /* Prenotazioni */
-.lezione-slot.tipo-prenotazione-allievi {
+.lezione-slot.tipo-prenotazione-soci {
     background-color: #e8f5e9;
     border-left: 3px solid #4caf50;
 }

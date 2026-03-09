@@ -81,7 +81,7 @@ include 'includes/header.php';
         <!-- Assenze da Recuperare -->
         <?php require 'includes/views/dashboard/absences.php'; ?>
 
-        <!-- Ultimi Allievi Aggiunti -->
+        <!-- Ultimi Soci Aggiunti -->
         <?php require 'includes/views/dashboard/last_added_students.php'; ?>
     </div>
 </div>

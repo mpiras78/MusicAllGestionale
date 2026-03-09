@@ -42,7 +42,7 @@ try:
             if any(skip in value.upper() for skip in ['DOCENTE', 'AULA', 'NOTE', 'PAUSA', 'NO ']):
                 continue
             
-            # Se contiene orario e nome allievo
+            # Se contiene orario e nome socio
             if '/' in value or ('-' in value and any(c.isalpha() for c in value)):
                 col_letter = openpyxl.utils.get_column_letter(col)
                 aula_nome, materia = aule_map.get(col_letter, (None, None))
@@ -52,7 +52,7 @@ try:
                 
                 # Estrai orario
                 orario = None
-                allievo = None
+                socio = None
                 
                 parts = value.split()
                 for part in parts:
@@ -61,19 +61,19 @@ try:
                         break
                 
                 if orario:
-                    # Il resto è l'allievo
-                    allievo_text = value.replace(orario, '').strip()
+                    # Il resto è l'socio
+                    socio_text = value.replace(orario, '').strip()
                     # Rimuovi parentesi e note
-                    allievo_text = allievo_text.split('(')[0].strip()
+                    socio_text = socio_text.split('(')[0].strip()
                     
                     # Prendi solo cognome (prima parola maiuscola significativa)
-                    words = allievo_text.split()
+                    words = socio_text.split()
                     for word in words:
                         if word.isupper() and len(word) > 2:
-                            allievo = word
+                            socio = word
                             break
                     
-                    if allievo and 'PROVA' not in value.upper():
+                    if socio and 'PROVA' not in value.upper():
                         # Determina docente dalla riga 6-7
                         docente_cell = ws.cell(row=6, column=col).value or ws.cell(row=7, column=col).value
                         if docente_cell:
@@ -92,16 +92,16 @@ try:
                         if len(ora_fine.split(':')[0]) == 1:
                             ora_fine = '0' + ora_fine
                         
-                        sql = f"""INSERT INTO lezioni (giorno_settimana, ora_inizio, ora_fine, id_aula, id_allievo, id_docente, id_materia)
+                        sql = f"""INSERT INTO lezioni (giorno_settimana, ora_inizio, ora_fine, id_aula, id_socio, id_docente, id_materia)
 SELECT 'MERCOLEDÌ', '{ora_inizio}', '{ora_fine}',
        (SELECT id FROM aule WHERE UPPER(nome) LIKE '%{aula_nome}%' LIMIT 1),
-       (SELECT s.id FROM soci s JOIN persone p ON s.persona_id = p.id WHERE UPPER(p.cognome) LIKE '%{allievo}%' LIMIT 1),
+       (SELECT s.id FROM soci s JOIN persone p ON s.persona_id = p.id WHERE UPPER(p.cognome) LIKE '%{socio}%' LIMIT 1),
        (SELECT id FROM docenti WHERE UPPER(cognome) LIKE '%{docente}%' LIMIT 1),
        (SELECT id FROM materie WHERE UPPER(nome) LIKE '%{materia.split()[0]}%' LIMIT 1);"""
                         
                         sql_statements.append(sql)
                         lezioni_count += 1
-                        print(f"  + {aula_nome:8} {ora_inizio}-{ora_fine:5} {allievo:20} ({docente})")
+                        print(f"  + {aula_nome:8} {ora_inizio}-{ora_fine:5} {socio:20} ({docente})")
     
     # Scrivi file
     output_file = os.path.join(os.path.dirname(__file__), '..', 'database', 'insert_lezioni_MERCOLEDI.sql')

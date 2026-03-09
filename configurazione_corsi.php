@@ -168,7 +168,7 @@ function salvaCorso() {
     const formData = new FormData(form);
     const id = document.getElementById('corso_id').value;
     
-    fetch('api_configurazione_corsi.php', {
+    fetch('<?= BASE_URL ?>/api/api_configurazione_corsi.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
@@ -189,7 +189,7 @@ function salvaCorso() {
 }
 
 function modificaCorso(id) {
-    fetch(`api_configurazione_corsi.php?action=get&tipo=corso&id=${id}`)
+    fetch(`<?= BASE_URL ?>/api/api_configurazione_corsi.php?action=get&tipo=corso&id=${id}`)
     .then(r => r.json())
     .then(data => {
         if (data.success) {
@@ -214,7 +214,7 @@ function modificaCorso(id) {
 function eliminaCorso(id) {
     if (!confirm('Sei sicuro di voler eliminare questo tipo di corso?')) return;
     
-    fetch('api_configurazione_corsi.php', {
+    fetch('<?= BASE_URL ?>/api/api_configurazione_corsi.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({action: 'delete', tipo: 'corso', id: id})

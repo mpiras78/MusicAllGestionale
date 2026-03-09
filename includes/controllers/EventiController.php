@@ -19,6 +19,20 @@ class EventiController {
      * @return array Lista eventi
      */
     public function getEventiPerData($data) {
+        // Determine which foreign-key column exists in `eventi_calendario` (socio_id vs socio_id)
+        $fk_col = 'socio_id';
+        try {
+            $pragma = $this->db->query("PRAGMA table_info(eventi_calendario)")->fetchAll(PDO::FETCH_ASSOC);
+            $colNames = array_column($pragma, 'name');
+            if (in_array('socio_id', $colNames)) {
+                $fk_col = 'socio_id';
+            } elseif (in_array('socio_id', $colNames)) {
+                $fk_col = 'socio_id';
+            }
+        } catch (Exception $e) {
+            // leave default
+        }
+
         $stmt = $this->db->prepare("
             SELECT 
                 e.id,
@@ -29,8 +43,8 @@ class EventiController {
                 t.nome as tipologia_nome,
                 t.colore_bg,
                 t.colore_border,
-                COALESCE(a.cognome || ' ' || a.nome, '') as allievo,
-                COALESCE(a.id, 0) as allievo_id,
+                COALESCE(a.cognome || ' ' || a.nome, '') as socio,
+                COALESCE(a.id, 0) as socio_id,
                 CASE
                     WHEN d.id IS NOT NULL THEN d.cognome || ' ' || d.nome
                     WHEN se.id IS NOT NULL THEN se.cognome || ' ' || se.nome
@@ -44,7 +58,7 @@ class EventiController {
                 'evento' as source_type
             FROM eventi_calendario e
             INNER JOIN tipologie_evento t ON e.tipologia_id = t.id
-            LEFT JOIN allievi a ON e.allievo_id = a.id
+            LEFT JOIN soci a ON e." . $fk_col . " = a.id
             LEFT JOIN docenti d ON e.docente_id = d.id
             LEFT JOIN soci_esterni se ON e.socio_occasionale_id = se.id
             LEFT JOIN materie m ON e.materia_id = m.id
@@ -66,20 +80,24 @@ class EventiController {
      * @return array|null Dati evento o null se non trovato
      */
     public function getEventoById($evento_id) {
+        // Determine which foreign-key column exists in `eventi_calendario` (socio_id vs socio_id)
+        $fk_col = 'socio_id';
+
+
         $stmt = $this->db->prepare("
             SELECT 
                 e.*,
                 t.codice as tipologia_codice,
                 t.nome as tipologia_nome,
                 t.categoria as tipologia_categoria,
-                a.cognome || ' ' || a.nome as allievo_nome,
+                a.cognome || ' ' || a.nome as socio_nome,
                 d.cognome || ' ' || d.nome as docente_nome,
-                se.cognome || ' ' || se.nome as socio_nome,
+                se.cognome || ' ' || se.nome as socio_occasionale_nome,
                 m.nome as materia_nome,
                 au.nome as aula_nome
             FROM eventi_calendario e
             INNER JOIN tipologie_evento t ON e.tipologia_id = t.id
-            LEFT JOIN allievi a ON e.allievo_id = a.id
+            LEFT JOIN soci a ON e." . $fk_col . " = a.id
             LEFT JOIN docenti d ON e.docente_id = d.id
             LEFT JOIN soci_esterni se ON e.socio_occasionale_id = se.id
             LEFT JOIN materie m ON e.materia_id = m.id

@@ -84,7 +84,7 @@ use MusicAll\Models\EventoCalendario;
 $eventi = [];
 if ($data_selezionata) {
     try {
-        $query = EventoCalendario::with(['tipologia', 'aula', 'docente', 'materia', 'allievo'])
+        $query = EventoCalendario::with(['tipologia', 'aula', 'docente', 'materia', 'socio'])
             ->where('attivo', true);
         
         // Eventi ricorrenti per questo giorno
@@ -94,7 +94,7 @@ if ($data_selezionata) {
         ];
         $giorno_db = $giorno_key_map[date('l', strtotime($data_selezionata))] ?? 'lunedi';
         
-        $eventi_ricorrenti = EventoCalendario::with(['tipologia', 'aula', 'docente', 'materia', 'allievo'])
+        $eventi_ricorrenti = EventoCalendario::with(['tipologia', 'aula', 'docente', 'materia', 'socio'])
             ->where('attivo', true)
             ->where('ricorrente', true)
             ->where('giorno_settimana', $giorno_db)
@@ -109,7 +109,7 @@ if ($data_selezionata) {
             ->get();
         
         // Eventi singoli per questa data
-        $eventi_singoli = EventoCalendario::with(['tipologia', 'aula', 'docente', 'materia', 'allievo'])
+        $eventi_singoli = EventoCalendario::with(['tipologia', 'aula', 'docente', 'materia', 'socio'])
             ->where('attivo', true)
             ->where('ricorrente', false)
             ->where('data_evento', $data_selezionata)
@@ -145,7 +145,7 @@ if ($data_selezionata) {
                 'docente_nome' => $ev->docente ? ($ev->docente->cognome . ' ' . $ev->docente->nome) : 'N/D',
                 'materia_id' => $ev->materia_id,
                 'materia_nome' => $ev->materia->nome ?? null,
-                'allievo_id' => $ev->allievo_id,
+                'socio_id' => $ev->socio_id,
                 'partecipante_nome' => $ev->partecipante,
                 'titolo' => $ev->titolo,
                 'descrizione' => $ev->descrizione,
@@ -384,11 +384,11 @@ include 'includes/header.php';
                                                 
                                                 <div class="lezione-header">
                                                     <span class="icona-strumento" style="font-size: 1.2rem;"><?= $icona ?></span>
-                                                    <?php if ($evento_slot['allievo_id']): ?>
-                                                        <span class="lezione-allievo" 
+                                                    <?php if ($evento_slot['socio_id']): ?>
+                                                        <span class="lezione-socio" 
                                                               style="cursor: pointer; text-decoration: underline;" 
-                                                              data-allievo-id="<?= $evento_slot['allievo_id'] ?>"
-                                                              onclick="caricaInfoAllievo(<?= $evento_slot['allievo_id'] ?>, <?= $evento_slot['id'] ?>, '<?= addslashes($evento_slot['partecipante_nome']) ?>', '<?= addslashes($evento_slot['materia_nome'] ?? '') ?>', '<?= $data_selezionata ?>'); return false;">
+                                                              data-socio-id="<?= $evento_slot['socio_id'] ?>"
+                                                              onclick="caricaInfoSocio(<?= $evento_slot['socio_id'] ?>, <?= $evento_slot['id'] ?>, '<?= addslashes($evento_slot['partecipante_nome']) ?>', '<?= addslashes($evento_slot['materia_nome'] ?? '') ?>', '<?= $data_selezionata ?>'); return false;">
                                                             <?= e($evento_slot['partecipante_nome']) ?>
                                                         </span>
                                                     <?php else: ?>
@@ -495,8 +495,8 @@ include 'includes/header.php';
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label class="form-label fw-bold"><i class="bi bi-person"></i> Allievo</label>
-                            <p id="dettaglioAllievo" class="text-muted">-</p>
+                            <label class="form-label fw-bold"><i class="bi bi-person"></i> Socio</label>
+                            <p id="dettaglioSocio" class="text-muted">-</p>
                         </div>
                     </div>
                 </div>
@@ -634,10 +634,10 @@ include 'includes/header.php';
                         </div>
                     </div>
                     
-                    <!-- Allievo -->
+                    <!-- Socio -->
                     <div class="mb-3">
-                        <label class="form-label">Allievo</label>
-                        <select class="form-select" id="eventoAllievo">
+                        <label class="form-label">Socio</label>
+                        <select class="form-select" id="eventoSocio">
                             <option value="">-- Nessuno --</option>
                         </select>
                     </div>
@@ -681,17 +681,17 @@ include 'includes/header.php';
     </div>
 </div>
 
-<!-- Modal Info Allievo (riuso quello esistente) -->
-<div class="modal fade" id="infoAllieviModal" tabindex="-1">
+<!-- Modal Info Socio (riuso quello esistente) -->
+<div class="modal fade" id="infoSociModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header" style="background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%); color: white;">
                 <h5 class="modal-title">
-                    <i class="bi bi-person-circle"></i> <span id="modalAllieviNome">Info Allievo</span>
+                    <i class="bi bi-person-circle"></i> <span id="modalSociNome">Info Socio</span>
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="modalAllieviBody">
+            <div class="modal-body" id="modalSociBody">
                 <div class="text-center py-5">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Caricamento...</span>
@@ -711,17 +711,17 @@ include 'includes/header.php';
 // Riuso funzioni esistenti da calendario.php
 let currentLezioneData = null;
 
-function caricaInfoAllievo(allieviId, eventoId = null, nomeAllievo = '', materiaEvento = '', dataEvento = '') {
-    const modalBody = document.getElementById('modalAllieviBody');
-    const modalNome = document.getElementById('modalAllieviNome');
-    const modalElement = document.getElementById('infoAllieviModal');
+function caricaInfoSocio(sociId, eventoId = null, nomeSocio = '', materiaEvento = '', dataEvento = '') {
+    const modalBody = document.getElementById('modalSociBody');
+    const modalNome = document.getElementById('modalSociNome');
+    const modalElement = document.getElementById('infoSociModal');
     
     const modal = new bootstrap.Modal(modalElement);
     modal.show();
     
     currentLezioneData = eventoId ? {
         lezione_id: eventoId,
-        allievo_nome: nomeAllievo,
+        socio_nome: nomeSocio,
         materia: materiaEvento,
         data: dataEvento
     } : null;
@@ -734,12 +734,12 @@ function caricaInfoAllievo(allieviId, eventoId = null, nomeAllievo = '', materia
         </div>
     `;
     
-    fetch(`<?= BASE_URL ?>/api_get_info_allievo.php?allievo_id=${allieviId}`)
+    fetch(`<?= BASE_URL ?>/api/api_get_info_socio.php?socio_id=${sociId}`)
         .then(response => response.json())
         .then(data => {
             if (data.error) throw new Error(data.error);
             
-            modalNome.textContent = data.allievo.nome_completo;
+            modalNome.textContent = data.socio.nome_completo;
             
             let html = `
                 <div class="row mb-4">
