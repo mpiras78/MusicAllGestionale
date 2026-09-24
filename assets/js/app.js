@@ -22,17 +22,44 @@
             }
         });
 
-        // Tooltip Bootstrap
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
+        // Toggle password visibility per button con id #togglePassword
+        $('#togglePassword').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            var passwordInput = $('#password');
+            var toggleIcon = $('#toggleIcon');
+            
+            if (passwordInput.length && toggleIcon.length) {
+                if (passwordInput.attr('type') === 'password') {
+                    passwordInput.attr('type', 'text');
+                    toggleIcon.removeClass('bi-eye').addClass('bi-eye-slash');
+                } else {
+                    passwordInput.attr('type', 'password');
+                    toggleIcon.removeClass('bi-eye-slash').addClass('bi-eye');
+                }
+            }
         });
 
-        // Popover Bootstrap
-        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-        popoverTriggerList.map(function (popoverTriggerEl) {
-            return new bootstrap.Popover(popoverTriggerEl);
-        });
+        // Tooltip Bootstrap (con safety check)
+        if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        } else {
+            console.warn('Bootstrap Tooltip non disponibile');
+        }
+
+        // Popover Bootstrap (con safety check)
+        if (typeof bootstrap !== 'undefined' && bootstrap.Popover) {
+            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+            popoverTriggerList.map(function (popoverTriggerEl) {
+                return new bootstrap.Popover(popoverTriggerEl);
+            });
+        } else {
+            console.warn('Bootstrap Popover non disponibile');
+        }
 
         // Validazione form
         var forms = document.querySelectorAll('.needs-validation');

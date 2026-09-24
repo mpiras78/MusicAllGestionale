@@ -243,7 +243,30 @@ body {
     color: #f44336; /* Rosso per esterni */
 }
 
-/* Lezione annullata - SEMPRE dietro agli eventi sovrapposti */
+/* Indicatore lezione annullata - SEMPRE visibile sopra l'evento */
+.lezione-annullata-indicator {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 22px;
+    height: 22px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    z-index: 25 !important; /* SEMPRE sopra l'evento e altri elementi */
+    cursor: help;
+}
+
+.lezione-annullata-indicator i {
+    font-size: 0.95rem;
+    color: #d32f2f;
+    line-height: 1;
+}
+
+/* Lezione annullata SENZA evento - visualizzazione standard */
 .lezione-slot.lezione-annullata {
     background-color: #e0e0e0 !important;
     border-left: 3px solid #9e9e9e !important;
@@ -491,6 +514,31 @@ body {
     box-shadow: 0 0 0 0.2rem rgba(242, 148, 0, 0.25);
 }
 
+.login-card .input-group .btn-outline-secondary {
+    color: #6c757d;
+    border-color: #dee2e6;
+    background-color: white;
+    font-size: 1.25rem;
+    padding: 0.625rem 1.25rem;
+}
+
+.login-card .input-group .btn-outline-secondary:hover {
+    color: #F29400;
+    border-color: #F29400;
+    background-color: #fff9f0;
+}
+
+.login-card .input-group .btn-outline-secondary:focus {
+    color: #F29400;
+    border-color: #F29400;
+    box-shadow: 0 0 0 0.2rem rgba(242, 148, 0, 0.25);
+}
+
+.login-card .input-group .btn-outline-secondary i {
+    color: inherit;
+    cursor: pointer;
+}
+
 .login-logo {
     margin-bottom: 1rem;
 }
@@ -530,6 +578,82 @@ body {
 .login-logo {
     font-size: 4rem;
     color: var(--primary-color);
+}
+
+/* Reset Password Page - Input Group Enhancement */
+.login-container .input-group-lg .btn-outline-secondary {
+    color: #6c757d;
+    border-color: #dee2e6;
+    background-color: white;
+    font-size: 1.25rem;
+    padding: 0.625rem 1.25rem;
+}
+
+.login-container .input-group-lg .btn-outline-secondary:hover {
+    color: #F29400;
+    border-color: #F29400;
+    background-color: #fff9f0;
+}
+
+.login-container .input-group-lg .btn-outline-secondary:focus {
+    color: #F29400;
+    border-color: #F29400;
+    box-shadow: 0 0 0 0.2rem rgba(242, 148, 0, 0.25);
+}
+
+.login-container .input-group-lg .btn-outline-secondary i {
+    color: inherit;
+}
+
+/* Password requirements box */
+.login-container .form-requirements {
+    background-color: #f8f9fa;
+    border-left: 3px solid #F29400;
+    border-radius: 8px;
+    padding: 12px 16px;
+}
+
+.login-container .form-requirements ul {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 0.875rem;
+}
+
+.login-container .form-requirements li {
+    margin-bottom: 4px;
+    color: #495057;
+}
+
+/* Form control enhancement for reset page */
+.login-container .form-control {
+    border: 1px solid #dee2e6;
+    background-color: white;
+    font-size: 1rem;
+}
+
+.login-container .form-control-lg {
+    padding: 0.875rem 1.25rem;
+    font-size: 1.125rem;
+    border-radius: 0.375rem;
+}
+
+.login-container .form-control:focus {
+    border-color: #F29400;
+    box-shadow: 0 0 0 0.2rem rgba(242, 148, 0, 0.15);
+    background-color: #fffaf5;
+}
+
+/* Labels enhancement */
+.login-container .form-label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.login-container .form-label i {
+    color: #F29400;
+    margin-right: 0.25rem;
 }
 
 /* Utility Classes */

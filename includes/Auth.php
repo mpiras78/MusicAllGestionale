@@ -18,6 +18,16 @@ class Auth {
      */
     private function startSession() {
         if (session_status() === PHP_SESSION_NONE) {
+            // Configura secure cookie flags per production
+            session_set_cookie_params([
+                'lifetime' => SESSION_LIFETIME,
+                'path' => '/',
+                'domain' => '',
+                'secure' => !DEBUG_MODE,      // HTTPS only in production
+                'httponly' => true,            // Non accessibile da JavaScript (XSS protection) - sec-002
+                'samesite' => 'Strict'         // CSRF protection - sec-002
+            ]);
+            
             session_name(SESSION_NAME);
             session_start();
             
@@ -80,21 +90,34 @@ class Auth {
     
     /**
      * Verifica se l'utente è autenticato
-     * Controlla anche timeout sessione (15 minuti)
+     * Controlla anche timeout sessione secondo SESSION_LIFETIME
+     * REASON: sec-002 - SESSION_LIFETIME ridotto da 8h a 30min per OWASP compliance
      */
     public function isLoggedIn() {
         if (!isset($_SESSION['user_id'])) {
             return false;
         }
         
-        // Verifica timeout sessione (15 minuti)
+        // Verifica timeout sessione con SESSION_LIFETIME
         if (isset($_SESSION['last_activity'])) {
-            $timeout = 15 * 60; // 15 minuti in secondi
+            $timeout = defined('SESSION_LIFETIME') ? SESSION_LIFETIME : (15 * 60);
             $elapsed = time() - $_SESSION['last_activity'];
             
             if ($elapsed > $timeout) {
                 // Sessione scaduta - salva flag per messaggio
                 $_SESSION['session_timeout'] = true;
+                $this->logout();
+                return false;
+            }
+        }
+        
+        // Verifica anche login_time per protezione ulteriore
+        if (isset($_SESSION['login_time'])) {
+            $maxSessionAge = defined('SESSION_LIFETIME') ? SESSION_LIFETIME : (15 * 60);
+            $sessionAge = time() - $_SESSION['login_time'];
+            
+            if ($sessionAge > $maxSessionAge) {
+                $_SESSION['session_expired'] = true;
                 $this->logout();
                 return false;
             }
@@ -226,18 +249,66 @@ class Auth {
      */
     public function logActivity($user_id, $action, $entity_type = null, $entity_id = null, $description = null) {
         $ip = $_SERVER['REMOTE_ADDR'] ?? null;
-        
-        $sql = "INSERT INTO activity_log (user_id, action, entity_type, entity_id, description, ip_address) 
-                VALUES (?, ?, ?, ?, ?, ?)";
-        
-        return $this->db->execute($sql, [
+        $userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255);
+         
+        $sql = "INSERT INTO activity_log (user_id, action, entity_type, entity_id, description, ip_address, user_agent) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
+         
+        $result = $this->db->execute($sql, [
             $user_id,
             $action,
             $entity_type,
             $entity_id,
             $description,
-            $ip
+            $ip,
+            $userAgent
         ]);
+         
+        // Aggiungi logging di sicurezza per eventi critici (sec-009)
+        // REASON: sec-009 - Loggare tutti gli eventi di sicurezza per audit trail
+        // SEVERITY: HIGH - sec-009
+        $securityActions = ['login', 'logout', 'login_failure', 'password_change', 'user_create', 'user_delete', 'role_change'];
+         
+        if (in_array($action, $securityActions)) {
+            $this->logSecurityEvent($user_id, $action, $entity_type, $entity_id, $description, $ip);
+        }
+         
+        return $result;
+    }
+     
+    /**
+     * Log di sicurezza - Registra eventi di sicurezza critici (sec-009)
+     */
+    private function logSecurityEvent($user_id, $action, $entity_type, $entity_id, $description, $ip) {
+        try {
+            $timestamp = date('Y-m-d H:i:s');
+            $userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255);
+            $severity = 'MEDIUM';
+             
+            // Determina severity
+            if (in_array($action, ['login_failure', 'password_change'])) {
+                $severity = 'HIGH';
+            } elseif (in_array($action, ['user_delete', 'role_change'])) {
+                $severity = 'CRITICAL';
+            }
+             
+            $sql = "INSERT INTO security_log (user_id, action, entity_type, entity_id, description, ip_address, user_agent, severity, timestamp) 
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+             
+            $this->db->execute($sql, [
+                $user_id,
+                $action,
+                $entity_type,
+                $entity_id,
+                $description,
+                $ip,
+                $userAgent,
+                $severity,
+                $timestamp
+            ]);
+        } catch (Exception $e) {
+            error_log("SecurityLog Error: " . $e->getMessage());
+        }
     }
     
     /**

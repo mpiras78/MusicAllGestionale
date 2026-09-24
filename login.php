@@ -25,7 +25,7 @@ if (isPost()) {
         if (empty($username) || empty($password)) {
             $error = 'Inserisci username e password';
         } else {
-            // Rate limiting - max 5 tentativi in 15 minuti
+            // Rate limiting - max 5 tentativi in 15 minuti per sec-001
             $rateLimiter = new RateLimiter();
             $identifier = $_SERVER['REMOTE_ADDR'];
             
@@ -38,6 +38,12 @@ if (isPost()) {
                 $rateLimiter->hit($identifier, 'login', ['username' => $username]);
                 
                 if ($auth->login($username, $password)) {
+                    // RESET rate limiting counter al login riuscito (sec-001)
+                    // Pulisci tutti i tentativi precedenti per questo IP
+                    $sql = "DELETE FROM rate_limit_log WHERE identifier = ? AND action = 'login'";
+                    $db = Database::getInstance();
+                    $db->execute($sql, [$identifier]);
+                    
                     // Redirect in base al ruolo
                     $role = $_SESSION['role'] ?? 'segreteria';
                     
@@ -117,7 +123,8 @@ if (isPost()) {
                                     <input type="password" 
                                            class="form-control" 
                                            id="password" 
-                                           name="password" 
+                                           name="password"
+                                           autocomplete="current-password"
                                            required>
                                     <button class="btn btn-outline-secondary" type="button" id="togglePassword">
                                         <i class="bi bi-eye" id="toggleIcon"></i>
@@ -131,6 +138,13 @@ if (isPost()) {
                                 </button>
                             </div>
                         </form>
+                        
+                        <!-- Link Forgot Password -->
+                        <div class="text-center mt-3">
+                            <a href="<?= BASE_URL ?>/forgot-password.php" class="text-decoration-none">
+                                <i class="bi bi-key"></i> Hai dimenticato la password?
+                            </a>
+                        </div>
                         
                         <div class="text-center mt-3">
                             <small class="text-muted d-block mb-1">
@@ -146,7 +160,7 @@ if (isPost()) {
                 
                 <div class="text-center mt-3">
                     <small class="text-white">
-                        <i class="bi bi-shield-lock"></i> Sistema protetto - Accesso riservato
+                        <i class="bi bi-shield-lock"></i> Sistema protetto - Accesso riservato csp_nonce:<?= $_SESSION['csp_nonce'] ?>
                     </small>
                 </div>
             </div>
@@ -155,22 +169,9 @@ if (isPost()) {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-// Toggle password visibility
-document.getElementById('togglePassword').addEventListener('click', function() {
-    const passwordInput = document.getElementById('password');
-    const toggleIcon = document.getElementById('toggleIcon');
-    
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        toggleIcon.classList.remove('bi-eye');
-        toggleIcon.classList.add('bi-eye-slash');
-    } else {
-        passwordInput.type = 'password';
-        toggleIcon.classList.remove('bi-eye-slash');
-        toggleIcon.classList.add('bi-eye');
-    }
-});
-</script>
+<!-- jQuery (DEVE essere caricato PRIMA di app.js) -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<!-- Custom JS (richiede jQuery e Bootstrap) -->
+<script src="<?= BASE_URL ?>/assets/js/app.js"></script>
 </body>
 </html>

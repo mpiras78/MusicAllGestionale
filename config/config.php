@@ -26,8 +26,14 @@ define('LOG_PATH', BASE_PATH . '/logs');
 
 // Sicurezza
 define('SESSION_NAME', 'MUSICALL_SESSION');
-define('SESSION_LIFETIME', 3600 * 8); // 8 ore
-define('PASSWORD_MIN_LENGTH', 6);
+define('SESSION_LIFETIME', 1800);  // Ridotto da 28800 (8h) a 1800 (30min) per OWASP compliance
+                                    // REASON: Session lunga = window più ampio per hijacking
+                                    // SEVERITY: CRITICAL - sec-002
+define('PASSWORD_MIN_LENGTH', 12);  // Aumentato da 6 per OWASP 2021 compliance
+define('PASSWORD_REQUIRE_UPPERCASE', true);
+define('PASSWORD_REQUIRE_LOWERCASE', true);
+define('PASSWORD_REQUIRE_NUMBERS', true);
+define('PASSWORD_REQUIRE_SYMBOLS', true);
 
 // Upload
 define('UPLOAD_PATH', BASE_PATH . '/uploads/');
@@ -79,14 +85,19 @@ define('ORA_INIZIO_SCUOLA', '09:15');
 define('ORA_FINE_SCUOLA', '22:00');
 define('DURATA_SLOT_DEFAULT', 15); // minuti (granularità del calendario)
 
-// Modalità Debug
-define('DEBUG_MODE', true);
+// Modalità Debug - Forza false in produzione per sicurezza
+// REASON: DEBUG_MODE=true espone stack trace, file paths, DB queries ai visitatori
+// SEVERITY: CRITICAL - Information Disclosure
+define('DEBUG_MODE', getenv('APP_ENV') === 'local' ? true : false);
 
 // Error Reporting
 if (DEBUG_MODE) {
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
+    ini_set('log_errors', 0);  // Non loggare durante debug (development)
 } else {
     error_reporting(0);
-    ini_set('display_errors', 0);
+    ini_set('display_errors', 0);  // Non mostrare errori (production safe)
+    ini_set('log_errors', 1);       // Loggare in file invece
+    ini_set('error_log', LOG_PATH . '/php_errors.log');  // File errors invece di browser
 }

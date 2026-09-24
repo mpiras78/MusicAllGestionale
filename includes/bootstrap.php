@@ -12,6 +12,58 @@ use Illuminate\Container\Container;
 // Carica configurazione
 require_once __DIR__ . '/../config/config.php';
 
+// Security Headers (sec-003: Content Security Policy)
+// REASON: CSP previene XSS injection bloccando inline scripts non autorizzati
+// SEVERITY: HIGH - sec-003
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+    // HTTPS Redirect (sec-004: Enforce HTTPS)
+    // REASON: HTTPS obbligatorio per proteggere dati in transito (man-in-the-middle prevention)
+    // SEVERITY: HIGH - sec-004
+    if (!DEBUG_MODE && !isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
+        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https://' : 'http://';
+        if (strpos(BASE_URL, 'https://') !== false && $protocol === 'http://') {
+            // Redirect a HTTPS
+            $url = str_replace('http://', 'https://', 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
+            header('Location: ' . $url, true, 301);
+            exit;
+        }
+    }
+    
+    // Imposta headers di sicurezza
+    header("X-Content-Type-Options: nosniff");                          // Previene MIME sniffing
+    header("X-Frame-Options: SAMEORIGIN");                              // Previene clickjacking
+    header("X-XSS-Protection: 1; mode=block");                          // XSS protection (legacy)
+    header("Strict-Transport-Security: max-age=31536000; includeSubDomains"); // HSTS header (sec-004)
+    
+    // Genera nonce per OGNI richiesta HTTP (non per sessione)
+    // MOTIVO: Il nonce deve cambiare ad ogni richiesta per sicurezza CSP ottimale
+    $_SESSION['csp_nonce'] = bin2hex(random_bytes(16));
+    $csp_nonce = $_SESSION['csp_nonce'];
+    
+    // Content Security Policy - restrittiva con nonce
+    $csp = "default-src 'self'; "
+        . "script-src 'self' https://cdn.jsdelivr.net https://code.jquery.com 'nonce-{$csp_nonce}'; "
+        . "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "  // Inline CSS per Bootstrap
+        . "img-src 'self' data: https:; "
+        . "font-src 'self' https://cdn.jsdelivr.net; "
+        . "connect-src 'self' https://cdn.jsdelivr.net; "                // AJAX a self + CDN source maps
+        . "frame-ancestors 'none'; "                                    // Non embeddable
+        . "base-uri 'self'; "
+        . "form-action 'self'";                                         // Form submission solo a self
+    
+    header("Content-Security-Policy: " . $csp);
+    
+    // Referrer Policy
+    header("Referrer-Policy: strict-origin-when-cross-origin");
+    
+    // Permissions Policy (ex Feature-Policy)
+    header("Permissions-Policy: geolocation=(), microphone=(), camera=()");
+}
+
+// Carica helper per CSP
+require_once __DIR__ . '/helpers_csp.php';
+
 // Carica Composer autoloader (se esiste)
 $composerAutoload = __DIR__ . '/../vendor/autoload.php';
 if (file_exists($composerAutoload)) {
