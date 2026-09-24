@@ -455,17 +455,151 @@ include 'includes/header.php';
                                             }
                                         }
                                         
+                                        // Caso 3: Evento sopra lezione annullata - ENTRAMBI VISIBILI!
+                                        if ($lezione_slot && $evento_slot):
+                                           $log_msg = "\n=== CASO 3 RILEVATO - ENTRAMBI VISIBILI ===\n";
+                                           $log_msg .= "Data: {$data_selezionata}, Aula: {$aula['nome']}, Slot: {$slot['inizio']}\n";
+                                           $log_msg .= "Lezione Annullata: " . json_encode([
+                                               'id' => $lezione_slot['id'],
+                                               'socio' => $lezione_slot['socio'],
+                                               'materia' => $lezione_slot['materia'],
+                                               'ora_inizio' => $lezione_slot['ora_inizio'],
+                                               'ora_fine' => $lezione_slot['ora_fine'],
+                                               'attiva' => $lezione_slot['attiva'] ?? 'N/D'
+                                           ]) . "\n";
+                                           $log_msg .= "Evento Sovrapposto: " . json_encode([
+                                               'id' => $evento_slot['id'],
+                                               'tipo' => $evento_slot['tipo'] ?? 'N/D',
+                                               'socio' => $evento_slot['socio'] ?? 'N/D',
+                                               'ora_inizio' => $evento_slot['ora_inizio'],
+                                               'ora_fine' => $evento_slot['ora_fine']
+                                           ]) . "\n\n";
+                                           file_put_contents($log_file, $log_msg, FILE_APPEND);
+                                            
+                                           $icona_lez = getIconaMateria($lezione_slot['materia']);
+                                           $is_annullata_lez = (isset($lezione_slot['attiva']) && $lezione_slot['attiva'] == 0) || $giorno_festivita;
+                                            
+                                           $icona_evt = getIconaMateria($evento_slot['materia']);
+                                           $tipo_css_evt = 'regolare';
+                                           $icona_prenotazione_evt = '';
+                                           $classe_icona_pren_evt = '';
+                                           $is_prenotazione_evt = false;
+                                           if (isset($evento_slot['tipo'])) {
+                                               $tipo_lower = strtolower($evento_slot['tipo']);
+                                               if (strpos($tipo_lower, 'recupero') !== false) {
+                                                   $tipo_css_evt = 'recupero';
+                                               } elseif (strpos($tipo_lower, 'pren_sala') !== false) {
+                                                   $tipo_css_evt = 'prenotazione-soci';
+                                                   $icona_prenotazione_evt = '👨‍🎓';
+                                                   $classe_icona_pren_evt = 'tipo-soci';
+                                                   $is_prenotazione_evt = true;
+                                               } elseif (strpos($tipo_lower, 'pren_docente') !== false) {
+                                                   $tipo_css_evt = 'prenotazione-docente';
+                                                   $icona_prenotazione_evt = '🎓';
+                                                   $classe_icona_pren_evt = 'tipo-docente';
+                                                   $is_prenotazione_evt = true;
+                                               } elseif (strpos($tipo_lower, 'pren_esterno') !== false) {
+                                                   $tipo_css_evt = 'prenotazione-esterno';
+                                                   $icona_prenotazione_evt = '👤';
+                                                   $classe_icona_pren_evt = 'tipo-esterno';
+                                                   $is_prenotazione_evt = true;
+                                               }
+                                           }
+                                            
+                                           // Info tooltip lezione annullata (per l'indicatore)
+                                           $motivo_annullata = $giorno_festivita ? $giorno_festivita['nome'] : 'Assenza';
+                                           $tooltip_annullata = e($lezione_slot['socio']) . ' - ' . e($lezione_slot['materia']) . 
+                                               ' (' . $motivo_annullata . ') ' . 
+                                               date('H:i', strtotime($lezione_slot['ora_inizio'])) . '-' . date('H:i', strtotime($lezione_slot['ora_fine']));
+                                        ?>
+                                            <!-- Evento CLICCABILE - mostra con spazio per l'indicatore -->
+                                            <div class="lezione-slot tipo-<?= e($tipo_css_evt) ?>"
+                                                 data-lezione-id="<?= $evento_slot['id'] ?>"
+                                                 data-evento-id="<?= $evento_slot['id'] ?>"
+                                                 data-onclick-action="mostraInfoEvento"
+                                                 title="<?= e($evento_slot['socio'] ?: ($evento_slot['docente'] ?: 'Prenotazione')) ?> | Lezione annullata: <?= $tooltip_annullata ?>"
+                                                 style="cursor: pointer; padding-left: 26px;">
+                                                <!-- Indicatore lezione annullata - DENTRO l'evento -->
+                                                <div class="lezione-annullata-indicator" 
+                                                     title="<?= $tooltip_annullata ?>">
+                                                    <i class="bi bi-x-circle-fill"></i>
+                                                </div>
+                                                
+                                                <div class="lezione-orario-badge">
+                                                    <?= date('H:i', strtotime($evento_slot['ora_inizio'])) ?>-<?= date('H:i', strtotime($evento_slot['ora_fine'])) ?>
+                                                </div>
+                                                
+                                                <?php if ($is_prenotazione_evt): ?>
+                                                    <!-- Layout uniforme per PRENOTAZIONI -->
+                                                    <div class="lezione-header">
+                                                        <span class="lezione-socio">
+                                                            <?php if ($icona_prenotazione_evt): ?>
+                                                                <span class="prenotazione-tipo-icon <?= $classe_icona_pren_evt ?>" style="font-size: 1.1rem;"><?= $icona_prenotazione_evt ?></span>
+                                                            <?php endif; ?>
+                                                            PRENOTAZIONE
+                                                        </span>
+                                                        <?php if (isset($evento_slot['confermato']) && $evento_slot['confermato'] == 0): ?>
+                                                            <i class="bi bi-clock-history text-warning" title="Da confermare"></i>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <div class="lezione-info-row">
+                                                        <div class="lezione-docente">
+                                                            <i class="bi bi-person-fill"></i> 
+                                                            <?= e($evento_slot['socio'] ?: $evento_slot['docente'] ?: 'Esterno') ?>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Badge: Lezione annullata sotto -->
+                                                    <div class="d-flex align-items-center gap-1 mt-1" style="font-size: 0.75rem; opacity: 0.7;">
+                                                        <i class="bi bi-exclamation-circle" style="color: #d32f2f;"></i>
+                                                        <span><?= $motivo_annullata ?></span>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <!-- Layout standard per RECUPERI e altri eventi -->
+                                                    <div class="lezione-header">
+                                                        <span class="icona-strumento" style="font-size: 1.2rem;"><?= $icona_evt ?></span>
+                                                        <span class="lezione-socio">
+                                                            <?= e($evento_slot['socio'] ?: ($evento_slot['docente'] ?: 'Evento')) ?>
+                                                            <?php if (isset($evento_slot['confermato']) && $evento_slot['confermato'] == 0): ?>
+                                                                <i class="bi bi-clock-history text-warning" title="Da confermare"></i>
+                                                            <?php endif; ?>
+                                                        </span>
+                                                    </div>
+                                                    <div class="lezione-info-row">
+                                                        <div class="lezione-docente">
+                                                            <i class="bi bi-person-fill"></i> <?= e($evento_slot['docente']) ?>
+                                                        </div>
+                                                        <?php if ($evento_slot['materia']): ?>
+                                                            <div class="lezione-materia-inline">
+                                                                <?= e($evento_slot['materia']) ?>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <!-- Badge: Lezione annullata sotto -->
+                                                    <div class="d-flex align-items-center gap-1 mt-1" style="font-size: 0.75rem; opacity: 0.7;">
+                                                        <i class="bi bi-exclamation-circle" style="color: #d32f2f;"></i>
+                                                        <span><?= $motivo_annullata ?></span>
+                                                    </div>
+                                                <?php endif; ?>
+                                                
+                                                <?php if ($evento_slot['note']): ?>
+                                                    <div class="lezione-note-badge">
+                                                        <i class="bi bi-sticky" title="<?= e($evento_slot['note']) ?>"></i>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                        
                                         // Caso 1: Solo lezione (o evento senza lezione)
-                                        if ($lezione_slot && !$evento_slot):
+                                        <?php elseif ($lezione_slot && !$evento_slot): ?>
+                                            <?php
                                             $icona = getIconaMateria($lezione_slot['materia']);
                                             // Determina se lezione è annullata (attiva = 0 O giorno festività)
                                             $is_annullata = (isset($lezione_slot['attiva']) && $lezione_slot['attiva'] == 0) || $giorno_festivita;
                                             
-                                            if ($is_annullata):
+                                           if ($is_annullata):
                                                 // Lezione ANNULLATA: mostra solo icona piccola + pulsante +
                                                 $motivo = $giorno_festivita ? $giorno_festivita['nome'] : 'Assenza';
                                                 $tooltip = e($lezione_slot['socio']) . ' - ' . e($lezione_slot['materia']) . ' (' . $motivo . ')';
-                                        ?>
+                                            ?>
                                                 <!-- Icona lezione annullata piccola in alto a sinistra -->
                                                 <div style="position: absolute; top: 5px; left: 5px; z-index: 10;">
                                                     <i class="bi bi-calendar-x text-muted" 
@@ -475,7 +609,13 @@ include 'includes/header.php';
                                                 
                                                 <!-- Slot disponibile per prenotazione -->
                                                 <div class="empty-slot-add" 
-                                                     onclick="apriModalNuovaPrenotazione(<?= $aula['id'] ?>, '<?= e($aula['nome']) ?>', '<?= $slot['inizio'] ?>', '<?= $giorno_selezionato ?>', '<?= $data_selezionata ?>', '<?= $lezione_slot['ora_inizio'] ?>', '<?= $lezione_slot['ora_fine'] ?>')">
+                                                     data-aula-id="<?= $aula['id'] ?>"
+                                                     data-aula-nome="<?= e($aula['nome']) ?>"
+                                                     data-slot-inizio="<?= $slot['inizio'] ?>"
+                                                     data-giorno="<?= $giorno_selezionato ?>"
+                                                     data-data="<?= $data_selezionata ?>"
+                                                     data-ora-inizio-lezione="<?= $lezione_slot['ora_inizio'] ?>"
+                                                     data-ora-fine-lezione="<?= $lezione_slot['ora_fine'] ?>">
                                                     <i class="bi bi-plus-circle"></i>
                                                 </div>
                                         <?php
@@ -494,7 +634,9 @@ include 'includes/header.php';
                                                           style="cursor: pointer; text-decoration: underline;" 
                                                           data-socio-id="<?= $lezione_slot['socio_id'] ?>"
                                                           data-lezione-id="<?= $lezione_slot['id'] ?>"
-                                                          onclick="caricaInfoSocio(<?= $lezione_slot['socio_id'] ?>, <?= $lezione_slot['id'] ?>, '<?= addslashes($lezione_slot['socio']) ?>', '<?= addslashes($lezione_slot['materia']) ?>', '<?= $data_selezionata ?>'); return false;">
+                                                          data-socio-nome="<?= addslashes($lezione_slot['socio']) ?>"
+                                                          data-materia="<?= addslashes($lezione_slot['materia']) ?>"
+                                                          data-data="<?= $data_selezionata ?>">
                                                         <?= e($lezione_slot['socio']) ?>
                                                     </span>
                                                 </div>
@@ -506,23 +648,21 @@ include 'includes/header.php';
                                                         <?= e($lezione_slot['materia']) ?>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        <?php
-                                            endif; // Fine if ($is_annullata)
-                                        endif; // Fine if ($lezione_slot && !$evento_slot)
-                                        ?>
-                                        <?php if ($evento_slot && !$lezione_slot): ?>
-                                            <!-- Caso 2: Solo evento (senza lezione) - CLICCABILE -->
-                                            <?php
+                                           </div>
+                                        <?php endif; ?>
+                                        
+                                        <?php elseif ($evento_slot && !$lezione_slot): ?>
+                                           <!-- Caso 2: Solo evento (senza lezione) - CLICCABILE -->
+                                           <?php
                                             $icona = getIconaMateria($evento_slot['materia']);
                                             $is_annullata = (isset($evento_slot['attiva']) && $evento_slot['attiva'] == 0) || $giorno_festivita;
                                             $classe_annullata = $is_annullata ? ' lezione-annullata' : '';
-                                            
+                                             
                                             $tipo_css = 'regolare';
                                             $icona_prenotazione = '';
                                             $classe_icona_pren = '';
                                             $is_prenotazione = false;
-                                            
+                                             
                                             if (isset($evento_slot['tipo'])) {
                                                 $tipo_lower = strtolower($evento_slot['tipo']);
                                                 if (strpos($tipo_lower, 'recupero') !== false || $tipo_lower === 'lez_recupero') {
@@ -544,20 +684,20 @@ include 'includes/header.php';
                                                     $is_prenotazione = true;
                                                 }
                                             }
-                                            
+                                             
                                             // TUTTI gli eventi (recuperi E prenotazioni) vanno su mostraInfoEvento
                                             $onclick_action = "mostraInfoEvento({$evento_slot['id']}); return false;";
                                         ?>
                                             <div class="lezione-slot tipo-<?= e($tipo_css) ?><?= $classe_annullata ?>" 
                                                  data-lezione-id="<?= $evento_slot['id'] ?>"
                                                  data-evento-id="<?= $evento_slot['id'] ?>"
+                                                 data-onclick-action="mostraInfoEvento"
                                                  title="<?= e($evento_slot['socio'] ?: $evento_slot['docente'] ?: 'Prenotazione') ?>"
-                                                 style="cursor: pointer;"
-                                                 onclick="<?= $onclick_action ?>">
+                                                 style="cursor: pointer;">
                                                 <div class="lezione-orario-badge">
                                                     <?= date('H:i', strtotime($evento_slot['ora_inizio'])) ?>-<?= date('H:i', strtotime($evento_slot['ora_fine'])) ?>
                                                 </div>
-                                                
+                                                 
                                             <?php if ($is_prenotazione): ?>
                                                     <!-- Layout uniforme per PRENOTAZIONI -->
                                                     <div class="lezione-header">
@@ -599,142 +739,24 @@ include 'includes/header.php';
                                                         <?php endif; ?>
                                                     </div>
                                                 <?php endif; ?>
-                                                
+                                                 
                                                 <?php if ($evento_slot['note']): ?>
                                                     <div class="lezione-note-badge">
                                                         <i class="bi bi-sticky" title="<?= e($evento_slot['note']) ?>"></i>
                                                     </div>
                                                 <?php endif; ?>
                                             </div>
-                                        
-                                        <?php elseif ($lezione_slot && $evento_slot): ?>
-                                            <!-- Caso 3: Evento sopra lezione annullata - SOLO ICONA per lezione annullata -->
-                                            <?php
-                                            // LOG: Caso 3 rilevato
-                                            $log_msg = "\n=== CASO 3 RILEVATO ===\n";
-                                            $log_msg .= "Data: {$data_selezionata}, Aula: {$aula['nome']}, Slot: {$slot['inizio']}\n";
-                                            $log_msg .= "Lezione: " . json_encode([
-                                                'id' => $lezione_slot['id'],
-                                                'socio' => $lezione_slot['socio'],
-                                                'materia' => $lezione_slot['materia'],
-                                                'ora_inizio' => $lezione_slot['ora_inizio'],
-                                                'ora_fine' => $lezione_slot['ora_fine'],
-                                                'attiva' => $lezione_slot['attiva'] ?? 'N/D'
-                                            ]) . "\n";
-                                            $log_msg .= "Evento: " . json_encode([
-                                                'id' => $evento_slot['id'],
-                                                'tipo' => $evento_slot['tipo'] ?? 'N/D',
-                                                'socio' => $evento_slot['socio'] ?? 'N/D',
-                                                'ora_inizio' => $evento_slot['ora_inizio'],
-                                                'ora_fine' => $evento_slot['ora_fine']
-                                            ]) . "\n\n";
-                                            file_put_contents($log_file, $log_msg, FILE_APPEND);
-                                            
-                                            $icona_lez = getIconaMateria($lezione_slot['materia']);
-                                            $is_annullata_lez = (isset($lezione_slot['attiva']) && $lezione_slot['attiva'] == 0) || $giorno_festivita;
-                                            
-                                            $icona_evt = getIconaMateria($evento_slot['materia']);
-                                            $tipo_css_evt = 'regolare';
-                                            $icona_prenotazione_evt = '';
-                                            $classe_icona_pren_evt = '';
-                                            $is_prenotazione_evt = false;
-                                            if (isset($evento_slot['tipo'])) {
-                                                $tipo_lower = strtolower($evento_slot['tipo']);
-                                                if (strpos($tipo_lower, 'recupero') !== false) {
-                                                    $tipo_css_evt = 'recupero';
-                                                } elseif (strpos($tipo_lower, 'pren_sala') !== false) {
-                                                    $tipo_css_evt = 'prenotazione-soci';
-                                                    $icona_prenotazione_evt = '👨‍🎓';
-                                                    $classe_icona_pren_evt = 'tipo-soci';
-                                                    $is_prenotazione_evt = true;
-                                                } elseif (strpos($tipo_lower, 'pren_docente') !== false) {
-                                                    $tipo_css_evt = 'prenotazione-docente';
-                                                    $icona_prenotazione_evt = '🎓';
-                                                    $classe_icona_pren_evt = 'tipo-docente';
-                                                    $is_prenotazione_evt = true;
-                                                } elseif (strpos($tipo_lower, 'pren_esterno') !== false) {
-                                                    $tipo_css_evt = 'prenotazione-esterno';
-                                                    $icona_prenotazione_evt = '👤';
-                                                    $classe_icona_pren_evt = 'tipo-esterno';
-                                                    $is_prenotazione_evt = true;
-                                                }
-                                            }
-                                            
-                                            // Info tooltip lezione annullata
-                                            $tooltip_annullata = e($lezione_slot['socio']) . ' - ' . e($lezione_slot['materia']) . ' (ANNULLATA)';
-                                        ?>
-                                            <!-- Piccola icona lezione annullata in alto a sinistra -->
-                                            <div class="lezione-annullata-indicator" 
-                                                 title="<?= $tooltip_annullata ?>">
-                                                <i class="bi bi-x-circle-fill"></i>
-                                            </div>
-                                            
-                                            <!-- Evento occupa TUTTO lo spazio - CLICCABILE (SENZA classe slot-sovrapposto) -->
-                                            <div class="lezione-slot tipo-<?= e($tipo_css_evt) ?>"
-                                                 data-lezione-id="<?= $evento_slot['id'] ?>"
-                                                 data-evento-id="<?= $evento_slot['id'] ?>"
-                                                 title="<?= e($evento_slot['socio'] ?: ($evento_slot['docente'] ?: 'Prenotazione')) ?>"
-                                                 style="cursor: pointer;"
-                                                 onclick="mostraInfoEvento(<?= $evento_slot['id'] ?>); return false;">
-                                                <div class="lezione-orario-badge">
-                                                    <?= date('H:i', strtotime($evento_slot['ora_inizio'])) ?>-<?= date('H:i', strtotime($evento_slot['ora_fine'])) ?>
-                                                </div>
-                                                
-                                                <?php if ($is_prenotazione_evt): ?>
-                                                    <!-- Layout uniforme per PRENOTAZIONI -->
-                                                    <div class="lezione-header">
-                                                        <span class="lezione-socio">
-                                                            <?php if ($icona_prenotazione_evt): ?>
-                                                                <span class="prenotazione-tipo-icon <?= $classe_icona_pren_evt ?>" style="font-size: 1.1rem;"><?= $icona_prenotazione_evt ?></span>
-                                                            <?php endif; ?>
-                                                            PRENOTAZIONE
-                                                        </span>
-                                                        <?php if (isset($evento_slot['confermato']) && $evento_slot['confermato'] == 0): ?>
-                                                            <i class="bi bi-clock-history text-warning" title="Da confermare"></i>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                    <div class="lezione-info-row">
-                                                        <div class="lezione-docente">
-                                                            <i class="bi bi-person-fill"></i> 
-                                                            <?= e($evento_slot['socio'] ?: $evento_slot['docente'] ?: 'Esterno') ?>
-                                                        </div>
-                                                    </div>
-                                                <?php else: ?>
-                                                    <!-- Layout standard per RECUPERI e altri eventi -->
-                                                    <div class="lezione-header">
-                                                        <span class="icona-strumento" style="font-size: 1.2rem;"><?= $icona_evt ?></span>
-                                                        <span class="lezione-socio">
-                                                            <?= e($evento_slot['socio'] ?: ($evento_slot['docente'] ?: 'Evento')) ?>
-                                                            <?php if (isset($evento_slot['confermato']) && $evento_slot['confermato'] == 0): ?>
-                                                                <i class="bi bi-clock-history text-warning" title="Da confermare"></i>
-                                                            <?php endif; ?>
-                                                        </span>
-                                                    </div>
-                                                    <div class="lezione-info-row">
-                                                        <div class="lezione-docente">
-                                                            <i class="bi bi-person-fill"></i> <?= e($evento_slot['docente']) ?>
-                                                        </div>
-                                                        <?php if ($evento_slot['materia']): ?>
-                                                            <div class="lezione-materia-inline">
-                                                                <?= e($evento_slot['materia']) ?>
-                                                            </div>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                <?php endif; ?>
-                                                
-                                                <?php if ($evento_slot['note']): ?>
-                                                    <div class="lezione-note-badge">
-                                                        <i class="bi bi-sticky" title="<?= e($evento_slot['note']) ?>"></i>
-                                                    </div>
-                                                <?php endif; ?>
-                                            </div>
-                                        
                                         <?php else: ?>
                                             <!-- Caso 4: Cella vuota - mostra + al hover -->
-                                            <div class="empty-slot-add" onclick="apriModalNuovaPrenotazione(<?= $aula['id'] ?>, '<?= e($aula['nome']) ?>', '<?= $slot['inizio'] ?>', '<?= $giorno_selezionato ?>', '<?= $data_selezionata ?>')">
+                                            <div class="empty-slot-add" 
+                                                 data-aula-id="<?= $aula['id'] ?>"
+                                                 data-aula-nome="<?= e($aula['nome']) ?>"
+                                                 data-slot-inizio="<?= $slot['inizio'] ?>"
+                                                 data-giorno="<?= $giorno_selezionato ?>"
+                                                 data-data="<?= $data_selezionata ?>">
                                                 <i class="bi bi-plus-circle"></i>
                                             </div>
-                                        <?php endif; ?>
+                                       <?php endif; ?>
                                     </td>
                                 <?php endforeach; ?>
                             </tr>
@@ -811,7 +833,7 @@ include 'includes/header.php';
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="bi bi-x-circle"></i> Annulla
                 </button>
-                <button type="button" class="btn btn-warning" onclick="confermaAssenza()">
+                <button type="button" class="btn btn-warning" id="btnConfAssenza">
                     <i class="bi bi-check-circle"></i> Conferma Assenza
                 </button>
             </div>
@@ -866,7 +888,7 @@ include 'includes/header.php';
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="chiudiModalInfoSocio()">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="bi bi-x-circle"></i> Chiudi
                 </button>
             </div>
@@ -899,7 +921,7 @@ include 'includes/header.php';
                     <!-- Select Ora Inizio (visibile solo per lezioni annullate con più slot) -->
                     <div id="selectOraContainer" style="display: none;" class="mb-3">
                         <label class="form-label fw-bold">Orario Inizio *</label>
-                        <select class="form-select" id="prenotOraSelect" onchange="document.getElementById('prenotOra').value = this.value">
+                        <select class="form-select" id="prenotOraSelect">
                             <option value="">Seleziona orario...</option>
                         </select>
                         <small class="text-muted">Seleziona l'orario di inizio desiderato tra gli slot disponibili</small>
@@ -908,7 +930,7 @@ include 'includes/header.php';
                     <!-- Tipo Prenotazione -->
                     <div class="mb-3">
                         <label class="form-label fw-bold">Tipo Prenotazione *</label>
-                        <select class="form-select" id="prenotTipo" name="tipo" required onchange="cambiaTipoPrenotazione()">
+                        <select class="form-select" id="prenotTipo" name="tipo" required>
                             <option value="">Seleziona tipo...</option>
                             <option value="PREN_SALA">👨‍🎓 Prenotazione Soci (lezione)</option>
                             <option value="PREN_DOCENTE">🎓 Prenotazione Docente (personale)</option>
@@ -945,7 +967,7 @@ include 'includes/header.php';
                         <!-- Select Socio Esistente -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">Socio Esterno *</label>
-                            <select class="form-select" id="prenotSocioEsternoId" name="socio_esterno_id" onchange="toggleNuovoSocioEsterno()">
+                            <select class="form-select" id="prenotSocioEsternoId" name="socio_esterno_id">
                                 <option value="">Caricamento...</option>
                             </select>
                         </div>
@@ -1001,7 +1023,7 @@ include 'includes/header.php';
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="bi bi-x-circle"></i> Annulla
                 </button>
-                <button type="button" class="btn btn-success" onclick="salvaPrenotazione()">
+                <button type="button" class="btn btn-success" id="salvaPrenotazioneBtn">
                     <i class="bi bi-check-circle"></i> Crea Prenotazione
                 </button>
             </div>
@@ -1009,7 +1031,7 @@ include 'includes/header.php';
     </div>
 </div>
 
-<script>
+<script nonce="<?= $_SESSION['csp_nonce'] ?>">
 let currentLezioneData = null;
 
 function apriModalNuovaPrenotazione(aulaId, aulaNome, ora, giorno, data, oraInizioLezione = null, oraFineLezione = null) {
@@ -1422,10 +1444,10 @@ function mostraInfoEvento(eventoId) {
                 }
                 html += `
                     <div class="d-grid gap-2">
-                        <button class="btn btn-primary" onclick="apriModalModificaEvento(${eventoId})">
+                        <button class="btn btn-primary" data-action="modifica-evento" data-evento-id="${eventoId}">
                             <i class="bi bi-pencil"></i> Modifica Orario/Sala
                         </button>
-                        <button class="btn btn-danger" onclick="annullaEvento(${eventoId})">
+                        <button class="btn btn-danger" data-action="annulla-evento" data-evento-id="${eventoId}">
                             <i class="bi bi-trash"></i> ${testoPulsante}
                         </button>
                     </div>
@@ -1530,6 +1552,120 @@ function salvaModificaEvento() {
 
 // Gestisci click su pulsante conferma annullamento
 document.addEventListener('DOMContentLoaded', function() {
+    // Event listener per prenotOraSelect
+    const prenotOraSelect = document.getElementById('prenotOraSelect');
+    if (prenotOraSelect) {
+        prenotOraSelect.addEventListener('change', function() {
+            document.getElementById('prenotOra').value = this.value;
+        });
+    }
+    
+    // Event listener per prenotTipo
+    const prenotTipo = document.getElementById('prenotTipo');
+    if (prenotTipo) {
+        prenotTipo.addEventListener('change', function() {
+            cambiaTipoPrenotazione();
+        });
+    }
+    
+    // Event listener per prenotSocioEsternoId
+    const prenotSocioEsternoId = document.getElementById('prenotSocioEsternoId');
+    if (prenotSocioEsternoId) {
+        prenotSocioEsternoId.addEventListener('change', function() {
+            toggleNuovoSocioEsterno();
+        });
+    }
+    
+    // Event listener per salvaPrenotazioneBtn
+    const salvaPrenotazioneBtn = document.getElementById('salvaPrenotazioneBtn');
+    if (salvaPrenotazioneBtn) {
+        salvaPrenotazioneBtn.addEventListener('click', function() {
+            salvaPrenotazione();
+        });
+    }
+    
+    // Event listener per .lezione-socio (nome socio)
+    document.querySelectorAll('.lezione-socio[data-socio-id]').forEach(socioEl => {
+        socioEl.addEventListener('click', function(e) {
+            const socioId = this.getAttribute('data-socio-id');
+            const lezioneId = this.getAttribute('data-lezione-id');
+            const socioNome = this.getAttribute('data-socio-nome');
+            const materia = this.getAttribute('data-materia');
+            const data = this.getAttribute('data-data');
+            
+            if (socioId && lezioneId) {
+                caricaInfoSocio(
+                    parseInt(socioId),
+                    parseInt(lezioneId),
+                    socioNome || '',
+                    materia || '',
+                    data || ''
+                );
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        });
+    });
+    
+    // Event listener per .empty-slot-add (slot vuoti)
+    document.querySelectorAll('.empty-slot-add').forEach(emptySlot => {
+        emptySlot.addEventListener('click', function() {
+            const aulaId = parseInt(this.getAttribute('data-aula-id'));
+            const aulaNome = this.getAttribute('data-aula-nome');
+            const slotInizio = this.getAttribute('data-slot-inizio');
+            const giorno = this.getAttribute('data-giorno');
+            const data = this.getAttribute('data-data');
+            const oraInizioLezione = this.getAttribute('data-ora-inizio-lezione') || null;
+            const oraFineLezione = this.getAttribute('data-ora-fine-lezione') || null;
+            
+            apriModalNuovaPrenotazione(
+                aulaId,
+                aulaNome,
+                slotInizio,
+                giorno,
+                data,
+                oraInizioLezione,
+                oraFineLezione
+            );
+        });
+    });
+    
+    // EVENT DELEGATION per pulsanti dinamici generati da JavaScript
+    document.addEventListener('click', function(e) {
+        const target = e.target.closest('[data-action]');
+        if (!target) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const action = target.getAttribute('data-action');
+        const eventoId = target.getAttribute('data-evento-id');
+        
+        console.log('📌 Data-action clicked:', action);
+        
+        switch(action) {
+            case 'modifica-evento':
+                console.log('🔧 Modifica evento:', eventoId);
+                if (eventoId) {
+                    apriModalModificaEvento(parseInt(eventoId));
+                }
+                break;
+            case 'annulla-evento':
+                console.log('❌ Annulla evento:', eventoId);
+                if (eventoId) {
+                    annullaEvento(parseInt(eventoId));
+                }
+                break;
+            case 'segna-assenza':
+                console.log('📋 Segna assenza!');
+                // Rimuovi focus dal button prima di chiudere il modal
+                target.blur();
+                segnaAssenza();
+                break;
+        }
+    });
+    
     const btnConferma = document.getElementById('btnConfermaAnnullamento');
     if (btnConferma) {
         btnConferma.addEventListener('click', function() {
@@ -1568,6 +1704,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 btnConferma.disabled = false;
                 btnConferma.innerHTML = originalHTML;
             });
+        });
+    }
+    
+    // Event listener per bottone Conferma Assenza
+    const btnConfAssenza = document.getElementById('btnConfAssenza');
+    if (btnConfAssenza) {
+        btnConfAssenza.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🎯 btnConfAssenza cliccato!');
+            confermaAssenza();
         });
     }
 });
@@ -1631,7 +1778,7 @@ function caricaInfoSocio(sociId, lezioneId = null, nomeSocio = '', materiaLezion
                         <i class="bi bi-calendar-event"></i>
                         <strong>Lezione:</strong> ${currentLezioneData.materia} - ${new Date(currentLezioneData.data).toLocaleDateString('it-IT')}
                     </div>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="segnaAssenza()">
+                    <button type="button" class="btn btn-danger btn-sm" data-action="segna-assenza">
                         <i class="bi bi-x-circle"></i> Segna Assenza
                     </button>
                 </div>
@@ -1789,10 +1936,16 @@ function chiudiModalInfoSocio() {
 }
 
 function segnaAssenza() {
+    console.log('📋 segnaAssenza() chiamato');
+    console.log('currentLezioneData:', currentLezioneData);
+    
     if (!currentLezioneData) {
+        console.warn('⚠️ currentLezioneData è NULL!');
         alert('Errore: nessuna lezione selezionata');
         return;
     }
+    
+    console.log('✅ currentLezioneData trovato:', currentLezioneData);
     
     // Chiudi modal info socio
     chiudiModalInfoSocio();
@@ -1829,13 +1982,21 @@ function segnaAssenza() {
 }
 
 function confermaAssenza() {
+    console.log('📋 confermaAssenza() chiamato');
+    console.log('currentLezioneData:', currentLezioneData);
+    
     if (!currentLezioneData) {
+        console.warn('⚠️ currentLezioneData è NULL!');
         alert('Errore: nessuna lezione selezionata');
         return;
     }
     
+    console.log('✅ currentLezioneData trovato, procedendo...');
+    
     const causale = document.getElementById('causaleAssenza').value;
     const note = document.getElementById('noteAssenza').value;
+    
+    console.log('📝 Causale:', causale, 'Note:', note);
     
     // Disabilita pulsante
     const btnConferma = event.target;
@@ -1848,6 +2009,8 @@ function confermaAssenza() {
         // Fallback: cerca nel primo form hidden field
         csrfToken = document.querySelector('input[name="csrf_token"]')?.value;
     }
+    
+    console.log('🔐 CSRF Token presente:', !!csrfToken);
     
     // Invia richiesta
     fetch('<?= BASE_URL ?>/api/api_salva_assenza_calendario.php', {
@@ -1863,8 +2026,13 @@ function confermaAssenza() {
             note: note
         })
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('📡 Response status:', response.status);
+        return response.json();
+    })
     .then(data => {
+        console.log('📊 API Response:', data);
+        
         if (data.success) {
             // Chiudi modal
             const modalElement = document.getElementById('segnaAssenzaModal');
@@ -1889,6 +2057,7 @@ function confermaAssenza() {
         }
     })
     .catch(error => {
+        console.error('❌ Errore:', error.message);
         mostraToast('Errore', error.message, 'danger');
         btnConferma.disabled = false;
         btnConferma.innerHTML = '<i class="bi bi-check-circle"></i> Conferma Assenza';
@@ -1955,6 +2124,7 @@ function mostraToast(titolo, messaggio, tipo = 'info') {
 
 document.addEventListener('DOMContentLoaded', function() {
     // Click su lezione apre modal info socio
+    // Click su lezione-slot: distingui tra lezioni regolari ed eventi/prenotazioni
     const lezioniSlots = document.querySelectorAll('.lezione-slot');
     lezioniSlots.forEach(slot => {
         slot.addEventListener('click', function(e) {
@@ -1963,7 +2133,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Altrimenti apri modal info socio
+            // Se l'elemento ha data-evento-id, è un evento/prenotazione
+            const eventoId = this.getAttribute('data-evento-id');
+            if (eventoId) {
+                // Chiama mostraInfoEvento per eventi/prenotazioni
+                mostraInfoEvento(parseInt(eventoId));
+                return;
+            }
+            
+            // Altrimenti è una lezione regolare: apri modal info socio
             const sociSpan = this.querySelector('.lezione-socio');
             if (sociSpan) {
                 sociSpan.click();

@@ -33,6 +33,19 @@ if (isPost()) {
                 $recuperiCtrl->creaRecupero($data);
                 $success = 'Recupero creato con successo!';
                 break;
+            
+            case 'modifica_recupero':
+                $data = [
+                    'data_recupero' => post('data_recupero'),
+                    'ora_inizio' => post('ora_inizio'),
+                    'ora_fine' => post('ora_fine'),
+                    'aula_id' => post('aula_id'),
+                    'note_segreteria' => post('note_segreteria')
+                ];
+                $recupero_id = post('recupero_id');
+                $recuperiCtrl->aggiornaRecupero($recupero_id, $data);
+                $success = 'Recupero modificato con successo!';
+                break;
                 
             case 'annulla':
                 $recupero_id = post('recupero_id');
@@ -50,7 +63,9 @@ if (isPost()) {
 }
 
 // Ottieni solo recuperi confermati (tutti sono già confermati nel nuovo flusso)
-$recuperi = $recuperiCtrl->getRecuperi(null) ?: [];
+$sort = isset($_GET['sort']) ? $_GET['sort'] : 'data_recupero';
+$order = isset($_GET['order']) && strtolower($_GET['order']) === 'asc' ? 'asc' : 'desc';
+$recuperi = $recuperiCtrl->getRecuperi(null, null, $sort, $order) ?: [];
 $tutte_aule = $auleCtrl->getAllAule() ?: [];
 
 // Conta
@@ -136,6 +151,12 @@ require_once 'includes/header.php';
                 <i class="bi bi-list"></i> Recuperi Programmati
                 <span class="badge bg-secondary ms-2"><?= count($recuperi) ?></span>
             </h6>
+            <div class="mt-2">
+                <span>Ordina per:</span>
+                <a href="?sort=data_assenza&order=<?= $sort === 'data_assenza' && $order === 'asc' ? 'desc' : 'asc' ?>" class="btn btn-sm btn-outline-primary ms-1<?= $sort === 'data_assenza' ? ' active' : '' ?>">Data Assenza</a>
+                <a href="?sort=data_recupero&order=<?= $sort === 'data_recupero' && $order === 'asc' ? 'desc' : 'asc' ?>" class="btn btn-sm btn-outline-primary ms-1<?= $sort === 'data_recupero' ? ' active' : '' ?>">Data Recupero</a>
+                <a href="?sort=socio&order=<?= $sort === 'socio' && $order === 'asc' ? 'desc' : 'asc' ?>" class="btn btn-sm btn-outline-primary ms-1<?= $sort === 'socio' ? ' active' : '' ?>">Socio</a>
+            </div>
         </div>
         <div class="card-body">
             <?php if (empty($recuperi)): ?>
@@ -149,6 +170,7 @@ require_once 'includes/header.php';
                     <table class="table table-hover">
                         <thead>
                             <tr>
+                                <th>Data Assenza</th>
                                 <th>Data Recupero</th>
                                 <th>Orario</th>
                                 <th>Socio</th>
@@ -175,6 +197,7 @@ require_once 'includes/header.php';
                                 $is_oggi = $data_recupero->format('Y-m-d') == $oggi->format('Y-m-d');
                                 ?>
                                 <tr class="<?= $is_oggi ? 'table-warning' : '' ?>">
+                                    <td><?= isset($rec['data_assenza']) && $rec['data_assenza'] ? formatDate($rec['data_assenza']) : '-' ?></td>
                                     <td>
                                         <strong><?= formatDate($rec['data_recupero']) ?></strong>
                                         <?php if ($is_oggi): ?>

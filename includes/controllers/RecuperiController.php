@@ -42,10 +42,9 @@ class RecuperiController {
     /**
      * Ottiene tutti i recuperi (admin/segreteria)
      */
-    public function getRecuperi($stato = null, $limit = null) {
+    public function getRecuperi($stato = null, $limit = null, $sort = 'data_recupero', $order = 'desc') {
         $where = "";
         $params = [];
-        
         if ($stato) {
             switch ($stato) {
                 case 'proposta':
@@ -62,15 +61,20 @@ class RecuperiController {
                     break;
             }
         }
-        
         $limit_clause = $limit ? "LIMIT ?" : "";
         if ($limit) $params[] = $limit;
-        
         $where_clause = $where ? $where : "WHERE 1=1";
-
+        // Mappa sort
+        $sort_map = [
+            'data_assenza' => 'a.data_assenza',
+            'data_recupero' => 'r.data_recupero',
+            'socio' => 'al.cognome, al.nome',
+        ];
+        $sort_sql = isset($sort_map[$sort]) ? $sort_map[$sort] : 'r.data_recupero';
+        $order_sql = strtolower($order) === 'asc' ? 'ASC' : 'DESC';
         return $this->db->query("
             SELECT 
-                r.*,
+                r.*, 
                 al.cognome || ' ' || al.nome as socio,
                 d.cognome || ' ' || d.nome as docente,
                 m.nome as materia,
@@ -83,7 +87,7 @@ class RecuperiController {
             LEFT JOIN materie m ON r.materia_id = m.id
             LEFT JOIN aule au ON r.aula_id = au.id
             $where_clause
-            ORDER BY r.data_recupero, r.ora_inizio
+            ORDER BY $sort_sql $order_sql, r.ora_inizio
             $limit_clause
         ", $params);
     }
@@ -181,13 +185,18 @@ class RecuperiController {
         // Verifica che non superi il tempo dell'assenza
         $minuti_totali = $assenza['minuti_gia_recuperati'] + $minuti_nuovo_recupero;
         $minuti_da_recuperare = $assenza['minuti_da_recuperare'] ?? 0;
-        
-        if ($minuti_da_recuperare > 0 && $minuti_totali > $minuti_da_recuperare) {
-            $minuti_rimanenti = $minuti_da_recuperare - $assenza['minuti_gia_recuperati'];
+        $minuti_rimanenti = $minuti_da_recuperare - $assenza['minuti_gia_recuperati'];
+        if ($minuti_da_recuperare > 0 && $minuti_nuovo_recupero > $minuti_rimanenti) {
             throw new Exception(
                 "Tempo di recupero eccessivo! " .
                 "Hai inserito {$minuti_nuovo_recupero} minuti, ma ne servono solo {$minuti_rimanenti}. " .
                 "(Totale assenza: {$minuti_da_recuperare}', già recuperati: {$assenza['minuti_gia_recuperati']}')"
+            );
+        }
+        if ($minuti_da_recuperare > 0 && $minuti_totali > $minuti_da_recuperare) {
+            throw new Exception(
+                "Tempo di recupero eccessivo! Il totale dei recuperi supera il tempo da recuperare. " .
+                "Totale assenza: {$minuti_da_recuperare}', già recuperati: {$assenza['minuti_gia_recuperati']}, nuovo recupero: {$minuti_nuovo_recupero}."
             );
         }
         
@@ -256,6 +265,156 @@ class RecuperiController {
     }
     
     /**
+     * Aggiorna un recupero esistente (modifica data, ora o aula)
+     * Verifica che non creiautomaticamente conflitti
+     */
+    public function aggiornaRecupero($recupero_id, $data) {
+        // Ottieni il recupero attuale
+        $recupero = $this->db->queryOne("SELECT * FROM recuperi WHERE id = ?", [$recupero_id]);
+        if (!$recupero) {
+            throw new Exception('Recupero non trovato');
+        }
+        
+        // Se è annullato, non permettere modifiche
+        if ($recupero['annullato']) {
+            throw new Exception('Non è possibile modificare un recupero annullato');
+        }
+        
+        // Se la data/ora non cambiano, permettere comunque (es. modifica note)
+        $data_cambiata = isset($data['data_recupero']) && $data['data_recupero'] !== $recupero['data_recupero'];
+        $ora_cambiata = (isset($data['ora_inizio']) && $data['ora_inizio'] !== $recupero['ora_inizio']) ||
+                       (isset($data['ora_fine']) && $data['ora_fine'] !== $recupero['ora_fine']);
+        $aula_cambiata = isset($data['aula_id']) && $data['aula_id'] !== $recupero['aula_id'];
+        
+        // Valida se cambiano dati rilevanti
+        if ($data_cambiata || $ora_cambiata || $aula_cambiata) {
+            $aula_id = $data['aula_id'] ?? $recupero['aula_id'];
+            
+            // Se c'è un'aula, verifica disponibilità
+            if ($aula_id) {
+                $data_recupero = $data['data_recupero'] ?? $recupero['data_recupero'];
+                $ora_inizio = $data['ora_inizio'] ?? $recupero['ora_inizio'];
+                $ora_fine = $data['ora_fine'] ?? $recupero['ora_fine'];
+                
+                if (!$this->isAulaDisponibile($aula_id, $data_recupero, $ora_inizio, $ora_fine, $recupero_id)) {
+                    throw new Exception('Aula non disponibile in questo nuovo orario');
+                }
+            }
+        }
+        
+        // Costruisci UPDATE dinamico solo per i campi forniti
+        $updates = [];
+        $params = [];
+        
+        if (isset($data['data_recupero'])) {
+            $updates[] = "data_recupero = ?";
+            $params[] = $data['data_recupero'];
+        }
+        if (isset($data['ora_inizio'])) {
+            $updates[] = "ora_inizio = ?";
+            $params[] = $data['ora_inizio'];
+        }
+        if (isset($data['ora_fine'])) {
+            $updates[] = "ora_fine = ?";
+            $params[] = $data['ora_fine'];
+        }
+        if (isset($data['aula_id'])) {
+            $updates[] = "aula_id = ?";
+            $params[] = $data['aula_id'];
+        }
+        if (isset($data['note_segreteria'])) {
+            $updates[] = "note_segreteria = ?";
+            $params[] = $data['note_segreteria'];
+        }
+        if (isset($data['materia_id'])) {
+            $updates[] = "materia_id = ?";
+            $params[] = $data['materia_id'];
+        }
+        
+        if (empty($updates)) {
+            throw new Exception('Nessun campo da aggiornare');
+        }
+        
+        $updates[] = "updated_at = datetime('now', 'localtime')";
+        $set_clause = implode(", ", $updates);
+        $params[] = $recupero_id;
+        
+        $this->db->execute("
+            UPDATE recuperi 
+            SET $set_clause
+            WHERE id = ?
+        ", $params);
+        
+        // FIX: Sincronizza anche evento_calendario se esiste
+        // Se cambiano data, ora o aula, aggiorna l'evento_calendario corrispondente
+        if ($data_cambiata || $ora_cambiata || $aula_cambiata) {
+            $new_data_evento = $data['data_recupero'] ?? $recupero['data_recupero'];
+            $new_ora_inizio = $data['ora_inizio'] ?? $recupero['ora_inizio'];
+            $new_ora_fine = $data['ora_fine'] ?? $recupero['ora_fine'];
+            $new_aula_id = $data['aula_id'] ?? $recupero['aula_id'];
+            
+            // Aggiorna evento_calendario se esiste
+            $evento_count = $this->db->queryOne("
+                SELECT COUNT(*) as count FROM eventi_calendario
+                WHERE data_evento = ? 
+                AND ora_inizio = ?
+                AND socio_id = ?
+                AND (
+                    SELECT COUNT(*) FROM tipologie_evento t 
+                    WHERE t.id = eventi_calendario.tipologia_id 
+                    AND t.categoria = 'recupero'
+                ) > 0
+            ", [$recupero['data_recupero'], $recupero['ora_inizio'], $recupero['socio_id']])['count'] ?? 0;
+            
+            if ($evento_count > 0) {
+                // Evento esiste, aggiorna i campi modificati
+                $evento_updates = [];
+                $evento_params = [];
+                
+                if ($data_cambiata) {
+                    $evento_updates[] = "data_evento = ?";
+                    $evento_params[] = $new_data_evento;
+                }
+                if ($ora_cambiata) {
+                    if (isset($data['ora_inizio'])) {
+                        $evento_updates[] = "ora_inizio = ?";
+                        $evento_params[] = $data['ora_inizio'];
+                    }
+                    if (isset($data['ora_fine'])) {
+                        $evento_updates[] = "ora_fine = ?";
+                        $evento_params[] = $data['ora_fine'];
+                    }
+                }
+                if ($aula_cambiata) {
+                    $evento_updates[] = "aula_id = ?";
+                    $evento_params[] = $new_aula_id;
+                }
+                
+                if (!empty($evento_updates)) {
+                    $evento_params[] = $recupero['data_recupero'];
+                    $evento_params[] = $recupero['ora_inizio'];
+                    $evento_params[] = $recupero['socio_id'];
+                    
+                    $evento_set = implode(", ", $evento_updates);
+                    $this->db->execute("
+                        UPDATE eventi_calendario
+                        SET $evento_set
+                        WHERE data_evento = ? 
+                        AND ora_inizio = ?
+                        AND socio_id = ?
+                        AND tipologia_id IN (
+                            SELECT id FROM tipologie_evento 
+                            WHERE categoria = 'recupero'
+                        )
+                    ", $evento_params);
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
      * Conferma recupero da parte del docente
      */
     public function confermaRecuperoDocente($recupero_id, $user_id) {
@@ -310,7 +469,7 @@ class RecuperiController {
     }
     
     /**
-     * Verifica disponibilità aula
+     * Verifica disponibilità aula (controlla recuperi, lezioni e eventi calendario)
      */
     public function isAulaDisponibile($aula_id, $data, $ora_inizio, $ora_fine, $escludi_recupero_id = null) {
         $where_escludi = $escludi_recupero_id ? "AND r.id != ?" : "";
@@ -331,7 +490,61 @@ class RecuperiController {
             $where_escludi
         ", array_merge([$aula_id, $data, $ora_fine, $ora_inizio, $ora_inizio, $ora_fine, $ora_inizio, $ora_fine], $escludi_recupero_id ? [$escludi_recupero_id] : []));
         
-        return $conflitto_recuperi['count'] == 0;
+        if ($conflitto_recuperi['count'] > 0) {
+            return false;
+        }
+        
+        // Calcola il giorno della settimana della data
+        $data_obj = new DateTime($data);
+        $giorno_settimana_recupero = strtolower($data_obj->format('l'));
+        $giorni_map = [
+            'monday' => 'lunedì',
+            'tuesday' => 'martedì',
+            'wednesday' => 'mercoledì',
+            'thursday' => 'giovedì',
+            'friday' => 'venerdì',
+            'saturday' => 'sabato',
+            'sunday' => 'domenica'
+        ];
+        $giorno_italiano = $giorni_map[$giorno_settimana_recupero] ?? $giorno_settimana_recupero;
+        
+        // Controlla lezioni regolari nella stessa aula e stesso giorno della settimana
+        $conflitto_lezioni = $this->db->queryOne("
+            SELECT COUNT(*) as count
+            FROM lezioni l
+            WHERE l.aula_id = ?
+            AND l.attiva = 1
+            AND LOWER(l.giorno_settimana) = ?
+            AND (
+                (l.ora_inizio < ? AND l.ora_fine > ?) OR
+                (l.ora_inizio >= ? AND l.ora_inizio < ?) OR
+                (l.ora_fine > ? AND l.ora_fine <= ?)
+            )
+        ", [$aula_id, $giorno_italiano, $ora_fine, $ora_inizio, $ora_inizio, $ora_fine, $ora_inizio, $ora_fine]);
+        
+        if ($conflitto_lezioni['count'] > 0) {
+            return false;
+        }
+        
+        // Controlla eventi calendario nella stessa aula e stessa data
+        $conflitto_eventi = $this->db->queryOne("
+            SELECT COUNT(*) as count
+            FROM eventi_calendario e
+            WHERE e.aula_id = ?
+            AND e.data_evento = ?
+            AND e.attivo = 1
+            AND (
+                (e.ora_inizio < ? AND e.ora_fine > ?) OR
+                (e.ora_inizio >= ? AND e.ora_inizio < ?) OR
+                (e.ora_fine > ? AND e.ora_fine <= ?)
+            )
+        ", [$aula_id, $data, $ora_fine, $ora_inizio, $ora_inizio, $ora_fine, $ora_inizio, $ora_fine]);
+        
+        if ($conflitto_eventi['count'] > 0) {
+            return false;
+        }
+        
+        return true;
     }
     
     /**
