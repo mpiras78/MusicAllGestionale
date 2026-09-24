@@ -48,8 +48,10 @@ if (!isset($assenze) || !isset($canCreate) || !isset($isDocente)) {
                             <?php
                             // Calcola stato recupero
                             $minuti_da_recuperare = $ass['minuti_da_recuperare'] ?? 0;
+                            echo "da recuperare: $minuti_da_recuperare";
                             $minuti_recuperati = $ass['minuti_recuperati'] ?? 0;
                             $recupero_completo = ($minuti_da_recuperare > 0 && $minuti_recuperati >= $minuti_da_recuperare);
+                            $recupero_eccessivo = ($minuti_da_recuperare > 0 && $minuti_recuperati > $minuti_da_recuperare);
                             $recupero_parziale = ($minuti_da_recuperare > 0 && $minuti_recuperati > 0 && $minuti_recuperati < $minuti_da_recuperare);
                             ?>
                             <tr>
@@ -125,13 +127,21 @@ if (!isset($assenze) || !isset($canCreate) || !isset($isDocente)) {
                                                 title="Modifica data assenza">
                                             <i class="bi bi-pencil"></i>
                                         </button>
-                                        <?php if ($ass['necessita_recupero'] && !$recupero_completo): ?>
-                                        <button type="button" class="btn btn-outline-success" 
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#creaRecuperoModal<?= $ass['id'] ?>"
-                                                title="Programma recupero">
-                                            <i class="bi bi-calendar-plus"></i>
-                                        </button>
+                                        <?php if ($ass['necessita_recupero'] && !$recupero_completo && !$recupero_eccessivo): ?>
+                                            <button type="button" class="btn btn-outline-success" 
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#creaRecuperoModal<?= $ass['id'] ?>"
+                                                    title="Programma recupero">
+                                                <i class="bi bi-calendar-plus"></i>
+                                            </button>
+                                        <?php elseif ($ass['necessita_recupero'] && ($recupero_completo || $recupero_eccessivo)): ?>
+                                            <button type="button" class="btn btn-outline-success" disabled 
+                                                    title="Recupero completato o eccessivo">
+                                                <i class="bi bi-calendar-check"></i> Recupero completato
+                                                <?php if ($recupero_eccessivo): ?>
+                                                    <span class="text-danger ms-2">(Attenzione: minuti recuperati > minuti da recuperare)</span>
+                                                <?php endif; ?>
+                                            </button>
                                         <?php endif; ?>
                                         <?php if ($ass['ha_recupero'] == 0): ?>
                                         <form method="POST" class="d-inline" 
@@ -232,11 +242,15 @@ if (!isset($assenze) || !isset($canCreate) || !isset($isDocente)) {
                                 <?= e($ass['socio']) ?> - <?= e($ass['materia']) ?><br>
                                 <?= formatDate($ass['data']) ?>, <?= e($ass['giorno_settimana']) ?> 
                                 <?= formatTime($ass['ora_inizio']) ?>-<?= formatTime($ass['ora_fine']) ?>
-                                <?php if ($minuti_da_recuperare > 0 && $minuti_recuperati > 0): ?>
-                                    <hr class="my-2">
-                                    <strong class="text-warning">Recupero parziale:</strong> 
-                                    <?= $minuti_recuperati ?>' già recuperati su <?= $minuti_da_recuperare ?>' 
-                                    (mancano <?= ($minuti_da_recuperare - $minuti_recuperati) ?>')
+                            </div>
+                            <div class="alert alert-warning mt-2">
+                                <i class="bi bi-hourglass-split"></i>
+                                <strong>Tempo già recuperato:</strong> <?= $minuti_recuperati ?>' su <?= $minuti_da_recuperare ?>'
+                                <br>
+                                <?php if ($minuti_da_recuperare > 0): ?>
+                                    <strong>Tempo rimanente da recuperare:</strong> <?= max($minuti_da_recuperare - $minuti_recuperati, 0) ?>'
+                                <?php else: ?>
+                                    <strong>Tempo rimanente da recuperare:</strong> <span class="text-danger">Non definito</span>
                                 <?php endif; ?>
                             </div>
                             
@@ -289,7 +303,7 @@ if (!isset($assenze) || !isset($canCreate) || !isset($isDocente)) {
     <?php endforeach; ?>
 <?php endif; ?>
 
-<script>
+<script nonce="<?= $_SESSION['csp_nonce'] ?>">
 // Inizializza tooltips
 document.addEventListener('DOMContentLoaded', function() {
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));

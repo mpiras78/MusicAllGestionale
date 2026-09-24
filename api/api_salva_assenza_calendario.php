@@ -125,7 +125,7 @@ try {
     if (!$assenza_id) {
         throw new Exception('Errore durante la creazione dell\'assenza');
     }
-    
+     
     file_put_contents(__DIR__ . '/debug_assenza.log', "✅ Assenza salvata con successo!\n", FILE_APPEND);
     
     echo json_encode([

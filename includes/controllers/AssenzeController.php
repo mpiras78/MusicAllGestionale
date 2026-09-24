@@ -202,7 +202,6 @@ class AssenzeController {
                 $base_query = "SELECT * FROM ($base_query) AS subq WHERE $condition";
             }
         }
-        
         return $this->db->query($base_query, $params) ?: [];
     }
     
@@ -235,20 +234,39 @@ class AssenzeController {
         $sql = "
             INSERT INTO assenze (
                 lezione_id, socio_id, docente_id,
-                data_assenza, tipo, da_recuperare, 
+                data_assenza, tipo, da_recuperare, minuti_da_recuperare,
                 motivo, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
         ";
         
         $da_recuperare = isset($data['necessita_recupero']) ? $data['necessita_recupero'] : 1;
+        
+        // Calcola durata in minuti dalla lezione
+        $ora_inizio = strtotime($lezione['ora_inizio']);
+        $ora_fine = strtotime($lezione['ora_fine']);
+        $minuti_da_recuperare = ($ora_fine - $ora_inizio) / 60;
+        
+        // DEBUG: Log dei valori calcolati
+        $debug_msg = "DEBUG creaAssenza(): " .
+            "ora_inizio={$lezione['ora_inizio']}, " .
+            "ora_fine={$lezione['ora_fine']}, " .
+            "timestamp_inizio={$ora_inizio}, " .
+            "timestamp_fine={$ora_fine}, " .
+            "differenza_secondi=" . ($ora_fine - $ora_inizio) . ", " .
+            "minuti_da_recuperare={$minuti_da_recuperare}\n";
+        file_put_contents(__DIR__ . '/../../../api/debug_assenza.log', $debug_msg, FILE_APPEND);
+        
+        // Mappa causata_da -> tipo (allievo|docente)
+        $tipo = ($data['causata_da'] == 'socio') ? 'allievo' : 'docente';
         
         $this->db->execute($sql, [
             $data['lezione_id'],
             $lezione['socio_id'],
             $lezione['docente_id'],
             $data['data'],
-            $data['causata_da'],
+            $tipo,  // ← Mappato correttamente!
             $da_recuperare,
+            (int)$minuti_da_recuperare,  // ← Minuti da recuperare
             $data['note_annullamento'] ?? null
         ]);
         

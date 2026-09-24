@@ -162,11 +162,12 @@ require_once 'includes/header.php';
     <?php require 'includes/views/assenze/modal_crea_assenza.php'; ?>
     
     <!-- JavaScript per modal -->
-    <script>
+    <script nonce="<?= $_SESSION['csp_nonce'] ?>">
         // Definisci BASE_URL per assenze.js
         const BASE_URL = '<?= BASE_URL ?>';
     </script>
     <script src="<?= BASE_URL ?>/assets/js/assenze.js"></script>
+    <script src="<?= BASE_URL ?>/assets/js/recuperi.js"></script>
 <?php endif; ?>
 
 <?php require_once 'includes/footer.php'; ?>

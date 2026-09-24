@@ -98,7 +98,7 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="bi bi-x-circle"></i> Annulla
                 </button>
-                <button type="button" class="btn" style="background-color: #9C27B0; color: white;" onclick="salvaLezioneProva()">
+                <button type="button" class="btn" id="btnSalvaLezioneProva" style="background-color: #9C27B0; color: white;">
                     <i class="bi bi-star"></i> Salva Lezione di Prova
                 </button>
             </div>
@@ -106,7 +106,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="<?= $_SESSION['csp_nonce'] ?>">
 function salvaLezioneProva() {
     const form = document.getElementById('formLezioneProva');
     if (!form.checkValidity()) {
@@ -135,10 +135,24 @@ function salvaLezioneProva() {
     .catch(error => mostraToast('Errore', error.message, 'danger'));
 }
 
-document.getElementById('modalLezioneProva')?.addEventListener('show.bs.modal', function() {
-    const dataSelezionata = document.getElementById('data_selezionata')?.value;
-    if (dataSelezionata) {
-        document.getElementById('dataLezioneProva').value = dataSelezionata;
+document.addEventListener('DOMContentLoaded', function() {
+    // Event listener per pulsante Salva Lezione di Prova
+    const btnSalva = document.getElementById('btnSalvaLezioneProva');
+    if (btnSalva) {
+        btnSalva.addEventListener('click', function() {
+            salvaLezioneProva();
+        });
+    }
+    
+    // Event listener per modale apertura
+    const modalLezioneProva = document.getElementById('modalLezioneProva');
+    if (modalLezioneProva) {
+        modalLezioneProva.addEventListener('show.bs.modal', function() {
+            const dataSelezionata = document.getElementById('data_selezionata')?.value;
+            if (dataSelezionata) {
+                document.getElementById('dataLezioneProva').value = dataSelezionata;
+            }
+        });
     }
 });
 </script>

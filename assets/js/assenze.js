@@ -61,7 +61,7 @@ document.getElementById('socioSelectHelper').addEventListener('change', function
         lezioneSelect.disabled = true;
         
         // Chiamata API
-        fetch(`${BASE_URL}/api_get_lezioni_socio.php?socio_id=${socioId}`)
+        fetch(`${BASE_URL}/api/api_get_lezioni_allievo.php?socio_id=${socioId}`)
             .then(r => r.json())
             .then(response => {
                 lezioneSelect.innerHTML = '<option value="">Seleziona lezione...</option>';
@@ -120,7 +120,7 @@ document.getElementById('lezioneSelectFinal').addEventListener('change', functio
         showLezioniAlert(`Seleziona una data che cada di ${giornoCapitalized} per questa lezione`, 'info');
         
         // Carica contatori assenze/recuperi
-        fetch(`${BASE_URL}/api_get_contatori_assenze.php?socio_id=${socioId}&lezione_id=${lezioneId}`)
+        fetch(`${BASE_URL}/api/api_get_contatori_assenze.php?socio_id=${socioId}&lezione_id=${lezioneId}`)
             .then(r => r.json())
             .then(response => {
                 if (response.success && response.contatori) {

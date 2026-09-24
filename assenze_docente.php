@@ -6,6 +6,8 @@
 
 require_once 'includes/bootstrap.php';
 
+//crea un metodo toString per gli oggetti
+
 // Solo per docenti
 $auth->requireRole('docente');
 
