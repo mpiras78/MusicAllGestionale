@@ -7,6 +7,8 @@
     
     <!-- CSRF Token per API -->
     <meta name="csrf-token" content="<?= CSRFHelper::generateToken() ?>">
+    <!-- CSP Nonce per script inline -->
+    <meta name="csp-nonce" content="<?= $_SESSION['csp_nonce'] ?? '' ?>">
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">

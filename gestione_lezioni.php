@@ -400,7 +400,7 @@ include 'includes/header.php';
     </div>
 </div>
 
-<script>
+<script nonce="<?= $_SESSION['csp_nonce'] ?>">
 // Carica docenti quando cambia materia (modal nuova lezione)
 document.querySelector('#addLezioneModal select[name="materia_id"]').addEventListener('change', function() {
     const materiaId = this.value;

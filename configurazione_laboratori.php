@@ -211,7 +211,7 @@ include 'includes/header.php';
     </div>
 </div>
 
-<script>
+<script nonce="<?= $_SESSION['csp_nonce'] ?>">
 function salvaLaboratorio() {
     const form = document.getElementById('formLaboratorio');
     const formData = new FormData(form);

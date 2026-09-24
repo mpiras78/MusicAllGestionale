@@ -1001,7 +1001,7 @@ include 'includes/header.php';
     </div>
 </div>
 
-<script>
+<script nonce="<?= $_SESSION['csp_nonce'] ?>">
 let currentLezioneData = null;
 
 function apriModalNuovaPrenotazione(aulaId, aulaNome, ora, giorno, data, oraInizioLezione = null, oraFineLezione = null) {

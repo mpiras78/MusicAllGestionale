@@ -157,7 +157,7 @@ include 'includes/header.php';
     </div>
 </div>
 
-<script>
+<script nonce="<?= $_SESSION['csp_nonce'] ?>">
 // Toggle laboratorio select
 document.getElementById('include_laboratorio').addEventListener('change', function() {
     document.getElementById('div_laboratorio').style.display = this.checked ? 'block' : 'none';

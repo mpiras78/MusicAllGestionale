@@ -328,7 +328,7 @@ require_once 'includes/header.php';
     </div>
 </div>
 
-<script>
+<script nonce="<?= $_SESSION['csp_nonce'] ?>">
 function openCreateModal() {
     document.getElementById('modalTitle').textContent = 'Nuovo Utente';
     document.getElementById('formAction').value = 'create';

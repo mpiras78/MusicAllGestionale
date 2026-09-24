@@ -707,7 +707,7 @@ include 'includes/header.php';
     </div>
 </div>
 
-<script>
+<script nonce="<?= $_SESSION['csp_nonce'] ?>">
 // Riuso funzioni esistenti da calendario.php
 let currentLezioneData = null;
 

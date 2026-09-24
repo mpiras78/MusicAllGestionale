@@ -183,7 +183,7 @@ include 'includes/header.php';
     </div>
 </div>
 
-<script>
+<script nonce="<?= $_SESSION['csp_nonce'] ?>">
 function salvaMateria() {
     const form = document.getElementById('formNuovaMateria');
     if (!form.checkValidity()) {

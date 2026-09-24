@@ -372,7 +372,7 @@ include 'includes/header.php';
     </div>
 </div>
 
-<script>
+<script nonce="<?= $_SESSION['csp_nonce'] ?>">
 // Carica info lezioni per ogni docente all'avvio
 document.addEventListener('DOMContentLoaded', function() {
     caricaLezioniDocenti();
