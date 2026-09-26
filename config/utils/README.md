@@ -17,9 +17,8 @@ bash config/utils/db-import-all.sh
 # Avvia server PHP
 php -S localhost:8000
 
-# Login con:
-# Username: admin
-# Password: admin123
+# Le credenziali iniziali devono essere create tramite la procedura di provisioning
+# dell'ambiente. Non usare credenziali predefinite.
 ```
 
 ## 📁 Script Disponibili

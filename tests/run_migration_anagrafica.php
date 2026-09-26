@@ -214,7 +214,7 @@ try {
     echo "   $backup_path\n\n";
     
     echo "📚 DOCUMENTAZIONE:\n";
-    echo "   - Schema: DATABASE_SCHEMA.md\n";
+    echo "   - Analisi e schema target: ANALISI_FUNZIONALE_TECNICA.md\n";
     echo "   - Proposta: database/PROPOSTA_REFACTORING_ANAGRAFICA.md\n\n";
     
 } catch (Exception $e) {

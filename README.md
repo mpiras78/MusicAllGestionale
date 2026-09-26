@@ -4,6 +4,12 @@
 
 Sistema completo per la gestione di scuole di musica con calendario settimanale, gestione soci, docenti, lezioni, assenze e iscrizioni accademiche.
 
+## Documentazione
+
+- [Analisi funzionale e tecnica](ANALISI_FUNZIONALE_TECNICA.md)
+- [Indice della documentazione](docs/README.md)
+- [Baseline database di produzione](database/schema_produzione.sql)
+
 ## 🎵 Caratteristiche Principali
 
 - **Calendario Settimanale Visuale**: Interfaccia simile a un foglio Excel con visualizzazione per aule e orari
@@ -113,11 +119,8 @@ mkdir -p musicall/logs
 
 **URL**: `http://localhost/musicall/login.php`
 
-**Credenziali Default**:
-- Username: `admin`
-- Password: `admin123`
-
-⚠️ **IMPORTANTE**: Cambia immediatamente la password dopo il primo accesso!
+Crea l'account amministrativo tramite la procedura di provisioning dell'ambiente.
+Non sono previste credenziali predefinite.
 
 ## 📁 Struttura del Progetto
 

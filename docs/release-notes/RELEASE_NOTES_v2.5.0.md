@@ -20,4 +20,5 @@
 
 ---
 
-Per dettagli consultare i file README.md e DOCUMENTAZIONE_TEST_SUITE.md.
+Per dettagli consultare [`README.md`](../../README.md) e la
+[guida alla test suite](../guides/DOCUMENTAZIONE_TEST_SUITE.md).
