@@ -51,12 +51,12 @@ Non esiste un documento formale che contenga un "Requisito X". La prima versione
 | FR-02 | Gestire anagrafiche di allievi, docenti ed esterni, con ricerca, creazione, modifica e disattivazione. | E | `SociController.php`, `DocentiController.php`, `api_soci.php`, `api_docenti.php`. |
 | FR-03 | Assegnare una o piu materie a un docente e usare tale assegnazione nell'offerta didattica. | E | `DocentiController::salvaMaterie`, `docenti_materie`. |
 | FR-04 | Configurare aule, materie, piani/tipi corso, tipi laboratorio e relativi partecipanti. | E | `AuleController.php`, `ConfigurazioneCorsiController.php`, API di configurazione. |
-| FR-05 | Iscrivere un allievo a materia, docente, piano corso e anno accademico, consultando statistiche e stato dell'iscrizione. | E | `IscrizioniController::creaIscrizione/aggiornaIscrizione`, `api_iscrizioni.php`. |
-| FR-06 | Pianificare, modificare e annullare lezioni, eventi e prenotazioni di aula, controllando le sovrapposizioni. | E | `api_lezioni.php`, `api_eventi.php`, `api_salva_prenotazione.php`, `api_check_conflicts.php`. |
+| FR-05 | Iscrivere un allievo a materia, docente, piano corso e anno accademico, dopo la sola iscrizione annuale/tessera prevista per quell'anno. | E | `IscrizioniController::creaIscrizione/aggiornaIscrizione`, `api_iscrizioni.php`. |
+| FR-06 | Dal calendario, pianificare, modificare e annullare lezioni, eventi e prenotazioni di aula, controllando le sovrapposizioni e selezionando una tipologia di evento. | E parziale | `api_lezioni.php`, `api_eventi.php`, `api_salva_prenotazione.php`, `api_check_conflicts.php`. |
 | FR-07 | Registrare assenze di allievo o docente e ricercare quelle da recuperare con contatori per periodo. | E | `AssenzeController.php`, `api_salva_assenza_calendario.php`, `api_get_contatori_assenze.php`. |
 | FR-08 | Creare, confermare, rifiutare o annullare recuperi e sincronizzarli al calendario, verificando la disponibilita dell'aula. | E | `RecuperiController.php`, `api_check_recupero_conflicts.php`, `api_sync_recuperi_calendario.php`. |
 | FR-09 | Registrare, aggiornare, eliminare, filtrare e rendicontare pagamenti, scadenze e ritardi. | E | `PagamentiController.php`, `api_calcolo_pagamenti.php`. |
-| FR-10 | Gestire pacchetti di lezioni custom e impedire il consumo oltre il numero acquistato. | E nel controller, non supportato dal live | `IscrizioniController::registraUtilizzoLezioneCustom` usa `is_pacchetto`, contatore e `utilizzo_lezioni_custom`, assenti dal DB live. |
+| FR-10 | Vendere carnet prepagati di 10 lezioni custom, ciascuno legato a uno specifico corso e docente, e impedire prenotazioni oltre le lezioni disponibili. | E nel controller, non supportato dal live | `IscrizioniController::registraUtilizzoLezioneCustom` usa `is_pacchetto`, contatore e `utilizzo_lezioni_custom`, assenti dal DB live. |
 | FR-11 | Tracciare operazioni e modifiche su record e gestire note, chiusure e job batch. | E/D | `AuditLogController.php` e tabelle operative; l'uso completo e parzialmente documentato. |
 
 **Tracciabilita del Requisito X.** Da questo momento "Requisito X" deve essere espresso con uno degli ID `FR-01`--`FR-11`, oppure aggiunto al catalogo con criteri di accettazione. Per ciascun requisito il modello target dichiara tabelle e vincoli di copertura nella sezione 3.3. Un requisito non ancora identificato non puo essere dichiarato coperto: questa e una salvaguardia contro aggiunte implicite allo schema.
@@ -69,14 +69,14 @@ Lo schema di produzione **non e una copia corretta del DB di test**, ma un model
 |---|---|---|---|
 | Anagrafica | `soci`, `soci_old`, `persone_bck`, `docenti`, due modelli di esterno e dettagli ruolo disallineati. | `persone` come master, profili 1:1 `allievi`, `docenti`, `esterni`. | Evita duplicazione e FK verso generazioni diverse; copre FR-01, FR-02, FR-03. |
 | Identita e ruoli | `users.role` e collegamento facoltativo solo a `docenti`; token in chiaro. | `utenti`, `ruoli_utente`, `utenti_ruoli`, collegamento opzionale a `persone`; token hash. | Separa autenticazione, persona e autorizzazione; consente ruoli multipli e riduce l'esposizione dei token (FR-01). Richiede adattamento dell'applicazione. |
-| Iscrizioni | Anno come testo, relazione non univoca, `iscrizioni_annuali` punta a `soci_old`. | `anni_accademici`, `iscrizioni_annuali`, `iscrizioni` con FK, date e unicita di business. | Impedisce iscrizioni orfane/incoerenti e rende l'anno un'entita governata (FR-05). |
-| Pacchetti custom | Il controller li richiede, ma il DB live non contiene colonne/tabella necessarie. | `iscrizioni.is_pacchetto`, `numero_lezioni_pacchetto`, `utilizzi_lezioni_custom`. | Colma una discrepanza codice-schema. Il saldo viene calcolato contando gli utilizzi in transazione, non salvando un contatore duplicato (FR-10). |
-| Calendario | Doppie rappresentazioni (`lezioni`, `lezioni_custom`, `eventi_calendario`) e partecipante alternativo socio/occasionale. | `eventi_calendario` e `partecipanti_evento`, con regola puntuale/ricorrente e risorse in FK. | Elimina relazioni polimorfe e abilita qualunque persona come partecipante senza duplicare colonne (FR-06, FR-08). |
+| Iscrizioni | Anno come testo, relazione non univoca, `iscrizioni_annuali` punta a `soci_old`. | `anni_accademici`, `iscrizioni_annuali`, `iscrizioni` con FK, date e unicita di business. | L'iscrizione annuale deve assegnare una tessera progressiva unica per anno e produrre un solo addebito annuale; poi abilita le iscrizioni didattiche (FR-05). |
+| Carnet custom | Il controller li richiede, ma il DB live non contiene colonne/tabella necessarie. | Revisione richiesta: `carnet_lezioni` con 10 lezioni, corso, docente e addebito prepagato; `utilizzi_lezioni_custom` con FK all'evento prenotato. | Ogni prenotazione confermata consuma una lezione in transazione; non sono ammessi superamenti, duplicazioni o carnet non saldati (FR-10). |
+| Calendario | Doppie rappresentazioni (`lezioni`, `lezioni_custom`, `eventi_calendario`) e partecipante alternativo socio/occasionale. | `eventi_calendario` e `partecipanti_evento`, con regola puntuale/ricorrente e risorse in FK. | La modale del `+` deve proporre prenotazione soci, prenotazione docente, lezione di prova, extra e custom; i codici tipologia, non gli ID fissi, governano il flusso (FR-06, FR-08, FR-10). |
 | Assenze e recuperi | Recupero ripete socio/docente/materia/aula e non ha FK verso l'evento calendario generato. | `assenze` su evento/persona e `recuperi` collegato a un unico evento di recupero. | Una sola fonte di verita per orario/aula; riduce disallineamenti tra recupero e calendario (FR-07, FR-08). |
-| Laboratori | Due coppie di tabelle sovrapposte, una senza FK. | Tipo, laboratorio annuale e partecipazione sono tre entita con FK. | Separa catalogo, erogazione e iscrizione del partecipante (FR-04). |
-| Tariffe e pagamenti | Metodi duplicati, denaro `REAL`/`DECIMAL` SQLite, pagamenti mensili separati e nessuna allocazione per pagamenti parziali. | Importi interi in centesimi, `addebiti`, `pagamenti`, `allocazioni_pagamento` e tipi/metodi unici. | Evita errori di arrotondamento e modella saldo parziale/rimborso in modo estendibile (FR-09). |
+| Laboratori | Due coppie di tabelle sovrapposte, una senza FK. | Tipo, laboratorio annuale e partecipazione sono tre entita con FK, piu quota mensile configurabile sul laboratorio. | Ogni mese la quota e zero se l'allievo ha almeno un altro corso attivo; altrimenti genera il relativo addebito mensile (FR-04, FR-09). |
+| Tariffe e pagamenti | Metodi duplicati, denaro `REAL`/`DECIMAL` SQLite, pagamenti mensili separati e nessuna allocazione per pagamenti parziali. | Importi interi in centesimi, `addebiti`, `pagamenti`, `allocazioni_pagamento`, tipi/metodi unici e configurazione compensi docenti. | Evita errori di arrotondamento, modella saldo parziale/rimborso e consente il conteggio mensile dei compensi docenti (FR-09). |
 | Integrita SQL | FK disabilitate nella lettura diretta, 19 violazioni e tre target FK assenti. | `PRAGMA foreign_keys = ON`, tutte le relazioni di dominio con FK, `CHECK`, indici e delete restrittivi. | Il DB rifiuta stati impossibili anziche affidarsi esclusivamente ai form PHP; copre trasversalmente FR-01--FR-11. |
-| Storico e audit | Tabelle legacy restano nel runtime; log con riferimenti eterogenei. | Nessuna tabella legacy; log/audit immutabili separati dal modello di dominio. | La migrazione conserva la provenienza tramite mapping ETL senza rendere il passato una dipendenza operativa (FR-11). |
+| Storico e audit | Tabelle legacy restano nel runtime; log con riferimenti eterogenei. | Nessuna tabella legacy; log/audit immutabili separati dal modello di dominio. | Ogni mutazione applicativa deve produrre audit con autore, data, entita, record e prima/dopo; i dati live correnti sono dati di test e non richiedono migrazione (FR-11). |
 
 ### 3.3 Copertura del modello target per requisito
 
@@ -85,14 +85,28 @@ Lo schema di produzione **non e una copia corretta del DB di test**, ma un model
 | FR-01 | `utenti`, `ruoli_utente`, `utenti_ruoli`, `activation_tokens`, `password_reset_tokens`; univocita username e token hash. | Coperto; le policy di autorizzazione restano nell'applicazione. |
 | FR-02 | `persone`, profili di ruolo, `relazioni_familiari`, stati e date di cessazione. | Coperto. |
 | FR-03 | `docenti_materie` con PK composta e FK a `docenti`/`materie`. | Coperto. |
-| FR-04 | `aule`, `materie`, `piani_corso`, `tipologie_laboratorio`, `laboratori`, `partecipanti_laboratorio`. | Coperto. |
-| FR-05 | `anni_accademici`, `iscrizioni_annuali`, `iscrizioni` e FK composta docente-materia. | Coperto. |
-| FR-06 | `tipologie_evento`, `eventi_calendario`, `partecipanti_evento`; check su ricorrenza, date e intervalli orari. | Coperto strutturalmente; il controllo di sovrapposizione richiede query transazionale applicativa. |
+| FR-04 | `aule`, `materie`, `piani_corso`, `tipologie_laboratorio`, `laboratori`, `partecipanti_laboratorio`, quota mensile laboratorio. | Parzialmente coperto: manca la tariffa mensile e la generazione condizionata dell'addebito. |
+| FR-05 | `anni_accademici`, `iscrizioni_annuali`, `iscrizioni`, addebito della tessera e FK composta docente-materia. | Parzialmente coperto: manca il legame obbligatorio tra tessera annuale e relativo addebito. |
+| FR-06 | `tipologie_evento`, `eventi_calendario`, `partecipanti_evento`; codici tipologia per i cinque flussi della modale e check su ricorrenza, date e intervalli orari. | Parzialmente coperto: il modello evento e presente, ma manca il flusso unico di prenotazione e la selezione contestuale richiesta. |
 | FR-07 | `assenze` con univocita evento-persona e stato del recupero. | Coperto. |
 | FR-08 | `recuperi` con univocita su assenza ed evento di recupero. | Coperto; la regola “tre recuperi” va parametrizzata e applicata da servizio/trigger dopo la decisione di business definitiva. |
 | FR-09 | `addebiti`, `pagamenti`, `allocazioni_pagamento`, importi in centesimi, stati e metodi. | Parzialmente coperto: ricevute/fatture, rimborsi e il divieto di allocazioni eccedenti richiedono regole ulteriori. |
-| FR-10 | Pacchetto in `iscrizioni` e singoli consumi in `utilizzi_lezioni_custom`; limite verificabile con conteggio transazionale. | Coperto, con refactoring del controller per non usare il contatore live inesistente. |
-| FR-11 | `note`, `activity_log`, `audit_log`, `batch_runs`, `chiusure_attivita`. | Parzialmente coperto: log e batch sono persistiti, ma audit obbligatorio, outbox email e chiusure per intervallo non lo sono. |
+| FR-10 | `carnet_lezioni`, `utilizzi_lezioni_custom` con FK all'evento, addebito prepagato saldato e limite transazionale di dieci prenotazioni. | Da aggiornare nella baseline: le colonne pacchetto su `iscrizioni` non identificano in modo robusto acquisti ripetuti di carnet. |
+| FR-11 | `note`, `activity_log`, `audit_log`, `batch_runs`, `chiusure_attivita`. | Parzialmente coperto: l'audit deve diventare obbligatorio per tutte le mutazioni applicative. |
+
+### 3.3.1 Flusso di prenotazione dal calendario
+
+La segreteria riceve telefonicamente i dati del richiedente e individua nel calendario settimanale una sala, un giorno e un orario liberi. Il click sul pulsante `+` dello slot apre una sola modale che mostra, in sola lettura, giorno, orario e sala selezionati; la segreteria sceglie poi una delle seguenti tipologie:
+
+| Tipologia | Dati e comportamento richiesti |
+|---|---|
+| Prenotazione soci | Selezione di un socio/anagrafica esistente; evento gratuito. |
+| Prenotazione docente | Selezione del docente che utilizza la sala; evento gratuito. |
+| Lezione di prova | Inserimento o ricerca dei dati del richiedente, materia e docente; evento gratuito e non legato a un'iscrizione ordinaria. |
+| Lezione extra | Selezione dell'allievo, quindi esclusivamente delle sue iscrizioni attive; la scelta collega l'evento all'iscrizione corrente per materia e docente. |
+| Lezione custom | Selezione tra i soli carnet saldati, attivi e con almeno una delle dieci lezioni ancora disponibili; la conferma crea evento e utilizzo del carnet nella stessa transazione. |
+
+La transazione di conferma deve ricontrollare conflitti di aula, docente e partecipante, verificare l'ammissibilita dell'iscrizione o del carnet e inserire l'evento con il relativo partecipante. Per il custom deve inoltre contare gli utilizzi non annullati e rifiutare l'undicesima prenotazione. L'annullamento di una lezione custom registra evento e utilizzo come `annullato`, non crea un'assenza ne un recupero e rende nuovamente disponibile la lezione nel carnet.
 
 ### 3.4 Verifica integrale dei requisiti presenti nei Markdown
 
@@ -231,7 +245,7 @@ Discrepanze rilevanti:
 ### 6.1 Principi
 
 1. **Una sola anagrafica:** `persone` e profili 1:1 (`allievi`, `docenti`, `esterni`), senza copiare nome, email o telefono.
-2. **Ruoli e accesso separati:** un account applicativo e opzionalmente collegato a una persona; non tutti i soci necessitano di credenziali.
+2. **Ruoli e accesso separati:** un account applicativo e opzionalmente collegato a una persona; non tutti i soci necessitano di credenziali. Le pagine e i flussi di gestione iscrizioni/allievi e di gestione docenti restano distinti per ruolo, anche quando una persona possiede entrambi i profili.
 3. **Eventi e partecipanti normalizzati:** `eventi_calendario` contiene risorsa e regola temporale; `partecipanti_evento` elimina le colonne alternative `socio_id`/`socio_occasionale_id`.
 4. **Una sola catena finanziaria:** un'obbligazione (`addebiti`) puo ricevere piu pagamenti tramite `allocazioni_pagamento`; lo stato e calcolabile senza duplicare importi.
 5. **Vincoli nel DB:** FK, `CHECK`, indici composti e unicita di business sono nella baseline, non lasciati ai soli form PHP.
@@ -275,12 +289,23 @@ erDiagram
 | Area | Tabelle target | Responsabilita |
 |---|---|---|
 | Identita | `persone`, `allievi`, `docenti`, `esterni`, `utenti`, `ruoli_utente`, `utenti_ruoli` | Dato anagrafico, profili di dominio e autorizzazioni. |
-| Didattica | `anni_accademici`, `materie`, `docenti_materie`, `aule`, `piani_corso`, `tipologie_laboratorio`, `laboratori`, `partecipanti_laboratorio`, `iscrizioni`, `iscrizioni_annuali`, `utilizzi_lezioni_custom` | Offerta, frequenza, pacchetti custom e relazione didattica. |
+| Didattica | `anni_accademici`, `materie`, `docenti_materie`, `aule`, `piani_corso`, `tipologie_laboratorio`, `laboratori`, `partecipanti_laboratorio`, `iscrizioni`, `iscrizioni_annuali`, `carnet_lezioni`, `utilizzi_lezioni_custom` | Offerta, frequenza, carnet custom e relazione didattica. |
 | Calendario | `tipologie_evento`, `eventi_calendario`, `partecipanti_evento`, `chiusure_attivita`, `assenze`, `recuperi` | Pianificazione, prenotazioni, partecipazione e recuperi. |
 | Tariffe e incassi | `configurazioni_tariffarie`, `tariffe_materie`, `metodi_pagamento`, `tipi_addebito`, `addebiti`, `pagamenti`, `allocazioni_pagamento` | Prezzi versionati, dovuti, incassi e saldi. |
+| Compensi docenti | `classi_pagamento_docente`, `compensi_docente`, `riepiloghi_compensi_docente`, `righe_compenso_docente` | Regole fiscali, compensi per tipologia evento e liquidazioni mensili. |
 | Operazioni | `dati_associazione`, `note`, `activity_log`, `audit_log`, `activation_tokens`, `password_reset_tokens`, `rate_limit_log`, `batch_runs` | Configurazione, sicurezza, audit e job. |
 
 La baseline SQL usa codici stabili per stati/tipologie anziche riferimenti testuali non vincolati; se il dominio dovra divenire configurabile, tali codici potranno essere promossi a tabelle di lookup senza cambiare le relazioni centrali.
+
+### 6.4 Revisioni necessarie della baseline
+
+`database/schema_produzione.sql` non include ancora le entita e i vincoli introdotti dai requisiti chiariti successivamente. Prima della ricreazione del database deve essere aggiornato con:
+
+- `carnet_lezioni`, associato a iscrizione, docente, corso, addebito prepagato e quantitativo acquistato pari a dieci; `utilizzi_lezioni_custom` deve riferire il carnet e l'evento prenotato;
+- quota mensile in centesimi sul laboratorio e regola applicativa transazionale che, per ogni mese, emetta un addebito solo se l'allievo non possiede altri corsi attivi;
+- codici tipologia evento per prenotazione socio, prenotazione docente, lezione di prova, lezione extra e lezione custom; la lezione extra e quella custom devono richiedere l'iscrizione sorgente, mentre il custom richiede anche un carnet disponibile;
+- `classi_pagamento_docente`, `compensi_docente`, `riepiloghi_compensi_docente` e `righe_compenso_docente`, con importi monetari in centesimi e validita temporale delle condizioni concordate;
+- audit immutabile obbligatorio per ogni mutazione di dominio, con autore, data/ora, entita, record e valori prima/dopo.
 
 ## 7. Piano di ricreazione e migrazione
 

@@ -1,0 +1,31 @@
+{
+  "name": "musicallgestionale",
+  "version": "1.0.0",
+  "description": "**Versione:** 2.2.1 (6 Marzo 2026)",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "npm run test:e2e",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mpiras78/MusicAllGestionale.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/mpiras78/MusicAllGestionale/issues"
+  },
+  "homepage": "https://github.com/mpiras78/MusicAllGestionale#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.63.0"
+  }
+}

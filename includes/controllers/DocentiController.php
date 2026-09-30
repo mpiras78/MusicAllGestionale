@@ -42,6 +42,15 @@ class DocentiController {
     public function getAllDocenti($attivi_only = true) {
         return $this->getDocenti($attivi_only);
     }
+
+    /**
+     * Ottiene le materie attive ordinate per nome.
+     */
+    public function getMaterieAttive() {
+        return $this->db->query(
+            "SELECT id, nome FROM materie WHERE attiva = 1 ORDER BY nome"
+        );
+    }
     
     /**
      * Ottiene un singolo docente per ID

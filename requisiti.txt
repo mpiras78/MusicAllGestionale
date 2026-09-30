@@ -1,0 +1,14 @@
+FR-01 Login - la pagina di accesso al sistema mostra il box di autenticazione con login password e pulsante Accedi
+	AC-1.1 - login ok: l'utente inserisce username e password e preme Accedi. Le informazioni sono corrette e la pagina index viene aperta
+	AC-1.2 - username mancante: l'utente non inserisce lo username e preme Accedi. Appare il messaggio sulla login "compila questo campo"
+	AC-1.3 - password mancante: l'utente non inserisce la password e preme Accedi. Appare il messaggio sulla login "compila questo campo"
+	AC-1.4 - credenziali errate: l'untente inserisce username e password, preme Accedi ma le informazioni sono errate. Il sistema mostra il messaggio Credenziali non valide
+	
+FR-02 Recupero Password
+Dalla pagina di autenticazione, l'utente clicca sul link "hai dimenticato la password?" 
+Si apre una nuova pagina per l'inserimento dell'indirizzo email legato al proprio utente. 
+	AC-2.1 formato email errata: l'utente inserisce un indirizzo email dal formato non corretto. Il sistema restituisce un messaggio di email non valida
+	AC-2.2 email non presente: L'utente inserisce un indirizzo email formalmente valido ma non legata ad alcuna anagrafica. Il messaggio mostrato a schermo sarà: Se l'email è registrata, riceverai un link per resettare la password
+	AC-2.3 link reset inviato: l'utente inserisce un indirizzo email formalmente valido e associato ad una anagrafica. Il messaggio mostrato a schermo sarà: Se l'email è registrata, riceverai un link per resettare la password
+	
+	

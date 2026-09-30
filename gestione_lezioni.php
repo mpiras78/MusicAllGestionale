@@ -106,7 +106,7 @@ include 'includes/header.php';
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <button class="btn btn-outline-secondary w-100" onclick="resetFiltri()">
+                    <button type="button" class="btn btn-outline-secondary w-100" data-lezioni-action="reset-filtri">
                         <i class="bi bi-arrow-clockwise"></i> Reset
                     </button>
                 </div>
@@ -158,10 +158,10 @@ include 'includes/header.php';
                                     <td><?= e($l['docente']) ?></td>
                                     <td><?= e($l['aula']) ?></td>
                                     <td class="text-center">
-                                        <button class="btn btn-sm btn-warning" onclick="modificaLezione(<?= $l['id'] ?>)" title="Modifica">
+                                        <button type="button" class="btn btn-sm btn-warning" data-lezioni-action="modifica" data-lezione-id="<?= $l['id'] ?>" title="Modifica">
                                             <i class="bi bi-pencil"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-danger" onclick="confermaEliminazione(<?= $l['id'] ?>, '<?= addslashes($l['socio']) ?>')" title="Elimina">
+                                        <button type="button" class="btn btn-sm btn-danger" data-lezioni-action="conferma-eliminazione" data-lezione-id="<?= $l['id'] ?>" data-socio-nome="<?= e($l['socio']) ?>" title="Elimina">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </td>
@@ -269,7 +269,7 @@ include 'includes/header.php';
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="bi bi-x-circle"></i> Annulla
                 </button>
-                <button type="button" class="btn" style="background-color: #9C27B0; color: white;" onclick="salvaLezione()">
+                <button type="button" class="btn" style="background-color: #9C27B0; color: white;" data-lezioni-action="salva">
                     <i class="bi bi-star"></i> Salva Lezione di Prova
                 </button>
             </div>
@@ -362,7 +362,7 @@ include 'includes/header.php';
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="bi bi-x-circle"></i> Annulla
                 </button>
-                <button type="button" class="btn btn-warning" onclick="aggiornaLezione()">
+                <button type="button" class="btn btn-warning" data-lezioni-action="aggiorna">
                     <i class="bi bi-check-circle"></i> Aggiorna
                 </button>
             </div>
@@ -392,7 +392,7 @@ include 'includes/header.php';
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="bi bi-x-circle"></i> Annulla
                 </button>
-                <button type="button" class="btn btn-danger" onclick="eliminaLezione()">
+                <button type="button" class="btn btn-danger" data-lezioni-action="elimina">
                     <i class="bi bi-trash"></i> Elimina
                 </button>
             </div>
@@ -401,6 +401,34 @@ include 'includes/header.php';
 </div>
 
 <script nonce="<?= $_SESSION['csp_nonce'] ?>">
+document.addEventListener('click', function(event) {
+    const button = event.target.closest('[data-lezioni-action]');
+    if (!button) {
+        return;
+    }
+
+    switch (button.dataset.lezioniAction) {
+        case 'reset-filtri':
+            resetFiltri();
+            break;
+        case 'modifica':
+            modificaLezione(button.dataset.lezioneId);
+            break;
+        case 'conferma-eliminazione':
+            confermaEliminazione(button.dataset.lezioneId, button.dataset.socioNome);
+            break;
+        case 'salva':
+            salvaLezione();
+            break;
+        case 'aggiorna':
+            aggiornaLezione();
+            break;
+        case 'elimina':
+            eliminaLezione();
+            break;
+    }
+});
+
 // Carica docenti quando cambia materia (modal nuova lezione)
 document.querySelector('#addLezioneModal select[name="materia_id"]').addEventListener('change', function() {
     const materiaId = this.value;

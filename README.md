@@ -53,6 +53,22 @@ composer install
 - `illuminate/events`: Sistema eventi
 - PHPUnit per testing (opzionale)
 
+### Avvio su Windows con PHP 8
+
+EasyPHP Webserver 14.1 include Apache 2.4 a 32 bit del 2014 e PHP 5.4: non può caricare il modulo di PHP 8 a 64 bit. Non sostituire `php5apache2_4.dll`.
+
+Dopo aver installato PHP 8 in `C:\EasyPHP-Webserver-14.1b2\binaries\php8`, puoi usare uno dei due metodi:
+
+- **Server PHP integrato:** arresta Apache EasyPHP per liberare la porta 888, quindi avvia:
+
+```bat
+START_PHP8_SERVER.bat
+```
+
+  L'applicazione sarà disponibile su `http://192.168.1.190:888/MusicAllGestionale/`.
+
+- **Apache EasyPHP con PHP 8 FastCGI:** la configurazione Apache inoltra le richieste PHP a `127.0.0.1:9000`. Avvia `START_PHP8_FASTCGI.bat`, quindi avvia Apache EasyPHP. PHP 5 rimane nella cartella `binaries\php` solo per compatibilità, ma Apache esegue gli script tramite PHP 8.
+
 ### 2. Download e Posizionamento File
 
 ```bash

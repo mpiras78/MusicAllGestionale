@@ -25,7 +25,7 @@ if (!is_array($soci)) {
 include 'includes/header.php';
 ?>
 
-<div class="container-fluid">
+<div class="container-fluid" data-testid="student-management-page">
     <div class="row mb-4">
         <div class="col">
             <h1 class="h3 mb-0">
@@ -34,7 +34,7 @@ include 'includes/header.php';
             <p class="text-muted mb-0">Visualizza e gestisci i soci della scuola</p>
         </div>
         <div class="col-auto">
-            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addSocioModal">
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addSocioModal" data-testid="students-create">
                 <i class="bi bi-plus-circle"></i> Nuovo Socio
             </button>
         </div>
@@ -140,7 +140,7 @@ include 'includes/header.php';
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0" id="tavollaSoci">
+                <table class="table table-hover mb-0" id="tavollaSoci" data-testid="students-table">
                     <thead>
                         <tr>
                             <th>Nome</th>
@@ -203,7 +203,7 @@ include 'includes/header.php';
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="formNuovoSocio">
+                <form id="formNuovoSocio" data-testid="students-form">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Nome *</label>

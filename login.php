@@ -100,7 +100,7 @@ if (isPost()) {
                             </div>
                         <?php endif; ?>
                         
-                        <form method="POST" action="">
+                        <form method="POST" action="" data-testid="login-form">
                             <?= CSRFHelper::field() ?>
                             <div class="mb-3">
                                 <label for="username" class="form-label">
@@ -112,7 +112,8 @@ if (isPost()) {
                                        name="username" 
                                        required 
                                        autofocus
-                                       value="<?= e(post('username')) ?>">
+                                       value="<?= e(post('username')) ?>"
+                                       data-testid="login-username">
                             </div>
                             
                             <div class="mb-4">
@@ -125,7 +126,8 @@ if (isPost()) {
                                            id="password" 
                                            name="password"
                                            autocomplete="current-password"
-                                           required>
+                                           required
+                                           data-testid="login-password">
                                     <button class="btn btn-outline-secondary" type="button" id="togglePassword">
                                         <i class="bi bi-eye" id="toggleIcon"></i>
                                     </button>
@@ -133,7 +135,7 @@ if (isPost()) {
                             </div>
                             
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg">
+                                <button type="submit" class="btn btn-primary btn-lg" data-testid="login-submit">
                                     <i class="bi bi-box-arrow-in-right"></i> Accedi
                                 </button>
                             </div>

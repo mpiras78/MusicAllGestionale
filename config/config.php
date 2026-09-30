@@ -20,7 +20,17 @@ define('DB_PATH', __DIR__ . '/../database/musicall.sqlite');
 // Configurazione Applicazione
 define('APP_NAME', 'MusicAll');
 define('APP_VERSION', '2.2.1');
-define('BASE_URL', 'http://localhost:8000');
+
+$httpHost = 'localhost:8000';
+if (isset($_SERVER['HTTP_HOST']) && preg_match('/^[A-Za-z0-9.:\-\[\]]+$/', $_SERVER['HTTP_HOST'])) {
+    $httpHost = $_SERVER['HTTP_HOST'];
+}
+
+$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http';
+$scriptName = isset($_SERVER['SCRIPT_NAME']) ? str_replace('\\', '/', $_SERVER['SCRIPT_NAME']) : '';
+$applicationUrlPath = strpos($scriptName, '/MusicAllGestionale/') === 0 ? '/MusicAllGestionale' : '';
+
+define('BASE_URL', $protocol . '://' . $httpHost . $applicationUrlPath);
 define('BASE_PATH', dirname(__DIR__));
 define('LOG_PATH', BASE_PATH . '/logs');
 

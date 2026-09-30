@@ -65,50 +65,81 @@ body {
 }
 
 /* Calendario Settimanale */
+
+/* ============================================
+   CALENDARIO SETTIMANALE - FIX DIMENSIONI
+   ============================================ */
+
+/* Container responsivo con altezza dinamica */
 .calendario-container {
-    max-height: calc(100vh - 400px); /* Altezza viewport - spazio per header/nav */
+    max-height: calc(100vh - 220px); /* Aumentato lo spazio visibile rispetto ai 400px precedenti */
     overflow-y: auto;
     overflow-x: auto;
     position: relative;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
 }
 
+/* Tabella calendario */
 .calendario-table {
-    min-width: 1000px;
+    width: 100%;
+    min-width: 1100px;
     font-size: 0.85rem;
-    table-layout: fixed;
+    table-layout: fixed; /* Mantiene proporzionali le colonne delle aule */
+    border-collapse: separate;
+    border-spacing: 0;
 }
+
+
 
 .calendario-table td {
     width: auto;
     min-width: 60px;
+    border-bottom: 1px solid #e9ecef;
+    border-right: 1px solid #e9ecef;
 }
 
+/* Header Aule (Fisso in alto) */
 .calendario-table th {
     position: sticky;
     top: 0;
     background-color: white;
     z-index: 10;
-    padding: 4px;
+    padding: 8px 4px;
     vertical-align: middle;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Ombra per evidenziare header fisso */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
+/* Colonna Orari (Fissa a sinistra) */
 .calendario-table .time-col {
-    position: sticky;
-    left: 0;
     background-color: #f8f9fa;
-    z-index: 5;
-    font-weight: 600;
-    width: 80px;
-    min-width: 80px;
+    width: 90px;
+    min-width: 90px;
+    text-align: center;
+    border-right: 2px solid #dee2e6;
 }
+
 
 .calendario-table .aula-header {
     background-color: var(--primary-color);
     color: white;
     font-weight: 600;
     text-align: center;
-    padding: 4px; /* Ridotto da 0.75rem (12px) a 4px */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Celle della griglia */
+.calendario-cell {
+    border: 1px solid #e9ecef;
+    padding: 2px;
+    /* Rimosso height: 10px irrealistico: impostata un'altezza minima calcolata per slot di 15/30 min */
+    height: 42px; 
+    min-height: 42px;
+    vertical-align: top;
+    position: relative;
+    box-sizing: border-box;
 }
 
 /* Colori specifici per aule */
@@ -152,17 +183,26 @@ body {
     margin: 0 !important;
 }
 
+/* Card Slot Lezione */
 .lezione-slot {
-    padding: 2px; /* Minimo padding in px */
-    margin: 0px; /* Nessun margin */
-    border-radius: 2px;
-    font-size: 9px; /* Font minimo leggibile */
+    padding: 4px 6px;
+    margin: 0;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    line-height: 2;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
     height: 100%;
+    min-height: 100%;
+    width: 100%;
+    box-sizing: border-box;
     overflow: hidden;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
+
 
 /* Badge orario in alto a destra */
 .lezione-orario-badge {
@@ -326,19 +366,30 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Header lezione con icona + nome socio */
-.lezione-header {
+/* Adattamento testo e contenitori interni */
+.lezione-header-old {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 4px;
-    padding-right: 60px; /* Spazio per badge orario */
+    justify-content: space-between;
+    gap: 4px;
+    margin-bottom: 2px;
+}
+
+
+.lezione-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: left;
+    gap: 0px;
+    width: 100%;
 }
 
 /* Header prenotazioni - NO padding extra, icona inline */
 .tipo-prenotazione-soci .lezione-header,
 .tipo-prenotazione-docente .lezione-header,
-.tipo-prenotazione-esterno .lezione-header {
+.tipo-prenotazione-esterno .lezione-header
+.tipo-prenotazione-regolare {
     padding-left: 0; /* Icona inline, no spazio extra */
 }
 
@@ -351,11 +402,13 @@ body {
 .lezione-socio {
     font-weight: 700;
     color: #2c3e50;
-    font-size: 0.8rem;
-    line-height: 1.1;
-    text-transform: uppercase;
-    letter-spacing: 0.2px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    align-content: center;
+    text-overflow: ellipsis;
 }
+
 
 /* Riga info con docente */
 .lezione-info-row {
@@ -364,14 +417,12 @@ body {
 
 .lezione-docente {
     font-size: 0.7rem;
-    color: #34495e;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    text-transform: uppercase;
-    letter-spacing: 0.1px;
+    color: #495057;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+
 
 .lezione-docente i {
     color: #7f8c8d;
@@ -933,4 +984,125 @@ body {
 
 .lezione-note-badge i {
     font-size: 0.85rem;
+}
+
+
+/* ============================================
+   OTTIMIZZAZIONE MOBILE (Smartphone)
+   ============================================ */
+
+@media (max-width: 768px) {
+
+    /* 1. Contenitore e Tabella Calendario */
+    .calendario-container {
+        /* Permette lo scorrimento fluido touch e limita l'altezza visibile */
+        max-height: calc(100vh - 180px);
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .calendario-table {
+        /* Riduce la larghezza minima della tabella per farla respirare sugli schermi piccoli */
+        min-width: 650px;
+        font-size: 0.75rem;
+    }
+
+    /* 2. Intestazioni Aule e Colonna Orari */
+    .calendario-table .time-col {
+        width: 60px !important;
+        min-width: 60px !important;
+        font-size: 0.7rem;
+        padding: 4px 2px;
+    }
+
+    .calendario-table th {
+        padding: 6px 2px;
+        font-size: 0.75rem;
+    }
+
+    /* 3. Card Slot Lezione */
+    .calendario-cell {
+        height: 38px;
+        min-height: 38px;
+    }
+
+    .lezione-slot {
+        padding: 2px 4px !important;
+        line-height: 1.2;
+    }
+
+    .lezione-socio {
+        font-size: 0.7rem;
+    }
+
+    .lezione-docente, 
+    .lezione-materia-inline {
+        font-size: 0.6rem;
+    }
+
+    .lezione-orario-badge {
+        font-size: 0.6rem;
+        padding: 1px 3px;
+        top: 2px;
+        right: 2px;
+    }
+
+    .icona-strumento {
+        font-size: 0.9rem;
+    }
+
+    /* 4. Tab dei Giorni (Orizzontali) */
+    .nav-tabs.nav-fill {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 5px;
+    }
+
+    .nav-tabs .nav-item {
+        flex: 0 0 auto;
+        min-width: 75px; /* Pulsanti giorno compatti e scorrevoli orizzontalmente */
+    }
+
+    .nav-tabs .nav-link {
+        margin: 0 2px;
+        padding: 6px 4px;
+    }
+
+    .nav-tabs .nav-link span.fs-6 {
+        font-size: 0.75rem !important;
+    }
+
+    /* 5. Header, Pulsanti e Legenda */
+    .card-body.py-1 {
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+    }
+
+    /* Trasforma la riga Contatore + Legenda in verticale per non occupare troppo spazio */
+    .card-body .d-flex.justify-content-between.align-items-center {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 8px;
+    }
+
+    .card-body .d-flex.justify-content-between.align-items-center > div {
+        width: 100%;
+        text-align: center;
+    }
+
+    .card-body .d-flex.justify-content-between.align-items-center .d-flex.flex-wrap {
+        justify-content: center;
+    }
+
+    /* Pulsanti Navigazione Settimana */
+    .card-body .d-flex.align-items-center.justify-content-between.mb-1 h5 {
+        font-size: 0.9rem;
+        text-align: center;
+    }
+
+    .card-body .d-flex.align-items-center.justify-content-between.mb-1 .btn-sm {
+        padding: 2px 6px;
+        font-size: 0.7rem;
+    }
 }

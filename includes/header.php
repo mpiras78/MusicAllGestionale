@@ -71,14 +71,14 @@
                 <?php else: ?>
                     <!-- Menu Admin e Segreteria -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="gestioneDropdown" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="gestioneDropdown" role="button" data-bs-toggle="dropdown" data-testid="nav-management">
                             <i class="bi bi-gear"></i> Gestione
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item <?= ($current_page ?? '') == 'soci' ? 'active' : '' ?>" href="<?= BASE_URL ?>/gestione_soci.php">
+                            <li><a class="dropdown-item <?= ($current_page ?? '') == 'soci' ? 'active' : '' ?>" href="<?= BASE_URL ?>/gestione_soci.php" data-testid="nav-students">
                                 <i class="bi bi-people"></i> Soci
                             </a></li>
-                            <li><a class="dropdown-item <?= ($current_page ?? '') == 'docenti' ? 'active' : '' ?>" href="<?= BASE_URL ?>/gestione_docenti.php">
+                            <li><a class="dropdown-item <?= ($current_page ?? '') == 'docenti' ? 'active' : '' ?>" href="<?= BASE_URL ?>/gestione_docenti.php" data-testid="nav-teachers">
                                 <i class="bi bi-person-badge"></i> Docenti
                             </a></li>
                             <li><a class="dropdown-item <?= ($current_page ?? '') == 'lezioni' ? 'active' : '' ?>" href="<?= BASE_URL ?>/gestione_lezioni.php">
@@ -99,7 +99,7 @@
                                 <i class="bi bi-people-fill"></i> Configurazione Laboratori
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="<?= BASE_URL ?>/aule/index.php">
+                            <li><a class="dropdown-item <?= ($current_page ?? '') == 'aule' ? 'active' : '' ?>" href="<?= BASE_URL ?>/aule/index.php">
                                 <i class="bi bi-door-open"></i> Aule
                             </a></li>
                             <li><a class="dropdown-item" href="<?= BASE_URL ?>/gestione_materie.php">
@@ -137,7 +137,7 @@
             </ul>
             <ul class="navbar-nav">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" data-testid="nav-user-menu">
                         <i class="bi bi-person-circle"></i> <?= e($_SESSION['username']) ?>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
@@ -145,7 +145,7 @@
                             <i class="bi bi-person"></i> Profilo
                         </a></li>
                         <?php if ($auth->isAdmin()): ?>
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>/gestione_utenti.php">
+                        <li><a class="dropdown-item" href="<?= BASE_URL ?>/gestione_utenti.php" data-testid="nav-users">
                             <i class="bi bi-people-fill"></i> Gestione Utenti
                         </a></li>
                         <li><a class="dropdown-item" href="<?= BASE_URL ?>/admin/settings.php">

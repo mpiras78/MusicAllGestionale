@@ -17,13 +17,12 @@ $stats = $docentiCtrl->getStatisticheLezioni();
 $docenti = $docentiCtrl->getDocenti(true);
 
 // Ottieni tutte le materie per il select
-use MusicAll\Models\Materia;
-$materie = Materia::where('attiva', true)->orderBy('nome')->get();
+$materie = $docentiCtrl->getMaterieAttive();
 
 include 'includes/header.php';
 ?>
 
-<div class="container-fluid">
+<div class="container-fluid" data-testid="teacher-management-page">
     <div class="row mb-4">
         <div class="col">
             <h1 class="h3 mb-0">
@@ -32,7 +31,7 @@ include 'includes/header.php';
             <p class="text-muted mb-0">Visualizza e gestisci i docenti della scuola</p>
         </div>
         <div class="col-auto">
-            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addDocenteModal">
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addDocenteModal" data-testid="teachers-create">
                 <i class="bi bi-plus-circle"></i> Nuovo Docente
             </button>
         </div>
@@ -121,7 +120,7 @@ include 'includes/header.php';
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <button class="btn btn-outline-secondary w-100" onclick="resetFiltri()">
+                    <button type="button" class="btn btn-outline-secondary w-100" data-docenti-action="reset-filtri">
                         <i class="bi bi-arrow-clockwise"></i> Reset Filtri
                     </button>
                 </div>
@@ -139,7 +138,7 @@ include 'includes/header.php';
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0" id="tabellaDocenti">
+                <table class="table table-hover mb-0" id="tabellaDocenti" data-testid="teachers-table">
                     <thead>
                         <tr>
                             <th>Nome</th>
@@ -177,13 +176,13 @@ include 'includes/header.php';
                                         <span class="badge bg-secondary lezioni-badge">-</span>
                                     </td>
                                     <td class="text-center">
-                                        <button class="btn btn-sm btn-info" onclick="visualizzaDettagli(<?= $docente['id'] ?>)" title="Visualizza Dettagli">
+                                        <button type="button" class="btn btn-sm btn-info" data-docenti-action="dettagli" data-docente-id="<?= $docente['id'] ?>" title="Visualizza Dettagli">
                                             <i class="bi bi-eye"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-warning" onclick="modificaDocente(<?= $docente['id'] ?>)" title="Modifica">
+                                        <button type="button" class="btn btn-sm btn-warning" data-docenti-action="modifica" data-docente-id="<?= $docente['id'] ?>" title="Modifica">
                                             <i class="bi bi-pencil"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-danger" onclick="confermaDisattivazione(<?= $docente['id'] ?>, '<?= addslashes($docente['cognome'] . ' ' . $docente['nome']) ?>')" title="Disattiva">
+                                        <button type="button" class="btn btn-sm btn-danger" data-docenti-action="conferma-disattivazione" data-docente-id="<?= $docente['id'] ?>" data-docente-nome="<?= e($docente['cognome'] . ' ' . $docente['nome']) ?>" title="Disattiva">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </td>
@@ -208,7 +207,7 @@ include 'includes/header.php';
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="formNuovoDocente">
+                <form id="formNuovoDocente" data-testid="teachers-form">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Nome *</label>
@@ -248,7 +247,7 @@ include 'includes/header.php';
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="bi bi-x-circle"></i> Annulla
                 </button>
-                <button type="button" class="btn btn-success" onclick="salvaDocente()">
+                <button type="button" class="btn btn-success" data-docenti-action="salva">
                     <i class="bi bi-check-circle"></i> Salva Docente
                 </button>
             </div>
@@ -308,7 +307,7 @@ include 'includes/header.php';
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="bi bi-x-circle"></i> Annulla
                 </button>
-                <button type="button" class="btn btn-warning" onclick="aggiornaDocente()">
+                <button type="button" class="btn btn-warning" data-docenti-action="aggiorna">
                     <i class="bi bi-check-circle"></i> Aggiorna
                 </button>
             </div>
@@ -364,7 +363,7 @@ include 'includes/header.php';
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="bi bi-x-circle"></i> Annulla
                 </button>
-                <button type="button" class="btn btn-danger" onclick="disattivaDocente()">
+                <button type="button" class="btn btn-danger" data-docenti-action="disattiva">
                     <i class="bi bi-trash"></i> Disattiva
                 </button>
             </div>
@@ -373,6 +372,37 @@ include 'includes/header.php';
 </div>
 
 <script nonce="<?= $_SESSION['csp_nonce'] ?>">
+document.addEventListener('click', function(event) {
+    const button = event.target.closest('[data-docenti-action]');
+    if (!button) {
+        return;
+    }
+
+    switch (button.dataset.docentiAction) {
+        case 'reset-filtri':
+            resetFiltri();
+            break;
+        case 'dettagli':
+            visualizzaDettagli(button.dataset.docenteId);
+            break;
+        case 'modifica':
+            modificaDocente(button.dataset.docenteId);
+            break;
+        case 'conferma-disattivazione':
+            confermaDisattivazione(button.dataset.docenteId, button.dataset.docenteNome);
+            break;
+        case 'salva':
+            salvaDocente();
+            break;
+        case 'aggiorna':
+            aggiornaDocente();
+            break;
+        case 'disattiva':
+            disattivaDocente();
+            break;
+    }
+});
+
 // Carica info lezioni per ogni docente all'avvio
 document.addEventListener('DOMContentLoaded', function() {
     caricaLezioniDocenti();

@@ -164,7 +164,7 @@ include 'includes/header.php';
 ?>
 
 <div class="container-fluid">
-    <div class="row mb-4">
+    <!--div class="row mb-4">
         <div class="col">
             <h1 class="h3 mb-0">
                 <i class="bi bi-calendar-week"></i> Calendario Settimanale
@@ -179,8 +179,24 @@ include 'includes/header.php';
                 <i class="bi bi-printer"></i> Stampa
             </button>
         </div>
-    </div>
+    </div-->
 
+    <div class="row mb-3 align-items-center">
+    <div class="col-12 col-md mb-2 mb-md-0">
+        <h1 class="h4 h3-md mb-0 text-center text-md-start">
+            <i class="bi bi-calendar-week"></i> Calendario Settimanale
+        </h1>
+        <p class="text-muted mb-0 d-none d-md-block">Visualizzazione programmazione giornaliera</p>
+    </div>
+    <div class="col-12 col-md-auto d-flex justify-content-center gap-2">
+        <button class="btn btn-sm btn-md me-0 me-md-2 text-white" style="background-color: #9C27B0;" data-bs-toggle="modal" data-bs-target="#modalLezioneProva">
+            <i class="bi bi-star"></i> Nuova Lezione
+        </button>
+        <button class="btn btn-sm btn-md btn-outline-primary btn-print d-none d-sm-inline-block">
+            <i class="bi bi-printer"></i> Stampa
+        </button>
+    </div>
+</div>
     <!-- Navigazione Settimana -->
     <div class="card mb-2">
         <div class="card-body py-1" style="padding-left: 8px; padding-right: 8px;">
@@ -278,7 +294,7 @@ include 'includes/header.php';
                 <table class="table table-bordered calendario-table mb-0">
                     <thead>
                         <tr>
-                            <th class="time-col">Orario</th>
+                            <th class="aula header time-col">Orario</th>
                             <?php foreach ($aule as $aula): 
                                 // Determina classe CSS per colore aula
                                 $aula_nome_lower = strtolower($aula['nome']);
@@ -395,6 +411,7 @@ include 'includes/header.php';
                                     }
                                     ?>
                                     <td class="calendario-cell calendario-cell-hoverable" 
+                                        data-testid="calendario-cell-<?= $aula['id'] ?>-<?= $slot['inizio'] ?>"
                                         rowspan="<?= $rowspan ?>"
                                         data-aula-id="<?= $aula['id'] ?>" 
                                         data-aula-nome="<?= e($aula['nome']) ?>"
@@ -556,7 +573,7 @@ include 'includes/header.php';
                                                 <?php else: ?>
                                                     <!-- Layout standard per RECUPERI e altri eventi -->
                                                     <div class="lezione-header">
-                                                        <span class="icona-strumento" style="font-size: 1.2rem;"><?= $icona_evt ?></span>
+                                                        <span class="icona-strumento"><?= $icona_evt ?></span>
                                                         <span class="lezione-socio">
                                                             <?= e($evento_slot['socio'] ?: ($evento_slot['docente'] ?: 'Evento')) ?>
                                                             <?php if (isset($evento_slot['confermato']) && $evento_slot['confermato'] == 0): ?>
@@ -629,9 +646,9 @@ include 'includes/header.php';
                                                     <?= date('H:i', strtotime($lezione_slot['ora_inizio'])) ?>-<?= date('H:i', strtotime($lezione_slot['ora_fine'])) ?>
                                                 </div>
                                                 <div class="lezione-header">
-                                                    <span class="icona-strumento" style="font-size: 1.2rem;"><?= $icona ?></span>
+                                                    <span class="icona-strumento"><?= $icona ?></span>
                                                     <span class="lezione-socio" 
-                                                          style="cursor: pointer; text-decoration: underline;" 
+                                                          style="cursor: pointer;" 
                                                           data-socio-id="<?= $lezione_slot['socio_id'] ?>"
                                                           data-lezione-id="<?= $lezione_slot['id'] ?>"
                                                           data-socio-nome="<?= addslashes($lezione_slot['socio']) ?>"
@@ -720,7 +737,7 @@ include 'includes/header.php';
                                                 <?php else: ?>
                                                     <!-- Layout standard per RECUPERI e altri eventi -->
                                                     <div class="lezione-header">
-                                                        <span class="icona-strumento" style="font-size: 1.2rem;"><?= $icona ?></span>
+                                                        <span class="icona-strumento"><?= $icona ?></span>
                                                         <span class="lezione-socio">
                                                             <?= e($evento_slot['socio'] ?: ($evento_slot['docente'] ?: 'Evento')) ?>
                                                             <?php if (isset($evento_slot['confermato']) && $evento_slot['confermato'] == 0): ?>

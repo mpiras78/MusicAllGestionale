@@ -14,6 +14,12 @@ if (!function_exists('e')) {
     }
 }
 
+if (!function_exists('is_countable')) {
+    function is_countable($value) {
+        return is_array($value) || $value instanceof Countable;
+    }
+}
+
 /**
  * Get parametro da GET con valore default
  */

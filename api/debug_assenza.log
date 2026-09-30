@@ -1,0 +1,22 @@
+2026-09-29 21:36:59 - Richiesta ricevuta
+Parametri: {"csrf_token":"85f3d2dd36777038034ab049deae8ba45f9ce3badc5bf22f135aae4e0697f5b0","lezione_id":125,"data_lezione":"2026-09-28","causale":"docente","note":"asdasdas"}
+Inizializzazione controllers...
+AssenzeController OK
+LezioniController OK
+Recupero lezione ID: 125
+Lezione trovata: {"id":"125","socio_id":"1","docente_id":"4","materia_id":"3","aula_id":"4","giorno_settimana":"lunedi","ora_inizio":"18:00","ora_fine":"19:00","tipo":"regolare","attiva":"1","data_inizio":null,"data_fine":null,"note":null,"created_at":"2026-03-03 08:20:27","iscrizione_id":"12","socio":"ALBERINI Viola","docente":"BONIOLI Andrea","materia":"Batteria","aula":"SALA JAZZ"}
+Dati assenza: {"lezione_id":125,"data":"2026-09-28","causata_da":"docente","necessita_recupero":1,"note_annullamento":"asdasdas"}
+Chiamata creaAssenza...
+Assenza creata ID: 1
+✅ Assenza salvata con successo!
+2026-09-29 21:37:43 - Richiesta ricevuta
+Parametri: {"csrf_token":"85f3d2dd36777038034ab049deae8ba45f9ce3badc5bf22f135aae4e0697f5b0","lezione_id":124,"data_lezione":"2026-09-22","causale":"socio","note":""}
+Inizializzazione controllers...
+AssenzeController OK
+LezioniController OK
+Recupero lezione ID: 124
+Lezione trovata: {"id":"124","socio_id":"4","docente_id":"5","materia_id":"7","aula_id":"2","giorno_settimana":"martedi","ora_inizio":"18:00","ora_fine":"18:45","tipo":"regolare","attiva":"1","data_inizio":null,"data_fine":null,"note":null,"created_at":"2026-03-03 07:05:13","iscrizione_id":"11","socio":"AMADDII Edoardo","docente":"BUONO Eleonora","materia":"Canto Pop","aula":"AULA PIANO"}
+Dati assenza: {"lezione_id":124,"data":"2026-09-22","causata_da":"socio","necessita_recupero":1,"note_annullamento":""}
+Chiamata creaAssenza...
+Assenza creata ID: 1
+✅ Assenza salvata con successo!

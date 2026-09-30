@@ -94,10 +94,10 @@ $pageTitle = 'Gestione Utenti';
 require_once 'includes/header.php';
 ?>
 
-<div class="container-fluid py-4">
+<div class="container-fluid py-4" data-testid="user-management-page">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="bi bi-people-fill"></i> Gestione Utenti</h2>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal" onclick="openCreateModal()">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal" onclick="openCreateModal()" data-testid="users-create">
             <i class="bi bi-plus-circle"></i> Nuovo Utente
         </button>
     </div>
@@ -157,7 +157,7 @@ require_once 'includes/header.php';
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover" data-testid="users-table">
                     <thead>
                         <tr>
                             <th>Username</th>
@@ -181,12 +181,12 @@ require_once 'includes/header.php';
                             <td><?= htmlspecialchars($user['email'] ?? '-') ?></td>
                             <td>
                                 <?php
-                                $badgeClass = match($user['role']) {
+                                $roleBadgeClasses = [
                                     'admin' => 'danger',
                                     'segreteria' => 'primary',
-                                    'docente' => 'success',
-                                    default => 'secondary'
-                                };
+                                    'docente' => 'success'
+                                ];
+                                $badgeClass = $roleBadgeClasses[$user['role']] ?? 'secondary';
                                 ?>
                                 <span class="badge bg-<?= $badgeClass ?>">
                                     <?= $user['role_label'] ?>
@@ -256,7 +256,7 @@ require_once 'includes/header.php';
 <div class="modal fade" id="userModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="POST" id="userForm">
+            <form method="POST" id="userForm" data-testid="users-form">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalTitle">Nuovo Utente</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -281,7 +281,7 @@ require_once 'includes/header.php';
                     
                     <div class="mb-3">
                         <label class="form-label">Ruolo *</label>
-                        <select class="form-select" name="role" id="role" required onchange="toggleDocenteSelect()">
+                        <select class="form-select" name="role" id="role" required onchange="toggleDocenteSelect()" data-testid="users-role">
                             <option value="">-- Seleziona Ruolo --</option>
                             <option value="admin">👑 Amministratore</option>
                             <option value="segreteria">📋 Segreteria</option>
@@ -291,7 +291,7 @@ require_once 'includes/header.php';
                     
                     <div class="mb-3" id="docenteSelectDiv" style="display:none;">
                         <label class="form-label">Collega a Docente</label>
-                        <select class="form-select" name="docente_id" id="docente_id">
+                        <select class="form-select" name="docente_id" id="docente_id" data-testid="users-teacher-link">
                             <option value="">-- Nessun collegamento --</option>
                             <?php foreach ($docenti as $doc): ?>
                             <option value="<?= $doc['id'] ?>" 
